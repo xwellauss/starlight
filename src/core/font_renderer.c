@@ -48,7 +48,7 @@ void init_font_renderer(const char* font_path, int character_size)
 	current_window = &game_engine.current_window;
 
 	init_shader_program(&shader_program, FONT_VERTEX_SHADER_PATH, FONT_FRAGMENT_SHADER_PATH);
-	init_vertex_attributes(&vertex_attributes, NULL, sizeof(Quad), indices, sizeof(indices), true);
+	init_vertex_attributes(&vertex_attributes, NULL, sizeof(Quad), indices, sizeof(indices), true, false);
 
 	//  Loading the .ttf file
 	buffer = (unsigned char*)read_file(font_path, "rb");
@@ -68,13 +68,13 @@ void init_font_renderer(const char* font_path, int character_size)
 		Texture texture;
 		texture.width = width;
 		texture.height = height;
-		init_texture_from_data(&texture, 0, GL_R8, GL_RED, GL_UNSIGNED_BYTE, bitmap);
+		texture.texture_config.is_init = true;
+		texture.texture_config.wrap_s = GL_CLAMP_TO_EDGE;
+		texture.texture_config.wrap_t = GL_CLAMP_TO_EDGE;
+		texture.texture_config.min_filter = GL_LINEAR;
+		texture.texture_config.mag_filter = GL_LINEAR;
 
-		// set texture options
-		set_texture_parameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    	set_texture_parameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-    	set_texture_parameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	    set_texture_parameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+		init_texture_from_data(&texture, 0, GL_R8, GL_RED, GL_UNSIGNED_BYTE, bitmap);
 	
 		// now store character for later use
 	    Character character = 
@@ -159,6 +159,18 @@ void render_text(char* text, float x, float y, float scale, char* hex_color, flo
         x += w;
 	}
 
-	unbind_vertex_buffer(&vertex_attributes, VAO);
+	unbind_vertex_buffer_all();
+	unbind_shader_program();
 	unbind_texture();
+}
+
+void destroy_font_renderer()
+{
+	for(size_t i = 0; i < hmlen(characters); i++)
+	{
+		destroy_texture(&characters[i].value.texture);
+	}
+
+	destroy_vertex_attributes(&vertex_attributes, true);
+	destroy_shader_program(&shader_program);
 }

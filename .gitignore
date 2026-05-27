@@ -13,6 +13,9 @@ android-project/app/src/main/assets
 android-project/.gradle
 build
 tmp/
+*.pem
+
+assets/3d-models/*.blend1
 
 third-party/glfw/src/wayland-client-protocol-code.h
 third-party/glfw/src/wayland-client-protocol.h

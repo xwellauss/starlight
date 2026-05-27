@@ -2,6 +2,7 @@
 #include "../core/game_engine.h"
 #include "../utils/ui_imgui.h"
 #include "../core/window.h"
+#include "../core/renderer.h"
 
 #include "cimgui.h"
 
@@ -79,6 +80,14 @@ static void activate()
 
 static void deactivate()
 {
+	unbind_vertex_buffer_all();
+	unbind_shader_program();
+	
+	texture_active_slot(GL_TEXTURE1);
+	unbind_texture();
+
+	texture_active_slot(GL_TEXTURE0);
+	unbind_texture();
 }
 
 static void destroy()

@@ -33,3 +33,6 @@
 [submodule "third-party/tinyobjloader-c"]
 	path = third-party/tinyobjloader-c
 	url = https://github.com/syoyo/tinyobjloader-c
+[submodule "third-party/miniaudio"]
+	path = third-party/miniaudio
+	url = https://github.com/mackron/miniaudio.git

@@ -107,6 +107,7 @@ project "starlight"
 			"-sUSE_GLFW=3",
 			"-sWASM=1",
 			"-sMAX_WEBGL_VERSION=2",
+			"-sMIN_WEBGL_VERSION=2",
 			"-sTOTAL_MEMORY=262144000", -- 32768000
 			"-sALLOW_MEMORY_GROWTH=1",
 --			"-sNO_EXIT_RUNTIME=0",
@@ -131,6 +132,7 @@ project "starlight"
 		"cimgui",
 		"glfw",
 		"enet",
+		"miniaudio"
 	}
 
 	includedirs
@@ -147,6 +149,7 @@ project "starlight"
 		"third-party/enet/include",
 		"third-party/cgltf",
 		"third-party/tinyobjloader-c",
+		"third-party/miniaudio",
 	}
 
 	files 
@@ -156,7 +159,9 @@ project "starlight"
 		"third-party/cJSON/cJSON.c", "third-party/cJSON/cJSON.h",
 		"third-party/hashmap.c/hashmap.c", "third-party/hashmap.c/hashmap.h",
 		"third-party/glad/src/glad.c", "third-party/glad/include/glad/gles2.h",
-		"third-party/stb/src/*.c", "third-party/stb/include/*.h",	
+		"third-party/cgltf/cgltf.h", "third-party/cgltf/cgltf_write.h",
+		"third-party/stb/src/*.c", "third-party/stb/include/*.h",
+		"third-party/miniaudio/miniaudio.c", "third-party/miniaudio/miniaudio.h",
 	}
 
 	removefiles
@@ -428,5 +433,30 @@ project "enet"
 	files
 	{
 		"third-party/enet/*.c",
+	}
+
+project "miniaudio"
+	kind "StaticLib"
+	language "C"
+	
+	targetdir "bin/%{outputdir}/%{prj.name}"
+	objdir "bin/%{outputdir}/%{prj.name}/obj"
+	location "build"
+
+	links
+	{
+		"pthread",
+		"m",
+	}
+
+	includedirs
+	{
+		"third-party/miniaudio"
+	}
+
+	files
+	{
+		"third-party/miniaudio/miniaudio.h",
+		"third-party/miniaudio/miniaudio.c",
 	}
 

@@ -153,7 +153,7 @@ static void init_map()
 
 	fill_map();
 	init_shader_program(&map->component_list.sprite_component.shader_program, "shaders/map-vertex-shader.glsl", "shaders/map-fragment-shader.glsl");
-	init_vertex_attributes(&map->component_list.sprite_component.vertex_attribs, map_tiles, sizeof(map_tiles), map_indices, sizeof(map_indices), true);
+	init_vertex_attributes(&map->component_list.sprite_component.vertex_attribs, map_tiles, sizeof(map_tiles), map_indices, sizeof(map_indices), true, false);
 }
 
 static void draw_map()
@@ -341,6 +341,14 @@ static void activate()
 
 static void deactivate()
 {
+	unbind_vertex_buffer_all();
+	unbind_shader_program();
+	
+	texture_active_slot(GL_TEXTURE1);
+	unbind_texture();
+
+	texture_active_slot(GL_TEXTURE0);
+	unbind_texture();
 }
 
 static void destroy()
@@ -351,7 +359,7 @@ static void destroy()
 		is_server_running = false;
 	}
 
-	destroy_textures(map->component_list.sprite_component.textures);
+	destroy_textures_hashmap(&map->component_list.sprite_component.textures);
 	destroy_shader_program(&map->component_list.sprite_component.shader_program);
 	destroy_vertex_attributes(&map->component_list.sprite_component.vertex_attribs, true);
 }

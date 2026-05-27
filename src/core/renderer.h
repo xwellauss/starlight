@@ -36,15 +36,17 @@ enum Buffers
 	EBO
 };
 
-void init_vertex_attributes(VertexAttributes* attrib, void* vertex_data, size_t vertex_data_size, void* index_data, size_t index_data_size, bool indexed);
+void init_vertex_attributes(VertexAttributes* attrib, void* vertex_data, size_t vertex_data_size, void* index_data, size_t index_data_size, bool indexed, bool has_normals);
 void bind_vertex_buffer(VertexAttributes* attrib, enum Buffers buffer);
-void unbind_vertex_buffer(VertexAttributes* attrib, enum Buffers buffer);
+void unbind_vertex_buffer(enum Buffers buffer);
+void unbind_vertex_buffer_all();
 void destroy_vertex_attributes(VertexAttributes* attrib, bool indexed);
 
 
 // Shader Program
 void init_shader_program(unsigned int* shader_program, const char* vertex_shader_source_path, const char* fragment_shader_source_path);
 void bind_shader_program(unsigned int* shader_program);
+void unbind_shader_program();
 
 int get_uniform_location(unsigned int* shader_program, const char* uniform_name);
 
@@ -91,6 +93,8 @@ void add_texture_from_data(TextureHashMap** textures, const char* texture_name, 
 void texture_active_slot(GLenum slot);
 void set_texture_parameteri(GLenum target, GLenum pname, GLint param);
 void bind_texture(Texture* texture);
+void bind_texture_id(GLuint texture_id);
 void unbind_texture();
 void destroy_texture(Texture* texture);
-void destroy_textures(TextureHashMap* textures);
+void destroy_textures_array(Texture** textures);
+void destroy_textures_hashmap(TextureHashMap** textures);

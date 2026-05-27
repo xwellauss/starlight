@@ -11,10 +11,12 @@ void add_scene(Scene* scene)
 {
 	shput(game_engine.scenes, scene->scene_name, scene);
 	total_scenes++;
+
+	scene->init();
 }
 
 void change_scene(char* scene_name)
-{
+{	
 	Scene* scene = shget(game_engine.scenes, scene_name);
 	shput(used_scenes, scene_name, scene);
 
@@ -25,7 +27,6 @@ void change_scene(char* scene_name)
 
 	game_engine.current_scene = scene;
 
-	game_engine.current_scene->init();
 	game_engine.current_scene->activate();
 }
 
@@ -46,6 +47,7 @@ void scene_process_input()
 
 void destroy_scene()
 {
+	game_engine.current_scene->deactivate();
 	game_engine.current_scene->destroy();
 }
 

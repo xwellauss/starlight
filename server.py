@@ -15,7 +15,9 @@ PORT = 8000
 
 httpd = HTTPServer((HOST, PORT), MyHandler)
 
-httpd.socket = ssl.wrap_socket(httpd.socket,certfile='./0.0.0.0.pem', keyfile='./0.0.0.0-key.pem', server_side=True)
+context = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
+context.load_cert_chain(certfile='./0.0.0.0.pem', keyfile='./0.0.0.0-key.pem')
+httpd.socket = context.wrap_socket(httpd.socket, server_side=True)
 
-print("Serving HTTPS on port 8000")
+print(f"Serving HTTPS on {HOST}:{PORT}")
 httpd.serve_forever()

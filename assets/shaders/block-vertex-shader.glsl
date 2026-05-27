@@ -1,12 +1,12 @@
-#version 100
+#version 300 es
 
-attribute vec3 a_pos;
-attribute vec4 a_color;
-attribute vec2 a_tex_coord;
-attribute vec3 a_normal;
+in vec3 a_pos;
+in vec4 a_color;
+in vec2 a_tex_coord;
+in vec3 a_normal;
 
-varying vec4 f_color;
-varying vec2 f_tex_coord;
+out vec4 f_color;
+out vec2 f_tex_coord;
 
 uniform mat4 projection;
 uniform mat4 view;

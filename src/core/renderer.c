@@ -4,7 +4,7 @@
 #include <stb_ds.h>
 
 // Vertex Attributes
-void init_vertex_attributes(VertexAttributes* attrib, void* vertex_data, size_t vertex_data_size, void* index_data, size_t index_data_size, bool indexed)
+void init_vertex_attributes(VertexAttributes* attrib, void* vertex_data, size_t vertex_data_size, void* index_data, size_t index_data_size, bool indexed, bool has_normals)
 {
 	glGenVertexArrays(1, &attrib->VAO);
 	bind_vertex_buffer(attrib, VAO);
@@ -22,8 +22,11 @@ void init_vertex_attributes(VertexAttributes* attrib, void* vertex_data, size_t 
 	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, tex_coord));
 	glEnableVertexAttribArray(2);
 
-	glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, normal));
-	glEnableVertexAttribArray(3);
+	if(has_normals)
+	{
+		glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, normal));
+		glEnableVertexAttribArray(3);
+	}
 
 	if(indexed)
 	{
@@ -31,6 +34,12 @@ void init_vertex_attributes(VertexAttributes* attrib, void* vertex_data, size_t 
 		bind_vertex_buffer(attrib, EBO);
 		glBufferData(GL_ELEMENT_ARRAY_BUFFER, index_data_size, index_data, GL_DYNAMIC_DRAW);
 	}
+
+	unbind_vertex_buffer_all();
+	glDisableVertexAttribArray(0);
+	glDisableVertexAttribArray(1);
+	glDisableVertexAttribArray(2);
+	glDisableVertexAttribArray(3);
 }
 
 void bind_vertex_buffer(VertexAttributes* attrib, enum Buffers buffer)
@@ -39,28 +48,43 @@ void bind_vertex_buffer(VertexAttributes* attrib, enum Buffers buffer)
 	{
 		case VAO:
 			glBindVertexArray(attrib->VAO);
+			break;
 		case VBO:
 			glBindBuffer(GL_ARRAY_BUFFER, attrib->VBO);
+			break;
 		case EBO:
 			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, attrib->EBO);
+			break;
 	}
 }
 
-void unbind_vertex_buffer(VertexAttributes* attrib, enum Buffers buffer)
+void unbind_vertex_buffer(enum Buffers buffer)
 {
 	switch(buffer)
 	{
 		case VAO:
 			glBindVertexArray(0);
+			break;
 		case VBO:
 			glBindBuffer(GL_ARRAY_BUFFER, 0);
+			break;
 		case EBO:
 			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+			break;
 	}
+}
+
+void unbind_vertex_buffer_all()
+{
+	unbind_vertex_buffer(VAO);
+	unbind_vertex_buffer(VBO);
+	unbind_vertex_buffer(EBO);
 }
 
 void destroy_vertex_attributes(VertexAttributes* attrib, bool indexed)
 {
+//	bind_vertex_buffer(attrib, VAO);
+
 	glDeleteVertexArrays(1, &attrib->VAO);
 	glDeleteBuffers(1, &attrib->VBO);
 
@@ -127,6 +151,8 @@ void init_shader_program(unsigned int* shader_program, const char* vertex_shader
 	glLinkProgram(*shader_program);
 
 	shader_check_for_errors(*shader_program, GL_LINK_STATUS);
+	
+	unbind_shader_program();
 
 	free(vertex_shader_source);
 	free(fragment_shader_source);
@@ -138,6 +164,11 @@ void init_shader_program(unsigned int* shader_program, const char* vertex_shader
 void bind_shader_program(unsigned int* shader_program)
 {
 	glUseProgram(*shader_program);
+}
+
+void unbind_shader_program()
+{
+	glUseProgram(0);
 }
 
 int get_uniform_location(unsigned int* shader_program, const char* uniform_name)
@@ -206,6 +237,8 @@ void init_texture_from_file(Texture* texture, const char* texture_path)
 
 void init_texture_from_data(Texture* texture, GLint level, GLint internalformat, GLenum format, GLenum type, void* texture_data)
 {
+	texture_active_slot(GL_TEXTURE0);
+
 	glGenTextures(1, &texture->texture_id);
 	bind_texture(texture);
 
@@ -224,6 +257,8 @@ void init_texture_from_data(Texture* texture, GLint level, GLint internalformat,
 
 	glTexImage2D(GL_TEXTURE_2D, level, internalformat, texture->width, texture->height, 0, format, type, texture_data);
 	glGenerateMipmap(GL_TEXTURE_2D);
+
+	unbind_texture();
 }
 
 void add_texture_from_file(TextureHashMap** textures, const char* texture_name, const char* texture_path)
@@ -256,10 +291,16 @@ void set_texture_parameteri(GLenum target, GLenum pname, GLint param)
 	glTexParameteri(target, pname, param);
 }
 
+void bind_texture_id(GLuint texture_id)
+{
+	glBindTexture(GL_TEXTURE_2D, texture_id);
+}
+
 void bind_texture(Texture* texture)
 {
-	glBindTexture(GL_TEXTURE_2D, texture->texture_id);
+	bind_texture_id(texture->texture_id);
 }
+
 
 void unbind_texture()
 {
@@ -271,10 +312,24 @@ void destroy_texture(Texture* texture)
 	glDeleteTextures(1, &texture->texture_id);
 }
 
-void destroy_textures(TextureHashMap* textures)
+void destroy_textures_array(Texture** textures)
 {
-	for(int i = 0; i < shlen(textures); i++)
+	for(int i = 0; i < arrlen(*textures); i++)
 	{
-		//
+		destroy_texture(&(*textures)[i]);
 	}
+
+	arrfree(*textures);
+	*textures = NULL;
+}
+
+void destroy_textures_hashmap(TextureHashMap** textures)
+{
+	for(int i = 0; i < shlen(*textures); i++)
+	{
+		destroy_texture(&((*textures)[i].value));
+	}
+	
+	shfree(*textures);
+	*textures = NULL;
 }

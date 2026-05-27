@@ -7,7 +7,7 @@
 #include "../core/renderer.h"
 #include "../core/camera.h"
 #include "../utils/ui_imgui.h"
-#include "../core/model_loader.h"
+#include "../core/model_loader/model_loader.h"
 
 #include "cimgui.h"
 
@@ -30,12 +30,12 @@ static Model light_model;
 static Entity* model_scene;
 
 static vec3s model_position = (vec3s){0.0f, 0.0f, 0.0f};
-static vec3s model_scale = (vec3s){1.0f, 1.0f, 1.0f};
+static vec3s model_scale = (vec3s){10.0f, 10.0f, 10.0f};
 static vec3s model_rotation = (vec3s){0.0f, 0.0f, 0.0f};
 
 static vec3s light_position = (vec3s){0.0f, 0.0f, 15.0f};
 static vec3s light_color = (vec3s){1.0f, 1.0f, 1.0f};
-static float light_intensity = 10.0f;
+static float light_intensity = 5.0f;
 
 static Entity* light_source;
 
@@ -48,31 +48,67 @@ static Camera camera;
 static InputState input_state;
 
 
+static void render_mesh_material(Material* material)
+{
+	uniform_vec4(&model_scene->component_list.sprite_component.shader_program, "material.base_color", material->base_color);
+	uniform_int(&model_scene->component_list.sprite_component.shader_program, "material.roughness_factor", material->roughness_factor);
+	uniform_int(&model_scene->component_list.sprite_component.shader_program, "material.metallic_factor", material->metallic_factor);
+
+	if(material->albedo_texture_id > 0)
+	{
+		texture_active_slot(GL_TEXTURE0);
+		bind_texture_id(material->albedo_texture_id);
+		uniform_int(&model_scene->component_list.sprite_component.shader_program, "material.base_color", 0);
+		uniform_int(&model_scene->component_list.sprite_component.shader_program, "material.has_albedo_map", 1);
+	}
+	else
+	{
+		uniform_int(&model_scene->component_list.sprite_component.shader_program, "material.has_albedo_map", 0);
+	}
+
+	if(material->metallic_roughness_texture_id > 0)
+	{
+		texture_active_slot(GL_TEXTURE1);
+		bind_texture_id(material->metallic_roughness_texture_id);
+		uniform_int(&model_scene->component_list.sprite_component.shader_program, "material.metallic_roughness", 1);
+		uniform_int(&model_scene->component_list.sprite_component.shader_program, "material.has_metallic_roughness_map", 1);
+	}
+	else
+	{
+		uniform_int(&model_scene->component_list.sprite_component.shader_program, "material.has_metallic_roughness_map", 0);
+	}
+
+	if(material->normal_texture_id > 0)
+	{
+		texture_active_slot(GL_TEXTURE2);
+		bind_texture_id(material->normal_texture_id);
+		uniform_int(&model_scene->component_list.sprite_component.shader_program, "material.normal_map", 1);
+	}
+	else
+	{
+		uniform_int(&model_scene->component_list.sprite_component.shader_program, "material.has_normal_map", 0);
+	}
+
+}
+
+
 static void init()
 {
 	model_scene = add_entity("Model");
 	light_source = add_entity("Light Source");
-
-	model.data = NULL;
-
-	model.type = MODEL_GLTF;
-	model_load_from_file(&model, "3d-models/Rover.glb");
+	
+	model_load_from_file(&model, "3d-models/material_cube.glb", FILE_GLTF);
+	model_load_from_file(&light_model, "3d-models/cube.glb", FILE_GLTF);
 //	model_load_from_file(&model, "3d-models/cube4.glb");
-	model_parse_data(&model);
+//	model_parse_data(&model);
 
-	light_model.data = NULL;
-
-	light_model.type = MODEL_GLTF;
-	model_load_from_file(&light_model, "3d-models/cube.glb");
-	model_parse_data(&light_model);
-
-//	model_load_materials(&model, &model_scene->component_list.sprite_component.textures);
-
-
-//	init_vertex_attributes(&model_scene->component_list.sprite_component.vertex_attribs, model.vertex_render_data, arrlen(model.vertex_render_data)*sizeof(Vertex), model.index_data, model.index_count*sizeof(GLushort), true);
+	init_vertex_attributes(&model_scene->component_list.sprite_component.vertex_attribs, model.vertex_data, model.vertex_count*sizeof(Vertex), model.index_data, model.index_count*sizeof(GLuint), true, true);
 	init_shader_program(&model_scene->component_list.sprite_component.shader_program, "shaders/model-vertex-shader.glsl", "shaders/model-fragment-shader.glsl");
 
+	init_vertex_attributes(&light_source->component_list.sprite_component.vertex_attribs, light_model.vertex_data, light_model.vertex_count*sizeof(Vertex), light_model.index_data, light_model.index_count*sizeof(GLuint), true, true);
 	init_shader_program(&light_source->component_list.sprite_component.shader_program, "shaders/light-source-vertex-shader.glsl", "shaders/light-source-fragment-shader.glsl");
+
+
 
 
 	camera.position = (vec3s){{-10.0f, 0.0f, 20.0f}};
@@ -99,17 +135,8 @@ static void render()
 #endif
 
 	change_window_color(hex_to_rbg("#222222", 1.0f));
-
-	mat4s model_transform = GLMS_MAT4_IDENTITY_INIT;
-	model_transform = glms_scale(model_transform, model_scale);
-	model_transform = glms_rotate(model_transform, glm_rad(model_rotation.x), (vec3s){1.0f, 0.0f, 0.0f});
-	model_transform = glms_rotate(model_transform, glm_rad(model_rotation.y), (vec3s){0.0f, 1.0f, 0.0f});
-	model_transform = glms_rotate(model_transform, glm_rad(model_rotation.z), (vec3s){0.0f, 0.0f, 1.0f});
-	model_transform = glms_translate(model_transform, model_position);
-//	static float angle = 0.0f;
-//	transform = glms_rotate(transform, glm_rad(angle), (vec3s){0.0f, 1.0f, 0.0f});
-//	angle -= 0.0f;
 	
+	// Light Cube
 	mat4s light_source_transform = GLMS_MAT4_IDENTITY_INIT;
 	light_source_transform = glms_translate(light_source_transform, light_position);
 	light_source_transform = glms_scale(light_source_transform, (vec3s){0.2f, 0.2f, 0.2f});
@@ -121,67 +148,67 @@ static void render()
 	uniform_mat4(&light_source->component_list.sprite_component.shader_program, "transform", light_source_transform);
 
 	//bind_vertex_buffer(&light_source->component_list.sprite_component.vertex_attribs, VAO);
-	bind_vertex_buffer(&light_model.meshes_hashmap[0].value.vertex_attribs, VAO);
-	glDrawElements(GL_TRIANGLES, light_model.meshes_hashmap[0].value.index_count, GL_UNSIGNED_SHORT, 0);
+	bind_vertex_buffer(&light_source->component_list.sprite_component.vertex_attribs, VAO);
+	glDrawElements(GL_TRIANGLES, light_model.index_count, GL_UNSIGNED_INT, 0);
 
+	// Model
 
+	mat4s model_transform = GLMS_MAT4_IDENTITY_INIT;
+	model_transform = glms_scale(model_transform, model_scale);
+	model_transform = glms_rotate(model_transform, glm_rad(model_rotation.x), (vec3s){1.0f, 0.0f, 0.0f});
+	model_transform = glms_rotate(model_transform, glm_rad(model_rotation.y), (vec3s){0.0f, 1.0f, 0.0f});
+	model_transform = glms_rotate(model_transform, glm_rad(model_rotation.z), (vec3s){0.0f, 0.0f, 1.0f});
+	model_transform = glms_translate(model_transform, model_position);
 
-
-//	cgltf_node_transform_local(&model.data->nodes[0], (float*)transform.raw);
-
-//	bind_texture(&shget(model_scene->component_list.sprite_component.textures, "base_color"));
 
 	bind_shader_program(&model_scene->component_list.sprite_component.shader_program);
+
+	uniform_vec3(&model_scene->component_list.sprite_component.shader_program, "cam_pos", camera.position);
+	uniform_vec3(&model_scene->component_list.sprite_component.shader_program, "model_pos", model_position);
+
+	uniform_vec3(&model_scene->component_list.sprite_component.shader_program, "light.position", light_position);
+	uniform_vec3(&model_scene->component_list.sprite_component.shader_program, "light.color", light_color);
+	uniform_float(&model_scene->component_list.sprite_component.shader_program, "light.intensity", light_intensity);
+
 	uniform_mat4(&model_scene->component_list.sprite_component.shader_program, "projection", camera.projection_matrix);
 	uniform_mat4(&model_scene->component_list.sprite_component.shader_program, "view", camera.view_matrix);
-	uniform_mat4(&model_scene->component_list.sprite_component.shader_program, "transform", model_transform);
+	
+	bind_vertex_buffer(&model_scene->component_list.sprite_component.vertex_attribs, VAO);
 
 
-	for(int i = 0; i < shlen(model.meshes_hashmap); i++)
+	for(size_t i = 0; i < model.mesh_count; i++)
 	{
-		bind_vertex_buffer(&model.meshes_hashmap[i].value.vertex_attribs, VAO);
+		Mesh* mesh = &model.meshes[i];
+		Material* material;
 
-		texture_active_slot(GL_TEXTURE0);
-		bind_texture(&shget(model.meshes_hashmap[i].value.material.texture_hashmap, "base_color"));
-		uniform_int(&model_scene->component_list.sprite_component.shader_program, "material.base_color", 0);
-				
-		texture_active_slot(GL_TEXTURE1);
-		bind_texture(&shget(model.meshes_hashmap[i].value.material.texture_hashmap, "metallic"));
-		uniform_int(&model_scene->component_list.sprite_component.shader_program, "material.metallic", 1);
-	
-//		uniform_int(&model_scene->component_list.sprite_component.shader_program, "material.roughness", 2);
-//		uniform_int(&model_scene->component_list.sprite_component.shader_program, "material.normal_map", 3);
-//		uniform_int(&model_scene->component_list.sprite_component.shader_program, "material.occlusion", 4);
-//		bind_texture(&shget(model.meshes_hashmap[i].value.material.texture_hashmap, "base_color"));
+		if(mesh->material_index != -1)
+		{
+			material = &model.materials[mesh->material_index];
+			render_mesh_material(material);
+		}
+		else
+		{
+			uniform_int(&model_scene->component_list.sprite_component.shader_program, "material.has_albedo_map", 0);
+			uniform_int(&model_scene->component_list.sprite_component.shader_program, "material.has_metallic_roughness_map", 0);
+			uniform_int(&model_scene->component_list.sprite_component.shader_program, "material.has_normal_map", 0);
+		}
 
-		uniform_vec3(&model_scene->component_list.sprite_component.shader_program, "cam_pos", camera.position);
-		uniform_vec3(&model_scene->component_list.sprite_component.shader_program, "model_pos", model_position);
-	
-		uniform_vec3(&model_scene->component_list.sprite_component.shader_program, "light.position", light_position);
-		uniform_vec3(&model_scene->component_list.sprite_component.shader_program, "light.color", light_color);
-		uniform_float(&model_scene->component_list.sprite_component.shader_program, "light.intensity", light_intensity);
-	
-//		texture_active_slot(GL_TEXTURE1);
-//		bind_texture(&shget(model_scene->component_list.sprite_component.textures, "specular"));
-//		uniform_int(&model_scene->component_list.sprite_component.shader_program, "material.specular", 1);
-
-//		texture_active_slot(GL_TEXTURE2);
-//		bind_texture(&shget(model_scene->component_list.sprite_component.textures, "normal"));
-//		uniform_int(&model_scene->component_list.sprite_component.shader_program, "material.normal_map", 2);
-
-		uniform_mat4(&model_scene->component_list.sprite_component.shader_program, "projection", camera.projection_matrix);
-		uniform_mat4(&model_scene->component_list.sprite_component.shader_program, "view", camera.view_matrix);
 		uniform_mat4(&model_scene->component_list.sprite_component.shader_program, "transform", model_transform);
 		uniform_mat3(&model_scene->component_list.sprite_component.shader_program, "transform_normal", glms_mat3_transpose(glms_mat3_inv(glms_mat4_pick3(model_transform))));
-
-		glDrawElements(GL_TRIANGLES, model.meshes_hashmap[i].value.index_count, GL_UNSIGNED_SHORT, 0);
+		
+		glDrawElements(GL_TRIANGLES, mesh->index_count, GL_UNSIGNED_INT, (void*)(mesh->index_offset * sizeof(GLuint)));
 	}
+
 
 	// Imgui
 	ImGui_Begin("Scene Controls", NULL, ImGuiWindowFlags_None);
 	{
 //		ImGui_SetWindowSize((ImVec2){150.0f, 500.0f}, ImGuiCond_Once);
 //		ImGui_SetWindowPos((ImVec2){0.0f, 0.0f}, ImGuiCond_Once);
+		if(ImGui_Button("Back to Menu"))
+		{
+			change_scene("SceneMenu");
+		}
 
 		ImGui_DragFloat3("Model Position", model_position.raw);
 		ImGui_DragFloat3("Model Scale", model_scale.raw);
@@ -192,7 +219,6 @@ static void render()
 		ImGui_DragFloat3Ex("Light Color", light_color.raw, 0.05f, -1.0f, 1.0f, "%.3f", 0);
 	}
 	ImGui_End();
-
 }
 
 static void update()
@@ -230,15 +256,27 @@ static void activate()
 
 static void deactivate()
 {
+	unbind_vertex_buffer_all();
+	unbind_shader_program();
+	
+	texture_active_slot(GL_TEXTURE1);
+	unbind_texture();
+
+	texture_active_slot(GL_TEXTURE0);
+	unbind_texture();
 }
 
 static void destroy()
 {
-//	free(index_data);
-
 	model_free(&model);
-	destroy_textures(model_scene->component_list.sprite_component.textures);
+	model_free(&light_model);
+	
 	destroy_shader_program(&model_scene->component_list.sprite_component.shader_program);
+	destroy_vertex_attributes(&model_scene->component_list.sprite_component.vertex_attribs, true);
+
+	destroy_shader_program(&light_source->component_list.sprite_component.shader_program);
+	destroy_vertex_attributes(&light_source->component_list.sprite_component.vertex_attribs, true);
+
 }
 
 

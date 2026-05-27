@@ -103,6 +103,7 @@ static void add_block(vec3s origin, float block_size, char* sprite_name, bool is
 			vertex.position = glms_vec3_add(cube_vertices_positions[cube_indices[i]], origin);
 			vertex.color = (vec4s){0.0f, 0.0f, 0.0f, 0.0f};
 			vertex.tex_coord = tex_coords[i % 6];
+			vertex.normal = (vec3s){0.0f, 0.0f, 0.0f};
 
 			//arrput(*vertex_data, vertex);
 			arrput(block.vertex_data, vertex);
@@ -245,7 +246,7 @@ void load_terrain(char* filepath)
 static void generate_map()
 {
 	int BLOCKS_X = 16;
-	int BLOCKS_Y = 8;
+	int BLOCKS_Y = 5;
 	int BLOCKS_Z = 16;
 	float HALF_BLOCK_SIZE = 1.0f;
 
@@ -332,7 +333,7 @@ static void init()
 	generate_map();
 
 	add_texture_from_file(&block->component_list.sprite_component.textures, "block", block_sprite_sheet->path);
-	init_vertex_attributes(&block->component_list.sprite_component.vertex_attribs, vertex_render_data, sizeof(Vertex)*arrlen(vertex_render_data), NULL, 0, false);
+	init_vertex_attributes(&block->component_list.sprite_component.vertex_attribs, vertex_render_data, sizeof(Vertex)*arrlen(vertex_render_data), NULL, 0, false, false);
 	init_shader_program(&block->component_list.sprite_component.shader_program, "shaders/block-vertex-shader.glsl", "shaders/block-fragment-shader.glsl");
 
 	camera.position = (vec3s){{10.0f, 20.0f, 10.0f}};
@@ -390,16 +391,26 @@ static void render()
 	background_color.g = 0.5f + 0.5f * sin(frequency * glfwGetTime() + 4.0f * M_PI / 3.0f);
 	change_window_color(background_color);
 	
+	texture_active_slot(GL_TEXTURE0);
 	bind_texture(&shget(block->component_list.sprite_component.textures, "block"));
 	
 	bind_shader_program(&block->component_list.sprite_component.shader_program);
 	uniform_mat4(&block->component_list.sprite_component.shader_program, "projection", camera.projection_matrix);
 	uniform_mat4(&block->component_list.sprite_component.shader_program, "view", camera.view_matrix);
+	uniform_int(&block->component_list.sprite_component.shader_program, "texture_sampler", 0);
 
-	ImGui_Begin("Menu", NULL, ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoScrollWithMouse);
+
+	//ImGui_Begin("Scene Controls", NULL, ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoScrollWithMouse);
+	ImGui_Begin("Scene Controls", NULL, ImGuiWindowFlags_None);
 	{
-		ImGui_SetWindowSize((ImVec2){0.0f, 0.0f}, ImGuiCond_Always);
-		ImGui_SetWindowPos((ImVec2){0.0f, 0.0f}, ImGuiCond_Always);
+	//	ImGui_SetWindowSize((ImVec2){0.0f, 0.0f}, ImGuiCond_Always);
+	//	ImGui_SetWindowPos((ImVec2){0.0f, 0.0f}, ImGuiCond_Always);
+
+		if(ImGui_Button("Back to Menu"))
+		{
+			change_scene("SceneMenu");
+		}
+
 		if(ImGui_Button("Generate"))
 		{
 			generate_map();
@@ -427,11 +438,19 @@ static void activate()
 
 static void deactivate()
 {
+	unbind_vertex_buffer_all();
+	unbind_shader_program();
+	
+	texture_active_slot(GL_TEXTURE1);
+	unbind_texture();
+
+	texture_active_slot(GL_TEXTURE0);
+	unbind_texture();
 }
 
 static void destroy()
 {
-	destroy_textures(block->component_list.sprite_component.textures);
+	destroy_textures_hashmap(&block->component_list.sprite_component.textures);
 	destroy_shader_program(&block->component_list.sprite_component.shader_program);
 	destroy_vertex_attributes(&block->component_list.sprite_component.vertex_attribs, false);
 }

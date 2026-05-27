@@ -1,11 +1,13 @@
-#version 100
+#version 300 es
 
 precision mediump float;
 
-varying vec3 f_pos;
-varying vec4 f_color;
-varying vec2 f_tex_coord;
-varying vec3 f_normal;
+in vec3 f_pos;
+in vec4 f_color;
+in vec2 f_tex_coord;
+in vec3 f_normal;
+
+out vec4 FragColor;
 
 uniform vec3 cam_pos;
 uniform vec3 model_pos;
@@ -19,11 +21,17 @@ vec3 fresnelSchlick(float cosTheta, vec3 F0);
 
 struct Material
 {
-	sampler2D base_color; // albedo
-	sampler2D metallic;
-	sampler2D roughness;
+	sampler2D base_color_map; // albedo
+	sampler2D metallic_roughness_map;
 	sampler2D normal_map;
-	sampler2D occlusion;
+
+	vec4 base_color;
+    float roughness_factor;
+    float metallic_factor;
+
+	int has_albedo_map;
+    int has_metallic_roughness_map;
+	int has_normal_map;
 };
 
 struct Light
@@ -74,72 +82,99 @@ float GeometrySmith(vec3 N, vec3 V, vec3 L, float roughness)
 	return ggx1 * ggx2;
 }
 
+vec3 GetNormalFromMap(sampler2D normal_map, vec2 tex_coord, vec3 world_normal, vec3 world_pos)
+{
+    vec3 tangent_normal = texture(normal_map, tex_coord).rgb * 2.0 - 1.0;
+
+    vec3 Q1  = dFdx(world_pos);
+    vec3 Q2  = dFdy(world_pos);
+    vec2 st1 = dFdx(tex_coord);
+    vec2 st2 = dFdy(tex_coord);
+
+    vec3 N   = normalize(world_normal);
+    vec3 T   = normalize(Q1*st2.t - Q2*st1.t);
+    vec3 B   = -normalize(cross(N, T));
+    
+    mat3 TBN = mat3(T, B, N);
+    return normalize(TBN * tangent_normal);
+}
 
 void main()
 {
-	/*
-	vec3 ambient = light.ambient * vec3(texture2D(material.base_color, f_tex_coord));
+	vec3 albedo = material.base_color.rgb;
+	if(material.has_albedo_map == 1)
+	{
+		vec3 sampled_albedo = texture(material.base_color_map, f_tex_coord).rgb;
+		albedo *= pow(sampled_albedo, vec3(2.2));
+	}
 
-	// Diffuse
-	vec3 norm = texture2D(material.normal_map, f_tex_coord).rgb;
-	norm = normalize(norm * 2.0 - 1.0);
-	vec3 light_dir = normalize(light.position - f_pos);
-	float diff = max(dot(norm, light_dir), 0.0);
-	vec3 diffuse = light.diffuse * (diff * vec3(texture2D(material.base_color, f_tex_coord)));
+	float metallic = material.metallic_factor;
+	float roughness = material.roughness_factor;
+	float ao = 1.0;
 
-	// Specular
-	vec3 view_dir = normalize(view_pos - f_pos);
-	vec3 halfway_dir = normalize(light_dir + view_dir);
-	float spec = pow(max(dot(view_dir, halfway_dir), 0.0), vec3(texture2D(material.metallic_roughness, f_tex_coord)).r);
-	vec3 specular = light.specular * (spec * vec3(texture2D(material.metallic_roughness, f_tex_coord)));
-	
-	gl_FragColor = vec4(ambient + diffuse + specular, 1.0);
+	if(material.has_metallic_roughness_map == 1)
+	{
+		vec3 sampled_mr = texture(material.metallic_roughness_map, f_tex_coord).rgb;
 
-	gl_FragColor = texture2D(material.base_color, f_tex_coord);
-//	gl_FragColor = f_color;
-	*/
 
-	vec3 albedo = pow(texture2D(material.base_color, f_tex_coord).rgb, vec3(2.2));
-//	vec3 normal = getNormalFromNormalMap();
-	float metallic = texture2D(material.metallic, f_tex_coord).b;
-	float roughness = texture2D(material.metallic, f_tex_coord).g;
-	float ao = texture2D(material.metallic, f_tex_coord).r;
-//	float ao = texture(aoMap, TexCoords).r;
+		float r_fac = (material.roughness_factor == 0.0) ? 1.0 : material.roughness_factor;
+		float m_fac = (material.metallic_factor == 0.0) ? 1.0 : material.metallic_factor;
+		roughness *= sampled_mr.g;
+		metallic *= sampled_mr.b;
 
-	vec3 N = normalize(f_normal);
+		ao = sampled_mr.r;
+	}
+
+	roughness = max(roughness, 0.05);
+
+	vec3 N;
+	if(material.has_normal_map == 1)
+	{
+		N = GetNormalFromMap(material.normal_map, f_tex_coord, f_normal, f_pos);
+	}
+	else
+	{
+		N = f_normal;
+	}
+
+
 	vec3 V = normalize(cam_pos - f_pos);
 	vec3 F0 = vec3(0.04);
 	F0 = mix(F0, albedo, metallic);
-	// reflectance equation
-	vec3 Lo = vec3(0.0);
 
-	// One light
-//	for(int i = 0; i < 4; ++i)
-//	{
-		// calculate per-light radiance
-		vec3 L = normalize(light.position - f_pos);
-		vec3 H = normalize(V + L);
-		float distance = length(light.position - f_pos);
-		float attenuation = 1.0 / (distance * distance);
-		vec3 radiance = light.color * attenuation;
-		// cook-torrance brdf
-		float NDF = DistributionGGX(N, H, roughness);
-		float G = GeometrySmith(N, V, L, roughness);
-		vec3 F = fresnelSchlick(max(dot(H, V), 0.0), F0);
-		vec3 kS = F;
-		vec3 kD = vec3(1.0) - kS;
-		kD *= 1.0 - metallic;
-		vec3 numerator = NDF * G * F;
-		float denominator = 4.0 * max(dot(N, V), 0.0) * max(dot(N, L), 0.0);
-		vec3 specular = numerator / max(denominator, 0.001);
-		// add to outgoing radiance Lo
-		float NdotL = max(dot(N, L), 0.0);
-		Lo += (kD * albedo / PI + specular) * radiance * NdotL;
-//	}
+	// Reflectance Equation
+    vec3 Lo = vec3(0.0);
+
+    // Calculate Per-Light Radiance (Including light intensity before tone mapping)
+    vec3 L = normalize(light.position - f_pos);
+    vec3 H = normalize(V + L);
+    float distance = length(light.position - f_pos);
+    float attenuation = 1.0 / (distance * distance);
+    vec3 radiance = light.color * light.intensity * attenuation;
+
+    // Cook-Torrance BRDF
+    float NDF = DistributionGGX(N, H, roughness);
+    float G = GeometrySmith(N, V, L, roughness);
+    vec3 F = fresnelSchlick(max(dot(H, V), 0.0), F0);
+    
+    vec3 kS = F;
+    vec3 kD = vec3(1.0) - kS;
+    kD *= 1.0 - metallic;
+    
+    vec3 numerator = NDF * G * F;
+    float denominator = 4.0 * max(dot(N, V), 0.0) * max(dot(N, L), 0.0);
+    vec3 specular = numerator / max(denominator, 0.001);
+    
+    float NdotL = max(dot(N, L), 0.0);
+    Lo += (kD * albedo / PI + specular) * radiance * NdotL;
+
 
 	vec3 ambient = vec3(0.03) * albedo * ao;
 	vec3 color = ambient + Lo;
 	color = color / (color + vec3(1.0));
-	color = pow(color, vec3(1.0/2.2)) * light.intensity;
-	gl_FragColor = vec4(color, 1.0);
+	color = pow(color, vec3(1.0/2.2));
+
+
+
+	FragColor = vec4(color, 1.0);
 }

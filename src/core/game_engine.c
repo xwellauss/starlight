@@ -9,6 +9,8 @@
 
 #include "../network/network.h"
 
+#include "../audio/audio.h"
+
 #include "scene.h"
 #include "../scenes/scenes.h"
 
@@ -66,6 +68,8 @@ static void init()
 	glEnable(GL_BLEND);
 	glEnable(GL_DEPTH_TEST);
 
+	audio_init(&game_engine.audio_engine);
+
 	init_spritesheet();
 	init_font_renderer("fonts/font.ttf", 96);
 	init_imgui("fonts/font.ttf", 20, "", "#version 100");
@@ -103,13 +107,15 @@ static void render_frame()
 
 static void cleanup()
 {
+	audio_destroy(&game_engine.audio_engine);
 	destroy_network();
 
 	destroy_ECS();
 	destroy_scenes();
 
 	destroy_spriteSheet();
-	
+
+	destroy_font_renderer();
 	destroy_imgui();
 	destroy_window(&game_engine.current_window);
 }
