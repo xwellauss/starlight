@@ -47,6 +47,8 @@ typedef struct
 	size_t index_count;
 
 	Material* materials;
+
+	vec4s color; // for testing and debugging
 	
 	Texture* textures;
 } Model;

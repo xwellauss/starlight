@@ -326,15 +326,18 @@ static void init()
 {
 	current_window = &game_engine.current_window;
 
-	block = add_entity("Block");
+	block = ecs_create_entity("Block");
+	ecs_add_component(block, COMPONENT_TRANSFORM);
+	ecs_add_component(block, COMPONENT_SPRITE);
+
 
 	block_sprite_sheet = (SpriteSheet*)hashmap_get(sprite_sheet_hashmap, &(SpriteSheet){ .name="tiles" });
 
 	generate_map();
 
-	add_texture_from_file(&block->component_list.sprite_component.textures, "block", block_sprite_sheet->path);
-	init_vertex_attributes(&block->component_list.sprite_component.vertex_attribs, vertex_render_data, sizeof(Vertex)*arrlen(vertex_render_data), NULL, 0, false, false);
-	init_shader_program(&block->component_list.sprite_component.shader_program, "shaders/block-vertex-shader.glsl", "shaders/block-fragment-shader.glsl");
+	add_texture_from_file(&ecs_get_sprite(block)->textures, "block", block_sprite_sheet->path);
+	init_vertex_attributes(&ecs_get_sprite(block)->vertex_attribs, vertex_render_data, sizeof(Vertex)*arrlen(vertex_render_data), NULL, 0, false, false);
+	init_shader_program(&ecs_get_sprite(block)->shader_program, "shaders/block-vertex-shader.glsl", "shaders/block-fragment-shader.glsl");
 
 	camera.position = (vec3s){{10.0f, 20.0f, 10.0f}};
 	camera.target = (vec3s){{0.0f, 0.0f, 0.0f}};
@@ -392,12 +395,12 @@ static void render()
 	change_window_color(background_color);
 	
 	texture_active_slot(GL_TEXTURE0);
-	bind_texture(&shget(block->component_list.sprite_component.textures, "block"));
+	bind_texture(&shget(ecs_get_sprite(block)->textures, "block"));
 	
-	bind_shader_program(&block->component_list.sprite_component.shader_program);
-	uniform_mat4(&block->component_list.sprite_component.shader_program, "projection", camera.projection_matrix);
-	uniform_mat4(&block->component_list.sprite_component.shader_program, "view", camera.view_matrix);
-	uniform_int(&block->component_list.sprite_component.shader_program, "texture_sampler", 0);
+	bind_shader_program(&ecs_get_sprite(block)->shader_program);
+	uniform_mat4(&ecs_get_sprite(block)->shader_program, "projection", camera.projection_matrix);
+	uniform_mat4(&ecs_get_sprite(block)->shader_program, "view", camera.view_matrix);
+	uniform_int(&ecs_get_sprite(block)->shader_program, "texture_sampler", 0);
 
 
 	//ImGui_Begin("Scene Controls", NULL, ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoScrollWithMouse);
@@ -426,10 +429,12 @@ static void render()
 	}
 	ImGui_End();
 
-	bind_vertex_buffer(&block->component_list.sprite_component.vertex_attribs, VAO);
+	bind_vertex_buffer(&ecs_get_sprite(block)->vertex_attribs, VAO);
 	//glBufferData(GL_ARRAY_BUFFER, sizeof(Vertex)*arrlen(vertex_render_data), vertex_render_data, GL_STATIC_DRAW);
 	glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(Vertex)*arrlen(vertex_render_data), vertex_render_data);
 	glDrawArrays(GL_TRIANGLES, 0, arrlen(vertex_render_data));
+	
+	render_text("Starlight", 0.0f, 0.0f, 1.0f, "#ffffff", 1.0f, camera.projection_matrix, camera.view_matrix);
 }
 
 static void activate()
@@ -450,9 +455,11 @@ static void deactivate()
 
 static void destroy()
 {
-	destroy_textures_hashmap(&block->component_list.sprite_component.textures);
-	destroy_shader_program(&block->component_list.sprite_component.shader_program);
-	destroy_vertex_attributes(&block->component_list.sprite_component.vertex_attribs, false);
+	destroy_textures_hashmap(&ecs_get_sprite(block)->textures);
+	destroy_shader_program(&ecs_get_sprite(block)->shader_program);
+	destroy_vertex_attributes(&ecs_get_sprite(block)->vertex_attribs, false);
+
+	ecs_destroy_entity(block);
 }
 
 

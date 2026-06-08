@@ -79,7 +79,7 @@ static GLushort map_indices[MAP_TILE_COUNT * 6];
 // Player
 static void init_player()
 {
-	player = add_entity("player");
+	player = ecs_create_entity("player");
 
 	player->component_list.transform_component = (Component_Transform)
 	{
@@ -92,9 +92,9 @@ static void init_player()
 
 	player_current_sprite_name = player_spritesheet->default_sprite;
 
-	add_texture_from_file(&player->component_list.sprite_component.textures, "player", player_spritesheet->path);
-	init_vertex_attributes(&player->component_list.sprite_component.vertex_attribs, player_quad, sizeof(player_quad), player_indices, sizeof(player_indices), true, false);
-	init_shader_program(&player->component_list.sprite_component.shader_program, "shaders/player-vertex-shader.glsl", "shaders/player-fragment-shader.glsl");
+	add_texture_from_file(&ecs_get_sprite(player)->textures, "player", player_spritesheet->path);
+	init_vertex_attributes(&ecs_get_sprite(player)->vertex_attribs, player_quad, sizeof(player_quad), player_indices, sizeof(player_indices), true, false);
+	init_shader_program(&ecs_get_sprite(player)->shader_program, "shaders/player-vertex-shader.glsl", "shaders/player-fragment-shader.glsl");
 }
 
 static void player_update_texcoords()
@@ -116,20 +116,20 @@ static void player_update_texcoords()
 
 static void draw_player()
 {
-	bind_shader_program(&player->component_list.sprite_component.shader_program);
+	bind_shader_program(&ecs_get_sprite(player)->shader_program);
 
-	bind_texture(&shget(player->component_list.sprite_component.textures, "player"));
+	bind_texture(&shget(ecs_get_sprite(player)->textures, "player"));
 
 	mat4s transform = GLMS_MAT4_IDENTITY_INIT;
 	transform = glms_scale(transform, player->component_list.transform_component.scale);
 	transform = glms_translate(transform, player->component_list.transform_component.position);
 
-	uniform_mat4(&player->component_list.sprite_component.shader_program, "projection", camera.projection_matrix);
-	uniform_mat4(&player->component_list.sprite_component.shader_program, "view", camera.view_matrix);
-	uniform_mat4(&player->component_list.sprite_component.shader_program, "transform", transform);
+	uniform_mat4(&ecs_get_sprite(player)->shader_program, "projection", camera.projection_matrix);
+	uniform_mat4(&ecs_get_sprite(player)->shader_program, "view", camera.view_matrix);
+	uniform_mat4(&ecs_get_sprite(player)->shader_program, "transform", transform);
 
-	bind_vertex_buffer(&player->component_list.sprite_component.vertex_attribs, VAO);
-	bind_vertex_buffer(&player->component_list.sprite_component.vertex_attribs, VBO);
+	bind_vertex_buffer(&ecs_get_sprite(player)->vertex_attribs, VAO);
+	bind_vertex_buffer(&ecs_get_sprite(player)->vertex_attribs, VBO);
 
 	player_update_texcoords();
 
@@ -202,7 +202,7 @@ static void fill_map()
 
 static void init_map()
 {
-	map = add_entity("map");
+	map = ecs_create_entity("map");
 	map->component_list.transform_component = (Component_Transform)
 	{
 		.position = {0.0f, 0.0f, 0.0f},
@@ -212,30 +212,32 @@ static void init_map()
 
 	map_sprite_sheet = (SpriteSheet*)hashmap_get(sprite_sheet_hashmap, &(SpriteSheet){ .name="tiles" });
 
-	add_texture_from_file(&map->component_list.sprite_component.textures, "map", map_sprite_sheet->path);
+	add_texture_from_file(&ecs_get_sprite(map)->textures, "map", map_sprite_sheet->path);
 
 	fill_map();
-	init_shader_program(&map->component_list.sprite_component.shader_program, "shaders/map-vertex-shader.glsl", "shaders/map-fragment-shader.glsl");
-	init_vertex_attributes(&map->component_list.sprite_component.vertex_attribs, map_tiles, sizeof(map_tiles), map_indices, sizeof(map_indices), true, false);
+	init_shader_program(&ecs_get_sprite(map)->shader_program, "shaders/map-vertex-shader.glsl", "shaders/map-fragment-shader.glsl");
+	init_vertex_attributes(&ecs_get_sprite(map)->vertex_attribs, map_tiles, sizeof(map_tiles), map_indices, sizeof(map_indices), true, false);
 }
 
 static void draw_map()
 {
-	bind_shader_program(&map->component_list.sprite_component.shader_program);
+	bind_shader_program(&ecs_get_sprite(map)->shader_program);
 
-	bind_texture(&shget(map->component_list.sprite_component.textures, "map"));
+	bind_texture(&shget(ecs_get_sprite(map)->textures, "map"));
 
 	mat4s transform = GLMS_MAT4_IDENTITY_INIT;
 	transform = glms_scale(transform, (vec3s){{1.0f, 1.0f, 0.0f}});
 	transform = glms_translate(transform, (vec3s){{0.0f, 0.0f, 0.0f}});
 
-	uniform_mat4(&map->component_list.sprite_component.shader_program, "projection", camera.projection_matrix);
-	uniform_mat4(&map->component_list.sprite_component.shader_program, "view", camera.view_matrix);
-	uniform_mat4(&map->component_list.sprite_component.shader_program, "transform", transform);
+	uniform_mat4(&ecs_get_sprite(map)->shader_program, "projection", camera.projection_matrix);
+	uniform_mat4(&ecs_get_sprite(map)->shader_program, "view", camera.view_matrix);
+	uniform_mat4(&ecs_get_sprite(map)->shader_program, "transform", transform);
 
-	bind_vertex_buffer(&map->component_list.sprite_component.vertex_attribs, VAO);
+	bind_vertex_buffer(&ecs_get_sprite(map)->vertex_attribs, VAO);
 
 	glDrawElements(GL_TRIANGLES, MAP_TILE_COUNT*6, GL_UNSIGNED_SHORT, 0);
+	
+	render_text("Starlight", 0.0f, 0.0f, 1.0f, "#ffffff", 1.0f, camera.projection_matrix, camera.view_matrix);
 }
 
 // Scene
@@ -349,13 +351,13 @@ static void deactivate()
 
 static void destroy()
 {
-	destroy_textures_hashmap(&map->component_list.sprite_component.textures);
-	destroy_shader_program(&map->component_list.sprite_component.shader_program);
-	destroy_vertex_attributes(&map->component_list.sprite_component.vertex_attribs, true);
+	destroy_textures_hashmap(&ecs_get_sprite(map)->textures);
+	destroy_shader_program(&ecs_get_sprite(map)->shader_program);
+	destroy_vertex_attributes(&ecs_get_sprite(map)->vertex_attribs, true);
 	
-	destroy_textures_hashmap(&player->component_list.sprite_component.textures);
-	destroy_vertex_attributes(&player->component_list.sprite_component.vertex_attribs, true);
-	destroy_shader_program(&player->component_list.sprite_component.shader_program);
+	destroy_textures_hashmap(&ecs_get_sprite(player)->textures);
+	destroy_vertex_attributes(&ecs_get_sprite(player)->vertex_attribs, true);
+	destroy_shader_program(&ecs_get_sprite(player)->shader_program);
 }
 
 Scene scene_play = {"ScenePlay", init, destroy, activate, deactivate, update, render, process_input};

@@ -70,6 +70,8 @@ static void init()
 
 	audio_init(&game_engine.audio_engine);
 
+	ecs_init();
+
 	init_spritesheet();
 	init_font_renderer("fonts/font.ttf", 96);
 	init_imgui("fonts/font.ttf", 20, "", "#version 100");
@@ -110,7 +112,7 @@ static void cleanup()
 	audio_destroy(&game_engine.audio_engine);
 	destroy_network();
 
-	destroy_ECS();
+	ecs_destroy();
 	destroy_scenes();
 
 	destroy_spriteSheet();

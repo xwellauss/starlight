@@ -74,7 +74,17 @@ void init_font_renderer(const char* font_path, int character_size)
 		texture.texture_config.min_filter = GL_LINEAR;
 		texture.texture_config.mag_filter = GL_LINEAR;
 
-		init_texture_from_data(&texture, 0, GL_R8, GL_RED, GL_UNSIGNED_BYTE, bitmap);
+		glGenTextures(1, &texture.texture_id);
+		glBindTexture(GL_TEXTURE_2D, texture.texture_id);
+
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_R8, width, height, 0, GL_RED, GL_UNSIGNED_BYTE, bitmap);
+		// NO glGenerateMipmap here
+		glBindTexture(GL_TEXTURE_2D, 0);
 	
 		// now store character for later use
 	    Character character = 

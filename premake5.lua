@@ -125,6 +125,9 @@ project "starlight"
 		"ASSETS_DIR=\"%{assets_dir}\"",
 	}
 
+	buildoptions { "-fsanitize=address" }
+	linkoptions  { "-fsanitize=address" }
+
 	links
 	{
 		"m",
@@ -166,7 +169,10 @@ project "starlight"
 
 	removefiles
 	{
-		"src/utils/android_fopen.h", "src/utils/android_fopen.c"
+		"src/utils/android_fopen.h", "src/utils/android_fopen.c",
+		"src/scenes/scene_play.h", "src/scenes/scene_play.c",
+		"src/scenes/scene_play_server.h", "src/scenes/scene_play_server.c",
+		"src/scenes/scene_play_client.h", "src/scenes/scene_play_client.c",
 	}
 
 	filter "configurations:Debug"

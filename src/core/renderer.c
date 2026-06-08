@@ -36,10 +36,6 @@ void init_vertex_attributes(VertexAttributes* attrib, void* vertex_data, size_t 
 	}
 
 	unbind_vertex_buffer_all();
-	glDisableVertexAttribArray(0);
-	glDisableVertexAttribArray(1);
-	glDisableVertexAttribArray(2);
-	glDisableVertexAttribArray(3);
 }
 
 void bind_vertex_buffer(VertexAttributes* attrib, enum Buffers buffer)
