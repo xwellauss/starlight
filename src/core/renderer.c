@@ -257,7 +257,7 @@ void init_texture_from_data(Texture* texture, GLint level, GLint internalformat,
 	unbind_texture();
 }
 
-void add_texture_from_file(TextureHashMap** textures, const char* texture_name, const char* texture_path)
+void add_texture_from_file(TextureHashMap* textures, const char* texture_name, const char* texture_path)
 {
 	Texture texture = {};
 
@@ -267,7 +267,7 @@ void add_texture_from_file(TextureHashMap** textures, const char* texture_name, 
 }
 
 
-void add_texture_from_data(TextureHashMap** textures, const char* texture_name, GLint level, GLint internalformat, GLenum format, GLenum type, void* texture_data)
+void add_texture_from_data(TextureHashMap* textures, const char* texture_name, GLint level, GLint internalformat, GLenum format, GLenum type, void* texture_data)
 {
 	Texture texture = {};
 
@@ -319,7 +319,7 @@ void destroy_textures_array(Texture** textures)
 	*textures = NULL;
 }
 
-void destroy_textures_hashmap(TextureHashMap** textures)
+void destroy_textures_hashmap(TextureHashMap* textures)
 {
 	for(int i = 0; i < shlen(*textures); i++)
 	{

@@ -40,7 +40,7 @@ typedef struct
 	
 	vec4s color; // For testing and debugging
 
-	TextureHashMap* textures;
+	TextureHashMap textures;
 } Sprite_Component;
 
 

@@ -10,7 +10,7 @@ void scene_register(Scene* scene)
 }
 
 void scene_switch(char* scene_name)
-{	
+{
 	Scene* scene = shget(game_engine.scenes, scene_name);
 
 	if (!scene)

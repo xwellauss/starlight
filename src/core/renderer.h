@@ -82,13 +82,13 @@ typedef struct
 	TextureConfig texture_config;
 } Texture;
 
-typedef struct { char* key; Texture value; } TextureHashMap;
+typedef struct { char* key; Texture value; }* TextureHashMap;
 
 void init_texture_from_file(Texture* texture, const char* texture_path);
 void init_texture_from_data(Texture* texture, GLint level, GLint internalformat, GLenum format, GLenum type, void* texture_data);
 
-void add_texture_from_file(TextureHashMap** textures, const char* texture_name, const char* texture_path);
-void add_texture_from_data(TextureHashMap** textures, const char* texture_name, GLint level, GLint internalformat, GLenum format, GLenum type, void* texture_data);
+void add_texture_from_file(TextureHashMap* textures, const char* texture_name, const char* texture_path);
+void add_texture_from_data(TextureHashMap* textures, const char* texture_name, GLint level, GLint internalformat, GLenum format, GLenum type, void* texture_data);
 
 void texture_active_slot(GLenum slot);
 void set_texture_parameteri(GLenum target, GLenum pname, GLint param);
@@ -97,4 +97,4 @@ void bind_texture_id(GLuint texture_id);
 void unbind_texture();
 void destroy_texture(Texture* texture);
 void destroy_textures_array(Texture** textures);
-void destroy_textures_hashmap(TextureHashMap** textures);
+void destroy_textures_hashmap(TextureHashMap* textures);

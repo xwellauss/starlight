@@ -3,24 +3,12 @@
 #include "../utils/utils.h"
 
 #include <cglm/struct.h>
-#include <hashmap.h>
 
 enum AtlasLayout
 {
 	ATLAS_LAYOUT_HORIZONTAL = 0,
 	ATLAS_LAYOUT_VERTICAL = 1,
 };
-
-typedef struct
-{
-	char* name;
-	char* path;
-	char* default_region_name;
-	enum AtlasLayout type;
-	int width;
-	int height;
-	struct hashmap* atlas_region_map;
-} TextureAtlas;
 
 typedef struct
 {
@@ -35,16 +23,27 @@ typedef struct
 
 typedef struct
 {
+	char* name;
+	char* path;
+	char* default_region_name;
+	enum AtlasLayout type;
+	int width;
+	int height;
+	struct { char* key; AtlasRegion* value; }* atlas_region_map;
+} TextureAtlas;
+
+typedef struct
+{
 	float x1;
 	float x2;
 	float y1;
 	float y2;
 } AtlasUV;
 
-extern struct hashmap* texture_atlas_hashmap;
-
 void texture_atlas_init();
 void texture_atlas_destroy();
+
+TextureAtlas* texture_atlas_get(const char* name);
 
 
 void atlas_get_uv(AtlasUV* atlas_uv, TextureAtlas* texture_atlas, AtlasRegion* atlas_region);

@@ -3,12 +3,12 @@
 #include "../core/game_engine.h"
 #include "../core/ecs.h"
 #include "../core/font_renderer.h"
-#include "../utils/utils.h"
 #include "../core/renderer.h"
 #include "../core/camera.h"
 #include "../core/texture_atlas.h"
 #include "../utils/ui_imgui.h"
 #include "../utils/json_helper.h"
+#include "../utils/utils.h"
 
 #include <string.h>
 #include <time.h>
@@ -74,7 +74,7 @@ static void add_block(vec3s origin, float block_size, char* block_name, bool is_
 		3, 2, 6, 7, 3, 6     // Bottom face
 	};
 
-	AtlasRegion* atlas_region = (AtlasRegion*)hashmap_get(blocks_texture_atlas->atlas_region_map, &(AtlasRegion){ .name=block_name });
+	AtlasRegion* atlas_region = shget(blocks_texture_atlas->atlas_region_map, block_name);
 
 	AtlasUV uv_coords;
 	atlas_get_uv(&uv_coords, blocks_texture_atlas, atlas_region);
@@ -331,7 +331,7 @@ static void init()
 	ecs_add_component(block, COMPONENT_SPRITE);
 
 
-	blocks_texture_atlas = (TextureAtlas*)hashmap_get(texture_atlas_hashmap, &(TextureAtlas){ .name="tiles" });
+	blocks_texture_atlas = texture_atlas_get("tiles");
 
 	generate_map();
 
@@ -455,6 +455,8 @@ static void deactivate()
 
 static void destroy()
 {
+	arrfree(vertex_render_data);
+
 	destroy_textures_hashmap(&ecs_get_sprite(block)->textures);
 	destroy_shader_program(&ecs_get_sprite(block)->shader_program);
 	destroy_vertex_attributes(&ecs_get_sprite(block)->vertex_attribs, false);

@@ -1,9 +1,19 @@
 #include "json_helper.h"
+#include "utils.h"
+
 #include "cJSON.h"
 
 cJSON* json_parse(const char* json_data_string)
 {
 	return cJSON_Parse(json_data_string);
+}
+
+cJSON* json_read_file(const char* path)
+{
+    char* json_string = read_file(path, "r");
+    cJSON* json = cJSON_Parse(json_string);
+    free(json_string);
+    return json;
 }
 
 char* json_print(cJSON* root)
@@ -64,4 +74,9 @@ char* json_get_string(cJSON* cjson, const char* string)
 cJSON* json_get_array_item(cJSON* array, int index)
 {
 	return cJSON_GetArrayItem(array, index);
+}
+
+int json_get_array_length(cJSON* array)
+{
+    return cJSON_GetArraySize(array);
 }
