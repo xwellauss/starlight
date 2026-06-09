@@ -244,7 +244,7 @@ void init_texture_from_data(Texture* texture, GLint level, GLint internalformat,
 		texture->texture_config.wrap_t = GL_REPEAT;
 		texture->texture_config.min_filter = GL_NEAREST;
 		texture->texture_config.mag_filter = GL_NEAREST;
-	}	
+	}
 
 	set_texture_parameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, texture->texture_config.wrap_s);
 	set_texture_parameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, texture->texture_config.wrap_t);

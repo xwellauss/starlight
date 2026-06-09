@@ -73,8 +73,8 @@ static void init()
 	ecs_init();
 
 	init_spritesheet();
-	init_font_renderer("fonts/font.ttf", 96);
-	init_imgui("fonts/font.ttf", 20, "", "#version 100");
+	font_renderer_init("fonts/font.ttf", 96);
+	imgui_init("fonts/font.ttf", 20, "", "#version 100");
 	init_network();
 //	ImGui_GetIO()->ConfigFlags |= ImGuiConfigFlags_DockingEnable;
 
@@ -100,11 +100,11 @@ static void render_frame()
 	
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	
-	new_imgui_frame();
+	imgui_new_frame();
 
 	scene_render(game_engine.current_scene);
 
-	render_imgui();
+	imgui_render_frame();
 	
 	window_swap_buffers(&game_engine.current_window);
 }
@@ -119,8 +119,8 @@ static void cleanup()
 
 	destroy_spriteSheet();
 
-	destroy_font_renderer();
-	destroy_imgui();
+	font_renderer_destroy();
+	imgui_destroy();
 	destroy_window(&game_engine.current_window);
 }
 

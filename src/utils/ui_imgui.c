@@ -12,7 +12,7 @@
 static ImGuiIO* imgui_io;
 static struct { char* key; ImFont* value; }* fonts = NULL;
 
-void init_imgui(const char* font_path, int font_size, const char* chars_add, const char* glsl_version)
+void imgui_init(const char* font_path, int font_size, const char* chars_add, const char* glsl_version)
 {
 	ImGui_CreateContext(NULL);
     imgui_io = ImGui_GetIO();
@@ -28,7 +28,9 @@ void init_imgui(const char* font_path, int font_size, const char* chars_add, con
 	ImFontGlyphRangesBuilder_AddRanges(&builder, ImFontAtlas_GetGlyphRangesDefault(imgui_io->Fonts));
 	ImFontGlyphRangesBuilder_AddText(&builder, chars_add, NULL);
 	ImFontGlyphRangesBuilder_BuildRanges(&builder, &ranges);
-	
+	ImGui_MemFree(builder.UsedChars.Data);	
+
+
 	shput(fonts, "Normal", ImFontAtlas_AddFontFromFileTTF(imgui_io->Fonts, font_path, font_size, NULL, ranges.Data));
 	shput(fonts, "Double", ImFontAtlas_AddFontFromFileTTF(imgui_io->Fonts, font_path, font_size * 2.0f, NULL, ranges.Data));
 	shput(fonts, "Triple", ImFontAtlas_AddFontFromFileTTF(imgui_io->Fonts, font_path, font_size * 3.0f, NULL, ranges.Data));
@@ -46,14 +48,14 @@ ImFont* ui_get_font(const char* name)
 	return shget(fonts, name);
 }
 
-void new_imgui_frame()
+void imgui_new_frame()
 {
 	cImGui_ImplOpenGL3_NewFrame();
 	cImGui_ImplGlfw_NewFrame();
 	ImGui_NewFrame();
 }
 
-void render_imgui()
+void imgui_render_frame()
 {
 	ImGui_Render();
 	cImGui_ImplOpenGL3_RenderDrawData(ImGui_GetDrawData());
@@ -104,7 +106,7 @@ void ui_component_joystick(const char* joystick_box_tag, const char* joystick_ci
 
 }
 
-void destroy_imgui()
+void imgui_destroy()
 {
 	cImGui_ImplOpenGL3_Shutdown();
 	cImGui_ImplGlfw_Shutdown();

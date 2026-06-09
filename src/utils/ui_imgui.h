@@ -3,9 +3,9 @@
 #include <cglm/struct.h>
 #include "cimgui.h"
 
-void init_imgui(const char* font_path, int font_size, const char* chars_add, const char* glsl_version);
-void new_imgui_frame();
-void render_imgui();
+void imgui_init(const char* font_path, int font_size, const char* chars_add, const char* glsl_version);
+void imgui_new_frame();
+void imgui_render_frame();
 
 ImFont* ui_get_font(const char* name);
 
@@ -15,4 +15,4 @@ void ui_imgui_begin();
 void ui_imgui_button();
 void ui_imgui_text();
 
-void destroy_imgui();
+void imgui_destroy();

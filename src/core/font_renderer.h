@@ -2,8 +2,6 @@
 
 #include <cglm/struct.h>
 
-void init_font_renderer(const char* font_path, int character_size);
-//void render_text(char* text, float x, float y, float scale, char* hex_color, float opacity);
-//void render_text(char* text, vec3s position, float scale, char* hex_color, float opacity, mat4s projection, mat4s view);
-void render_text(char* text, float x, float y, float scale, char* hex_color, float opacity, mat4s projection, mat4s view);
-void destroy_font_renderer();
+void font_renderer_init(const char* font_path, int character_size);
+void font_renderer_render_text(char* text, float x, float y, float scale, char* hex_color, float opacity);
+void font_renderer_destroy();

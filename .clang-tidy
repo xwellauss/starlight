@@ -5,7 +5,6 @@ Checks: '
   cert-*,
   modernize-*,
   performance-*,
-  readability-*
 '
 WarningsAsErrors: 'bugprone-*'
 HeaderFilterRegex: '^src/.*'

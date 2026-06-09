@@ -1,5 +1,7 @@
 #include "scene_default.h"
 
+#include "../core/font_renderer.h"
+
 static void init()
 {
 	log_debug("Scene init...\n");
@@ -17,6 +19,7 @@ static void update()
 
 static void render()
 {
+	font_renderer_render_text("Starlight", 0.0f, 0.0f, 1.0f, "#ffffff", 1.0f);
 	log_debug("Scene render...\n");
 }
 

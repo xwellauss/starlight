@@ -228,7 +228,7 @@ static void render()
 	}
 	ImGui_End();
 	
-	render_text("Starlight", 0.0f, 0.0f, 1.0f, "#ffffff", 1.0f, camera.projection_matrix, camera.view_matrix);
+	font_renderer_render_text("Starlight", 0.0f, 0.0f, 1.0f, "#ffffff", 1.0f);
 }
 
 static void update()

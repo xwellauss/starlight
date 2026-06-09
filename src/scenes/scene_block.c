@@ -434,7 +434,7 @@ static void render()
 	glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(Vertex)*arrlen(vertex_render_data), vertex_render_data);
 	glDrawArrays(GL_TRIANGLES, 0, arrlen(vertex_render_data));
 	
-	render_text("Starlight", 0.0f, 0.0f, 1.0f, "#ffffff", 1.0f, camera.projection_matrix, camera.view_matrix);
+	font_renderer_render_text("Starlight", 0.0f, 0.0f, 1.0f, "#ffffff", 1.0f);
 }
 
 static void activate()
