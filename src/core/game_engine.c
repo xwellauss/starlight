@@ -80,7 +80,7 @@ static void init()
 
 	// Scene
 	load_scenes();
-	change_scene("SceneMenu");
+	scene_switch("SceneDefault");
 }
 
 static void render_frame()
@@ -93,14 +93,16 @@ static void render_frame()
 
 	window_poll_events();
 
-	update_scene();
 
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	scene_process_input(game_engine.current_scene);
+	scene_update(game_engine.current_scene);
 
-	new_imgui_frame();
 	
-	scene_process_input();
-	render_scene();
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	
+	new_imgui_frame();
+
+	scene_render(game_engine.current_scene);
 
 	render_imgui();
 	
@@ -113,7 +115,7 @@ static void cleanup()
 	destroy_network();
 
 	ecs_destroy();
-	destroy_scenes();
+	scene_destroy_all();
 
 	destroy_spriteSheet();
 

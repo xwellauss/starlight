@@ -215,7 +215,7 @@ static void render()
 //		ImGui_SetWindowPos((ImVec2){0.0f, 0.0f}, ImGuiCond_Once);
 		if(ImGui_Button("Back to Menu"))
 		{
-			change_scene("SceneMenu");
+			scene_switch("SceneMenu");
 		}
 
 		ImGui_DragFloat3("Model Position", model_position.raw);

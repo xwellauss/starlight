@@ -6,6 +6,7 @@
 //#include "scene_play_client.h"
 #include "scene_block.h"
 #include "physics_sim/scene_gravity.h"
+#include "scene_default.h"
 #include "scene_menu.h"
 
 void load_scenes()
@@ -13,8 +14,9 @@ void load_scenes()
 //	add_scene(&scene_play);
 //	add_scene(&scene_play_server);
 //	add_scene(&scene_play_client);
-	add_scene(&scene_block);
+	scene_register(&scene_default);
+	//add_scene(&scene_block);
 	//add_scene(&scene_model);
-	add_scene(&scene_gravity);
-	add_scene(&scene_menu);
+	//add_scene(&scene_gravity);
+	//scene_register(&scene_menu);
 }

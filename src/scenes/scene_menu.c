@@ -56,7 +56,7 @@ static void render()
 
 				if(ImGui_Button(game_engine.scenes[i].key))
 				{
-					change_scene(game_engine.scenes[i].key);
+					scene_switch(game_engine.scenes[i].key);
 				}
 			}
 			ImGui_PopFont();

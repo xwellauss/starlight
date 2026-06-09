@@ -3,22 +3,21 @@
 
 #include <stb_ds.h>
 
-static struct { char* key; Scene* value; }* used_scenes = NULL;
-
-static unsigned int total_scenes;
-
-void add_scene(Scene* scene)
+void scene_register(Scene* scene)
 {
 	shput(game_engine.scenes, scene->scene_name, scene);
-	total_scenes++;
-
 	scene->init();
 }
 
-void change_scene(char* scene_name)
+void scene_switch(char* scene_name)
 {	
 	Scene* scene = shget(game_engine.scenes, scene_name);
-	shput(used_scenes, scene_name, scene);
+
+	if (!scene)
+	{
+		log_error("Scene %s not found!\n", scene_name);
+		return;
+	}
 
 	if(game_engine.current_scene)
 	{
@@ -26,35 +25,34 @@ void change_scene(char* scene_name)
 	}
 
 	game_engine.current_scene = scene;
-
 	game_engine.current_scene->activate();
 }
 
-void update_scene()
+void scene_update(Scene* scene)
 {
-	game_engine.current_scene->update();
+	scene->update();
 }
 
-void render_scene()
+void scene_render(Scene* scene)
 {
-	game_engine.current_scene->render();
+	scene->render();
 }
 
-void scene_process_input()
+void scene_process_input(Scene* scene)
 {
-	game_engine.current_scene->process_input();
+	scene->process_input();
 }
 
-void destroy_scene()
+void scene_destroy(Scene* scene)
 {
-	game_engine.current_scene->deactivate();
-	game_engine.current_scene->destroy();
+	scene->deactivate();
+	scene->destroy();
 }
 
-void destroy_scenes()
+void scene_destroy_all()
 {
-	for(int i = 0; i < shlen(used_scenes); i++)
+	for(int i = 0; i < shlen(game_engine.scenes); i++)
 	{
-		used_scenes[i].value->destroy();
+		scene_destroy(game_engine.scenes[i].value);
 	}
 }

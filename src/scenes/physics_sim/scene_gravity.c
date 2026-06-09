@@ -101,7 +101,7 @@ static void init()
 	ecs_get_transform(planet1_entity)->rotation = (vec3s){0.0f, 0.0f, 0.0f};
 	ecs_get_transform(planet1_entity)->scale = (vec3s){1.0f, 1.0f, 1.0f};
 	ecs_get_sprite(planet1_entity)->color = hex_to_rbg("#32a852", 1.0f);
-	ecs_get_physics(planet1_entity)->mass = 10.0;
+	ecs_get_physics(planet1_entity)->mass = 10.0f;
 
 	init_vertex_attributes(&ecs_get_sprite(planet1_entity)->vertex_attribs, sphere_model.vertex_data, sphere_model.vertex_count*sizeof(Vertex), sphere_model.index_data, sphere_model.index_count*sizeof(GLuint), true, true);
 	init_shader_program(&ecs_get_sprite(planet1_entity)->shader_program, "shaders/physics_sim/planet-vertex-shader.glsl", "shaders/physics_sim/planet-fragment-shader.glsl");
@@ -116,7 +116,7 @@ static void init()
 	ecs_get_transform(planet2_entity)->rotation = (vec3s){0.0f, 0.0f, 0.0f};
 	ecs_get_transform(planet2_entity)->scale = (vec3s){1.0f, 1.0f, 1.0f};
 	ecs_get_sprite(planet2_entity)->color = hex_to_rbg("#c79910", 1.0f);
-	ecs_get_physics(planet2_entity)->mass = 10.0;
+	ecs_get_physics(planet2_entity)->mass = 10.0f;
 
 	init_vertex_attributes(&ecs_get_sprite(planet2_entity)->vertex_attribs, sphere_model.vertex_data, sphere_model.vertex_count*sizeof(Vertex), sphere_model.index_data, sphere_model.index_count*sizeof(GLuint), true, true);
 	init_shader_program(&ecs_get_sprite(planet2_entity)->shader_program, "shaders/physics_sim/planet-vertex-shader.glsl", "shaders/physics_sim/planet-fragment-shader.glsl");
@@ -158,7 +158,7 @@ static void render()
 //		ImGui_SetWindowPos((ImVec2){0.0f, 0.0f}, ImGuiCond_Once);
 		if(ImGui_Button("Back to Menu"))
 		{
-			change_scene("SceneMenu");
+			scene_switch("SceneMenu");
 		}
 
 		ImGui_DragFloat3("Planet 1 Position", ecs_get_transform(planet1_entity)->position.raw);

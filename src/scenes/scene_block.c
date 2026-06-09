@@ -411,7 +411,7 @@ static void render()
 
 		if(ImGui_Button("Back to Menu"))
 		{
-			change_scene("SceneMenu");
+			scene_switch("SceneMenu");
 		}
 
 		if(ImGui_Button("Generate"))
