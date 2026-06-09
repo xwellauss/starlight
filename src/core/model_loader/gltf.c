@@ -7,7 +7,7 @@
 typedef struct
 {
 	cgltf_material* gltf_material;
-	TextureHashMap* texture_hashmap;
+	Texture2DHashMap* texture_hashmap;
 
 	float metallic_factor;
 	float roughness_factor;
@@ -167,13 +167,13 @@ static void gltf_parse_node(Model* model, cgltf_data* gltf_data, cgltf_node* glt
 	}
 }
 
-static void gltf_parse_image(cgltf_image* image, Texture* texture)
+static void gltf_parse_image(cgltf_image* image, Texture2D* texture)
 {
 	stbi_set_flip_vertically_on_load(false);
 
 	if(image->uri)
 	{
-		init_texture_from_file(texture, image->uri);
+		texture2d_init_from_file(texture, image->uri);
 		// FIXME: the image path
 	}
 	else if(image->buffer_view)
@@ -184,7 +184,7 @@ static void gltf_parse_image(cgltf_image* image, Texture* texture)
 		int channels;
 		unsigned char* data = stbi_load_from_memory(image_data, image_size, &texture->width, &texture->height, &channels, 4);
 
-		init_texture_from_data(texture, 0, GL_RGBA, GL_RGBA, GL_UNSIGNED_BYTE, data);
+		texture2d_init_from_data(texture, 0, GL_RGBA, GL_RGBA, GL_UNSIGNED_BYTE, data);
 
 		stbi_image_free(data);
 	}
@@ -192,7 +192,7 @@ static void gltf_parse_image(cgltf_image* image, Texture* texture)
 
 static void gltf_parse_texture(Model* model, cgltf_texture* gltf_texture, size_t texture_index)
 {
-	Texture texture;
+	Texture2D texture;
 	
 	if(gltf_texture->sampler)
 	{
@@ -226,7 +226,7 @@ static void gltf_parse_material(Model* model, cgltf_data* gltf_data, cgltf_mater
 		{
 			size_t texture_index = cgltf_texture_index(gltf_data, gltf_material->pbr_metallic_roughness.base_color_texture.texture);
 
-			Texture texture = model->textures[texture_index];
+			Texture2D texture = model->textures[texture_index];
 
 			material.albedo_texture_id = texture.texture_id;
 		}
@@ -235,7 +235,7 @@ static void gltf_parse_material(Model* model, cgltf_data* gltf_data, cgltf_mater
 		{
 			size_t texture_index = cgltf_texture_index(gltf_data, gltf_material->pbr_metallic_roughness.metallic_roughness_texture.texture);
 
-			Texture texture = model->textures[texture_index];
+			Texture2D texture = model->textures[texture_index];
 
 			material.metallic_roughness_texture_id = texture.texture_id;
 		}
@@ -244,7 +244,7 @@ static void gltf_parse_material(Model* model, cgltf_data* gltf_data, cgltf_mater
 		{
 			size_t texture_index = cgltf_texture_index(gltf_data, gltf_material->normal_texture.texture);
 
-			Texture texture = model->textures[texture_index];
+			Texture2D texture = model->textures[texture_index];
 
 			material.normal_texture_id = texture.texture_id;
 		}

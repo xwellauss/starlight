@@ -1,6 +1,7 @@
 #pragma once
 
 #include "../renderer.h"
+#include "../../utils/utils.h"
 
 
 enum ModelFileType
@@ -50,7 +51,7 @@ typedef struct
 
 	vec4s color; // for testing and debugging
 	
-	Texture* textures;
+	Texture2D* textures;
 } Model;
 
 

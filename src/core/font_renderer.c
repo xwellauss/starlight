@@ -21,7 +21,7 @@
 
 typedef struct
 {
-	Texture texture;
+	Texture2D texture;
 	vec2s size;
 	unsigned int advance;
 } Character;
@@ -31,8 +31,8 @@ static struct { char key; Character value; }* characters = NULL;
 static stbtt_fontinfo font;
 static unsigned char* buffer;
 
-static unsigned int shader_program;
-static VertexAttributes vertex_attributes;
+static Shader shader;
+static VertexBuffer vertex_buffer;
 
 static Window* current_window;
 
@@ -47,8 +47,8 @@ void font_renderer_init(const char* font_path, int character_size)
 {
 	current_window = &game_engine.current_window;
 
-	init_shader_program(&shader_program, FONT_VERTEX_SHADER_PATH, FONT_FRAGMENT_SHADER_PATH);
-	init_vertex_attributes(&vertex_attributes, NULL, sizeof(VertexQuad), indices, sizeof(indices), true, false);
+	shader_init(&shader, FONT_VERTEX_SHADER_PATH, FONT_FRAGMENT_SHADER_PATH);
+	vertex_buffer_init(&vertex_buffer, NULL, sizeof(VertexQuad), indices, sizeof(indices), true);
 
 	//  Loading the .ttf file
 	buffer = (unsigned char*)read_file(font_path, "rb");
@@ -64,7 +64,7 @@ void font_renderer_init(const char* font_path, int character_size)
 		unsigned char* bitmap = stbtt_GetGlyphBitmap(&font, 0, scale, glyph_index, &width, &height, NULL, NULL);
 
 		// generate texture
-		Texture texture;
+		Texture2D texture;
 		texture.width = width;
 		texture.height = height;
 		texture.texture_config.is_init = true;
@@ -73,10 +73,10 @@ void font_renderer_init(const char* font_path, int character_size)
 		texture.texture_config.min_filter = GL_LINEAR;
 		texture.texture_config.mag_filter = GL_LINEAR;
 
-		init_texture_from_data(&texture, 0, GL_R8, GL_RED, GL_UNSIGNED_BYTE, bitmap);
+		texture2d_init_from_data(&texture, 0, GL_R8, GL_RED, GL_UNSIGNED_BYTE, bitmap);
 
 		stbtt_FreeBitmap(bitmap, NULL);
-		unbind_texture();
+		texture2d_unbind();
 	
 		// now store character for later use
 		int advance_width, lsb;
@@ -90,21 +90,21 @@ void font_renderer_init(const char* font_path, int character_size)
     	};
 		hmput(characters, c, character);
 	}
-	unbind_texture();
+	texture2d_unbind();
 }
 
 // BUG: Blurry text if scale is not 1.0
 void font_renderer_render_text(char* text, float x, float y, float scale, char* hex_color, float opacity)
 {
-	bind_shader_program(&shader_program);
+	shader_bind(&shader);
 	
 	projection = glms_ortho(0.0f, current_window->width, 0.0f, current_window->height, -1.0f, 1.0f);
 
 
-	uniform_mat4(&shader_program, "projection", projection);
-	uniform_vec4(&shader_program, "text_color", hex_to_rbg(hex_color, opacity));
+	shader_uniform_mat4(&shader, "projection", projection);
+	shader_uniform_vec4(&shader, "text_color", hex_to_rbg(hex_color, opacity));
 
-	bind_vertex_buffer(&vertex_attributes, VAO);
+	vertex_buffer_bind(&vertex_buffer, BUFFER_VAO);
 
 	for(char* c = text; *c != '\0'; c++)
 	{
@@ -152,29 +152,29 @@ void font_renderer_render_text(char* text, float x, float y, float scale, char* 
 		*/
 
         // render glyph texture over quad
-		bind_texture(&ch.texture);
+		texture2d_bind(&ch.texture);
         // update content of VBO memory
-		bind_vertex_buffer(&vertex_attributes, VBO);
+		vertex_buffer_bind(&vertex_buffer, BUFFER_VBO);
         glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(quad), quad);
         // render quad
 		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_SHORT, 0);
         x += (float)ch.advance;
 	}
 
-	unbind_vertex_buffer_all();
-	unbind_shader_program();
-	unbind_texture();
+	vertex_buffer_unbind_all();
+	shader_unbind();
+	texture2d_unbind();
 }
 
 void font_renderer_destroy()
 {
 	for(size_t i = 0; i < hmlen(characters); i++)
 	{
-		destroy_texture(&characters[i].value.texture);
+		texture2d_destroy(&characters[i].value.texture);
 	}
 
 	hmfree(characters);
 
-	destroy_vertex_attributes(&vertex_attributes, true);
-	destroy_shader_program(&shader_program);
+	vertex_buffer_destroy(&vertex_buffer);
+	shader_destroy(&shader);
 }

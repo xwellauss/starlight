@@ -1,6 +1,7 @@
 #include "model_loader.h"
 #include "gltf.h"
-#include "../renderer.h"
+
+#include <stb_ds.h>
 
 
 
@@ -25,6 +26,6 @@ void model_load_from_file(Model* model, const char* filepath, enum ModelFileType
 
 void model_free(Model* model)
 {
-	destroy_textures_array(&model->textures);
+	texture2d_array_destroy(&model->textures);
 }
 

@@ -47,14 +47,14 @@ static void update_entity_transform(Entity* e)
 
 static void render_planet_model(Entity* e)
 {
-	bind_shader_program(&ecs_get_sprite(e)->shader_program);
+	shader_bind(&ecs_get_sprite(e)->shader);
 
-	uniform_vec4(&ecs_get_sprite(e)->shader_program, "light_color", ecs_get_sprite(e)->color);
-	uniform_mat4(&ecs_get_sprite(e)->shader_program, "projection", camera.projection_matrix);
-	uniform_mat4(&ecs_get_sprite(e)->shader_program, "view", camera.view_matrix);
-	uniform_mat4(&ecs_get_sprite(e)->shader_program, "transform", ecs_get_transform(e)->transform);
+	shader_uniform_vec4(&ecs_get_sprite(e)->shader, "light_color", ecs_get_sprite(e)->color);
+	shader_uniform_mat4(&ecs_get_sprite(e)->shader, "projection", camera.projection_matrix);
+	shader_uniform_mat4(&ecs_get_sprite(e)->shader, "view", camera.view_matrix);
+	shader_uniform_mat4(&ecs_get_sprite(e)->shader, "transform", ecs_get_transform(e)->transform);
 	
-	bind_vertex_buffer(&ecs_get_sprite(e)->vertex_attribs, VAO);
+	vertex_buffer_bind(&ecs_get_sprite(e)->vertex_buffer, BUFFER_VAO);
 	glDrawElements(GL_TRIANGLES, sphere_model.index_count, GL_UNSIGNED_INT, 0);
 }
 
@@ -101,8 +101,8 @@ static void init()
 	ecs_get_sprite(planet1_entity)->color = hex_to_rbg("#32a852", 1.0f);
 	ecs_get_physics(planet1_entity)->mass = 10.0f;
 
-	init_vertex_attributes(&ecs_get_sprite(planet1_entity)->vertex_attribs, sphere_model.vertex_data, sphere_model.vertex_count*sizeof(Vertex), sphere_model.index_data, sphere_model.index_count*sizeof(GLuint), true, true);
-	init_shader_program(&ecs_get_sprite(planet1_entity)->shader_program, "shaders/physics_sim/planet-vertex-shader.glsl", "shaders/physics_sim/planet-fragment-shader.glsl");
+	vertex_buffer_init(&ecs_get_sprite(planet1_entity)->vertex_buffer, sphere_model.vertex_data, sphere_model.vertex_count*sizeof(Vertex), sphere_model.index_data, sphere_model.index_count*sizeof(GLuint), true);
+	shader_init(&ecs_get_sprite(planet1_entity)->shader, "shaders/physics_sim/planet-vertex-shader.glsl", "shaders/physics_sim/planet-fragment-shader.glsl");
 
 	planet2_entity = ecs_create_entity("Planet2");
 	ecs_add_component(planet2_entity, COMPONENT_TRANSFORM);
@@ -116,8 +116,8 @@ static void init()
 	ecs_get_sprite(planet2_entity)->color = hex_to_rbg("#c79910", 1.0f);
 	ecs_get_physics(planet2_entity)->mass = 10.0f;
 
-	init_vertex_attributes(&ecs_get_sprite(planet2_entity)->vertex_attribs, sphere_model.vertex_data, sphere_model.vertex_count*sizeof(Vertex), sphere_model.index_data, sphere_model.index_count*sizeof(GLuint), true, true);
-	init_shader_program(&ecs_get_sprite(planet2_entity)->shader_program, "shaders/physics_sim/planet-vertex-shader.glsl", "shaders/physics_sim/planet-fragment-shader.glsl");
+	vertex_buffer_init(&ecs_get_sprite(planet2_entity)->vertex_buffer, sphere_model.vertex_data, sphere_model.vertex_count*sizeof(Vertex), sphere_model.index_data, sphere_model.index_count*sizeof(GLuint), true);
+	shader_init(&ecs_get_sprite(planet2_entity)->shader, "shaders/physics_sim/planet-vertex-shader.glsl", "shaders/physics_sim/planet-fragment-shader.glsl");
 
 
 
@@ -213,22 +213,22 @@ static void activate()
 
 static void deactivate()
 {
-	unbind_vertex_buffer_all();
-	unbind_shader_program();
+	vertex_buffer_unbind_all();
+	shader_unbind();
 	
 	texture_active_slot(GL_TEXTURE1);
-	unbind_texture();
+	texture2d_unbind();
 
 	texture_active_slot(GL_TEXTURE0);
-	unbind_texture();
+	texture2d_unbind();
 }
 
 static void destroy()
 {
 	model_free(&sphere_model);
 
-	destroy_shader_program(&ecs_get_sprite(planet1_entity)->shader_program);
-	destroy_vertex_attributes(&ecs_get_sprite(planet1_entity)->vertex_attribs, true);
+	shader_destroy(&ecs_get_sprite(planet1_entity)->shader);
+	vertex_buffer_destroy(&ecs_get_sprite(planet1_entity)->vertex_buffer);
 
 	ecs_destroy_entity(planet1_entity);
 	ecs_destroy_entity(planet2_entity);

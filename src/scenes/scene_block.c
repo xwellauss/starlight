@@ -335,9 +335,9 @@ static void init()
 
 	generate_map();
 
-	add_texture_from_file(&ecs_get_sprite(block)->textures, "block", blocks_texture_atlas->path);
-	init_vertex_attributes(&ecs_get_sprite(block)->vertex_attribs, vertex_render_data, sizeof(Vertex)*arrlen(vertex_render_data), NULL, 0, false, false);
-	init_shader_program(&ecs_get_sprite(block)->shader_program, "shaders/block-vertex-shader.glsl", "shaders/block-fragment-shader.glsl");
+	texture2d_map_add_from_file(&ecs_get_sprite(block)->textures, "block", blocks_texture_atlas->path);
+	vertex_buffer_init(&ecs_get_sprite(block)->vertex_buffer, vertex_render_data, sizeof(Vertex)*arrlen(vertex_render_data), NULL, 0, false);
+	shader_init(&ecs_get_sprite(block)->shader, "shaders/block-vertex-shader.glsl", "shaders/block-fragment-shader.glsl");
 
 	camera.position = (vec3s){{10.0f, 20.0f, 10.0f}};
 	camera.target = (vec3s){{0.0f, 0.0f, 0.0f}};
@@ -395,12 +395,12 @@ static void render()
 	window_change_bgcolor(background_color);
 	
 	texture_active_slot(GL_TEXTURE0);
-	bind_texture(&shget(ecs_get_sprite(block)->textures, "block"));
+	texture2d_bind(&shget(ecs_get_sprite(block)->textures, "block"));
 	
-	bind_shader_program(&ecs_get_sprite(block)->shader_program);
-	uniform_mat4(&ecs_get_sprite(block)->shader_program, "projection", camera.projection_matrix);
-	uniform_mat4(&ecs_get_sprite(block)->shader_program, "view", camera.view_matrix);
-	uniform_int(&ecs_get_sprite(block)->shader_program, "texture_sampler", 0);
+	shader_bind(&ecs_get_sprite(block)->shader);
+	shader_uniform_mat4(&ecs_get_sprite(block)->shader, "projection", camera.projection_matrix);
+	shader_uniform_mat4(&ecs_get_sprite(block)->shader, "view", camera.view_matrix);
+	shader_uniform_int(&ecs_get_sprite(block)->shader, "texture_sampler", 0);
 
 
 	//ImGui_Begin("Scene Controls", NULL, ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoScrollWithMouse);
@@ -429,7 +429,7 @@ static void render()
 	}
 	ImGui_End();
 
-	bind_vertex_buffer(&ecs_get_sprite(block)->vertex_attribs, VAO);
+	vertex_buffer_bind(&ecs_get_sprite(block)->vertex_buffer, BUFFER_VAO);
 	//glBufferData(GL_ARRAY_BUFFER, sizeof(Vertex)*arrlen(vertex_render_data), vertex_render_data, GL_STATIC_DRAW);
 	glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(Vertex)*arrlen(vertex_render_data), vertex_render_data);
 	glDrawArrays(GL_TRIANGLES, 0, arrlen(vertex_render_data));
@@ -443,23 +443,23 @@ static void activate()
 
 static void deactivate()
 {
-	unbind_vertex_buffer_all();
-	unbind_shader_program();
+	vertex_buffer_unbind_all();
+	shader_unbind();
 	
 	texture_active_slot(GL_TEXTURE1);
-	unbind_texture();
+	texture2d_unbind();
 
 	texture_active_slot(GL_TEXTURE0);
-	unbind_texture();
+	texture2d_unbind();
 }
 
 static void destroy()
 {
 	arrfree(vertex_render_data);
 
-	destroy_textures_hashmap(&ecs_get_sprite(block)->textures);
-	destroy_shader_program(&ecs_get_sprite(block)->shader_program);
-	destroy_vertex_attributes(&ecs_get_sprite(block)->vertex_attribs, false);
+	texture2d_map_destroy(&ecs_get_sprite(block)->textures);
+	shader_destroy(&ecs_get_sprite(block)->shader);
+	vertex_buffer_destroy(&ecs_get_sprite(block)->vertex_buffer);
 
 	ecs_destroy_entity(block);
 }

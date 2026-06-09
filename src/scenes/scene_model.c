@@ -9,6 +9,7 @@
 #include "../utils/ui_imgui.h"
 #include "../core/model_loader/model_loader.h"
 
+#include "cglm/struct/mat4.h"
 #include "cimgui.h"
 
 #include <stb_ds.h>
@@ -50,43 +51,43 @@ static InputState input_state;
 
 static void render_mesh_material(Material* material)
 {
-	uniform_vec4(&ecs_get_sprite(model_scene)->shader_program, "material.base_color", material->base_color);
-	uniform_int(&ecs_get_sprite(model_scene)->shader_program, "material.roughness_factor", material->roughness_factor);
-	uniform_int(&ecs_get_sprite(model_scene)->shader_program, "material.metallic_factor", material->metallic_factor);
+	shader_uniform_vec4(&ecs_get_sprite(model_scene)->shader, "material.base_color", material->base_color);
+	shader_uniform_int(&ecs_get_sprite(model_scene)->shader, "material.roughness_factor", material->roughness_factor);
+	shader_uniform_int(&ecs_get_sprite(model_scene)->shader, "material.metallic_factor", material->metallic_factor);
 
 	if(material->albedo_texture_id > 0)
 	{
 		texture_active_slot(GL_TEXTURE0);
-		bind_texture_id(material->albedo_texture_id);
-		uniform_int(&ecs_get_sprite(model_scene)->shader_program, "material.base_color", 0);
-		uniform_int(&ecs_get_sprite(model_scene)->shader_program, "material.has_albedo_map", 1);
+		texture2d_bind_id(material->albedo_texture_id);
+		shader_uniform_int(&ecs_get_sprite(model_scene)->shader, "material.base_color", 0);
+		shader_uniform_int(&ecs_get_sprite(model_scene)->shader, "material.has_albedo_map", 1);
 	}
 	else
 	{
-		uniform_int(&ecs_get_sprite(model_scene)->shader_program, "material.has_albedo_map", 0);
+		shader_uniform_int(&ecs_get_sprite(model_scene)->shader, "material.has_albedo_map", 0);
 	}
 
 	if(material->metallic_roughness_texture_id > 0)
 	{
 		texture_active_slot(GL_TEXTURE1);
-		bind_texture_id(material->metallic_roughness_texture_id);
-		uniform_int(&ecs_get_sprite(model_scene)->shader_program, "material.metallic_roughness", 1);
-		uniform_int(&ecs_get_sprite(model_scene)->shader_program, "material.has_metallic_roughness_map", 1);
+		texture2d_bind_id(material->metallic_roughness_texture_id);
+		shader_uniform_int(&ecs_get_sprite(model_scene)->shader, "material.metallic_roughness", 1);
+		shader_uniform_int(&ecs_get_sprite(model_scene)->shader, "material.has_metallic_roughness_map", 1);
 	}
 	else
 	{
-		uniform_int(&ecs_get_sprite(model_scene)->shader_program, "material.has_metallic_roughness_map", 0);
+		shader_uniform_int(&ecs_get_sprite(model_scene)->shader, "material.has_metallic_roughness_map", 0);
 	}
 
 	if(material->normal_texture_id > 0)
 	{
 		texture_active_slot(GL_TEXTURE2);
-		bind_texture_id(material->normal_texture_id);
-		uniform_int(&ecs_get_sprite(model_scene)->shader_program, "material.normal_map", 1);
+		texture2d_bind_id(material->normal_texture_id);
+		shader_uniform_int(&ecs_get_sprite(model_scene)->shader, "material.normal_map", 1);
 	}
 	else
 	{
-		uniform_int(&ecs_get_sprite(model_scene)->shader_program, "material.has_normal_map", 0);
+		shader_uniform_int(&ecs_get_sprite(model_scene)->shader, "material.has_normal_map", 0);
 	}
 
 }
@@ -110,11 +111,11 @@ static void init()
 //	model_load_from_file(&model, "3d-models/cube4.glb");
 //	model_parse_data(&model);
 
-	init_vertex_attributes(&ecs_get_sprite(model_scene)->vertex_attribs, model.vertex_data, model.vertex_count*sizeof(Vertex), model.index_data, model.index_count*sizeof(GLuint), true, true);
-	init_shader_program(&ecs_get_sprite(model_scene)->shader_program, "shaders/model-vertex-shader.glsl", "shaders/model-fragment-shader.glsl");
+	vertex_buffer_init(&ecs_get_sprite(model_scene)->vertex_buffer, model.vertex_data, model.vertex_count*sizeof(Vertex), model.index_data, model.index_count*sizeof(GLuint), true);
+	shader_init(&ecs_get_sprite(model_scene)->shader, "shaders/model-vertex-shader.glsl", "shaders/model-fragment-shader.glsl");
 
-	init_vertex_attributes(&ecs_get_sprite(light_source)->vertex_attribs, light_model.vertex_data, light_model.vertex_count*sizeof(Vertex), light_model.index_data, light_model.index_count*sizeof(GLuint), true, true);
-	init_shader_program(&ecs_get_sprite(light_source)->shader_program, "shaders/light-source-vertex-shader.glsl", "shaders/light-source-fragment-shader.glsl");
+	vertex_buffer_init(&ecs_get_sprite(light_source)->vertex_buffer, light_model.vertex_data, light_model.vertex_count*sizeof(Vertex), light_model.index_data, light_model.index_count*sizeof(GLuint), true);
+	shader_init(&ecs_get_sprite(light_source)->shader, "shaders/light-source-vertex-shader.glsl", "shaders/light-source-fragment-shader.glsl");
 
 
 
@@ -145,23 +146,23 @@ static void render()
 	window_change_bgcolor(hex_to_rbg("#222222", 1.0f));
 	
 	// Light Cube
-	mat4s light_source_transform = GLMS_MAT4_IDENTITY_INIT;
+	mat4s light_source_transform = glms_mat4_identity();
 	light_source_transform = glms_translate(light_source_transform, light_position);
 	light_source_transform = glms_scale(light_source_transform, (vec3s){0.2f, 0.2f, 0.2f});
 
-	bind_shader_program(&ecs_get_sprite(light_source)->shader_program);
-	uniform_vec3(&ecs_get_sprite(light_source)->shader_program, "light_color", light_color);
-	uniform_mat4(&ecs_get_sprite(light_source)->shader_program, "projection", camera.projection_matrix);
-	uniform_mat4(&ecs_get_sprite(light_source)->shader_program, "view", camera.view_matrix);
-	uniform_mat4(&ecs_get_sprite(light_source)->shader_program, "transform", light_source_transform);
+	shader_bind(&ecs_get_sprite(light_source)->shader);
+	shader_uniform_vec3(&ecs_get_sprite(light_source)->shader, "light_color", light_color);
+	shader_uniform_mat4(&ecs_get_sprite(light_source)->shader, "projection", camera.projection_matrix);
+	shader_uniform_mat4(&ecs_get_sprite(light_source)->shader, "view", camera.view_matrix);
+	shader_uniform_mat4(&ecs_get_sprite(light_source)->shader, "transform", light_source_transform);
 
-	//bind_vertex_buffer(&ecs_get_sprite(light_source)->vertex_attribs, VAO);
-	bind_vertex_buffer(&ecs_get_sprite(light_source)->vertex_attribs, VAO);
+	//bind_vertex_buffer(&ecs_get_sprite(light_source)->vertex_buffer, VAO);
+	vertex_buffer_bind(&ecs_get_sprite(light_source)->vertex_buffer, BUFFER_VAO);
 	glDrawElements(GL_TRIANGLES, light_model.index_count, GL_UNSIGNED_INT, 0);
 
 	// Model
 
-	mat4s model_transform = GLMS_MAT4_IDENTITY_INIT;
+	mat4s model_transform = glms_mat4_identity();
 	model_transform = glms_scale(model_transform, model_scale);
 	model_transform = glms_rotate(model_transform, glm_rad(model_rotation.x), (vec3s){1.0f, 0.0f, 0.0f});
 	model_transform = glms_rotate(model_transform, glm_rad(model_rotation.y), (vec3s){0.0f, 1.0f, 0.0f});
@@ -169,19 +170,19 @@ static void render()
 	model_transform = glms_translate(model_transform, model_position);
 
 
-	bind_shader_program(&ecs_get_sprite(model_scene)->shader_program);
+	shader_bind(&ecs_get_sprite(model_scene)->shader);
 
-	uniform_vec3(&ecs_get_sprite(model_scene)->shader_program, "cam_pos", camera.position);
-	uniform_vec3(&ecs_get_sprite(model_scene)->shader_program, "model_pos", model_position);
+	shader_uniform_vec3(&ecs_get_sprite(model_scene)->shader, "cam_pos", camera.position);
+	shader_uniform_vec3(&ecs_get_sprite(model_scene)->shader, "model_pos", model_position);
 
-	uniform_vec3(&ecs_get_sprite(model_scene)->shader_program, "light.position", light_position);
-	uniform_vec3(&ecs_get_sprite(model_scene)->shader_program, "light.color", light_color);
-	uniform_float(&ecs_get_sprite(model_scene)->shader_program, "light.intensity", light_intensity);
+	shader_uniform_vec3(&ecs_get_sprite(model_scene)->shader, "light.position", light_position);
+	shader_uniform_vec3(&ecs_get_sprite(model_scene)->shader, "light.color", light_color);
+	shader_uniform_float(&ecs_get_sprite(model_scene)->shader, "light.intensity", light_intensity);
 
-	uniform_mat4(&ecs_get_sprite(model_scene)->shader_program, "projection", camera.projection_matrix);
-	uniform_mat4(&ecs_get_sprite(model_scene)->shader_program, "view", camera.view_matrix);
+	shader_uniform_mat4(&ecs_get_sprite(model_scene)->shader, "projection", camera.projection_matrix);
+	shader_uniform_mat4(&ecs_get_sprite(model_scene)->shader, "view", camera.view_matrix);
 	
-	bind_vertex_buffer(&ecs_get_sprite(model_scene)->vertex_attribs, VAO);
+	vertex_buffer_bind(&ecs_get_sprite(model_scene)->vertex_buffer, BUFFER_VAO);
 
 
 	for(size_t i = 0; i < model.mesh_count; i++)
@@ -196,13 +197,13 @@ static void render()
 		}
 		else
 		{
-			uniform_int(&ecs_get_sprite(model_scene)->shader_program, "material.has_albedo_map", 0);
-			uniform_int(&ecs_get_sprite(model_scene)->shader_program, "material.has_metallic_roughness_map", 0);
-			uniform_int(&ecs_get_sprite(model_scene)->shader_program, "material.has_normal_map", 0);
+			shader_uniform_int(&ecs_get_sprite(model_scene)->shader, "material.has_albedo_map", 0);
+			shader_uniform_int(&ecs_get_sprite(model_scene)->shader, "material.has_metallic_roughness_map", 0);
+			shader_uniform_int(&ecs_get_sprite(model_scene)->shader, "material.has_normal_map", 0);
 		}
 
-		uniform_mat4(&ecs_get_sprite(model_scene)->shader_program, "transform", model_transform);
-		uniform_mat3(&ecs_get_sprite(model_scene)->shader_program, "transform_normal", glms_mat3_transpose(glms_mat3_inv(glms_mat4_pick3(model_transform))));
+		shader_uniform_mat4(&ecs_get_sprite(model_scene)->shader, "transform", model_transform);
+		shader_uniform_mat3(&ecs_get_sprite(model_scene)->shader, "transform_normal", glms_mat3_transpose(glms_mat3_inv(glms_mat4_pick3(model_transform))));
 		
 		glDrawElements(GL_TRIANGLES, mesh->index_count, GL_UNSIGNED_INT, (void*)(mesh->index_offset * sizeof(GLuint)));
 	}
@@ -266,14 +267,14 @@ static void activate()
 
 static void deactivate()
 {
-	unbind_vertex_buffer_all();
-	unbind_shader_program();
+	vertex_buffer_unbind_all();
+	shader_unbind();
 	
 	texture_active_slot(GL_TEXTURE1);
-	unbind_texture();
+	texture2d_unbind();
 
 	texture_active_slot(GL_TEXTURE0);
-	unbind_texture();
+	texture2d_unbind();
 }
 
 static void destroy()
@@ -281,11 +282,11 @@ static void destroy()
 	model_free(&model);
 	model_free(&light_model);
 	
-	destroy_shader_program(&ecs_get_sprite(model_scene)->shader_program);
-	destroy_vertex_attributes(&ecs_get_sprite(model_scene)->vertex_attribs, true);
+	shader_destroy(&ecs_get_sprite(model_scene)->shader);
+	vertex_buffer_destroy(&ecs_get_sprite(model_scene)->vertex_buffer);
 
-	destroy_shader_program(&ecs_get_sprite(light_source)->shader_program);
-	destroy_vertex_attributes(&ecs_get_sprite(light_source)->vertex_attribs, true);
+	shader_destroy(&ecs_get_sprite(light_source)->shader);
+	vertex_buffer_destroy(&ecs_get_sprite(light_source)->vertex_buffer);
 
 	ecs_destroy_entity(model_scene);
 	ecs_destroy_entity(light_source);

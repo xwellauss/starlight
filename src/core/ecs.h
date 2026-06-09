@@ -34,13 +34,13 @@ typedef struct
 // TODO: Split this
 typedef struct
 {
-	VertexAttributes vertex_attribs;
-	VertexAttribHashMap* vertex_attrib_hashmap;
-	unsigned int shader_program;
+	VertexBuffer vertex_buffer;
+	VertexBufferHashMap vertex_buffer_hashmap;
+	Shader shader;
 	
 	vec4s color; // For testing and debugging
 
-	TextureHashMap textures;
+	Texture2DHashMap textures;
 } Sprite_Component;
 
 
