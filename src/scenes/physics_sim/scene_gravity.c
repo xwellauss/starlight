@@ -8,8 +8,6 @@
 #include "../../core/camera.h"
 #include "../../core/model_loader/model_loader.h"
 #include "../../utils/ui_imgui.h"
-#include "../../utils/spritesheet.h"
-#include "../../utils/json_helper.h"
 
 #include <cglm/struct.h>
 #include <math.h>
@@ -146,7 +144,7 @@ static void render()
 	ui_component_joystick("Input", "Joystick", joystick_box_size, joystick_radius, joystick_color, &joystick_angle, &is_joystick_active);
 #endif
 	
-	change_window_color(hex_to_rbg("#111111", 1.0f));
+	window_change_bgcolor(hex_to_rbg("#111111", 1.0f));
 	
 	render_planet_model(planet1_entity);
 	render_planet_model(planet2_entity);

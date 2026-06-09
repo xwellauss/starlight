@@ -27,7 +27,7 @@ typedef struct
 typedef struct
 {
 	Vertex vertices[4];
-} Quad;
+} VertexQuad;
 
 
 typedef struct
@@ -38,7 +38,7 @@ typedef struct
 	mat4s transform;
 	
 	Vertex vertex_data[6];
-} Player_Packet;
+} PlayerPacket;
 
 typedef struct
 {

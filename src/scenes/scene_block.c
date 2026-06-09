@@ -6,8 +6,8 @@
 #include "../utils/utils.h"
 #include "../core/renderer.h"
 #include "../core/camera.h"
+#include "../core/texture_atlas.h"
 #include "../utils/ui_imgui.h"
-#include "../utils/spritesheet.h"
 #include "../utils/json_helper.h"
 
 #include <string.h>
@@ -40,13 +40,13 @@ static Camera camera;
 static Vertex* vertex_render_data = NULL;
 //static vec3s* block_positions;
 
-static SpriteSheet* block_sprite_sheet;
+static TextureAtlas* blocks_texture_atlas;
 
 static Entity* block;
 static InputState input_state;
 
 //static void add_block(vec3s origin, float block_size, char* sprite_name, Vertex** vertex_data)
-static void add_block(vec3s origin, float block_size, char* sprite_name, bool is_transparent)
+static void add_block(vec3s origin, float block_size, char* block_name, bool is_transparent)
 {
 	Block block = {};
 	block.position = origin;
@@ -74,10 +74,10 @@ static void add_block(vec3s origin, float block_size, char* sprite_name, bool is
 		3, 2, 6, 7, 3, 6     // Bottom face
 	};
 
-	Sprite* sprite = (Sprite*)hashmap_get(block_sprite_sheet->sprite_hashmap, &(Sprite){ .name=sprite_name });
-	UV_Coords uv_coords;
+	AtlasRegion* atlas_region = (AtlasRegion*)hashmap_get(blocks_texture_atlas->atlas_region_map, &(AtlasRegion){ .name=block_name });
 
-	get_spriteUV(&uv_coords, block_sprite_sheet, sprite);
+	AtlasUV uv_coords;
+	atlas_get_uv(&uv_coords, blocks_texture_atlas, atlas_region);
 
 	vec2s tex_coords[6];
 	tex_coords[0] = (vec2s){uv_coords.x2, uv_coords.y2};
@@ -331,11 +331,11 @@ static void init()
 	ecs_add_component(block, COMPONENT_SPRITE);
 
 
-	block_sprite_sheet = (SpriteSheet*)hashmap_get(sprite_sheet_hashmap, &(SpriteSheet){ .name="tiles" });
+	blocks_texture_atlas = (TextureAtlas*)hashmap_get(texture_atlas_hashmap, &(TextureAtlas){ .name="tiles" });
 
 	generate_map();
 
-	add_texture_from_file(&ecs_get_sprite(block)->textures, "block", block_sprite_sheet->path);
+	add_texture_from_file(&ecs_get_sprite(block)->textures, "block", blocks_texture_atlas->path);
 	init_vertex_attributes(&ecs_get_sprite(block)->vertex_attribs, vertex_render_data, sizeof(Vertex)*arrlen(vertex_render_data), NULL, 0, false, false);
 	init_shader_program(&ecs_get_sprite(block)->shader_program, "shaders/block-vertex-shader.glsl", "shaders/block-fragment-shader.glsl");
 
@@ -389,10 +389,10 @@ static void render()
 #endif
 	
 	const float frequency = 0.5f;
-	background_color.r = 0.5f + 0.5f * sin(frequency * glfwGetTime());
-	background_color.b = 0.5f + 0.5f * sin(frequency * glfwGetTime() + 2.0f * M_PI / 3.0f);
-	background_color.g = 0.5f + 0.5f * sin(frequency * glfwGetTime() + 4.0f * M_PI / 3.0f);
-	change_window_color(background_color);
+	background_color.r = 0.5f + 0.5f * sin(frequency * window_get_time());
+	background_color.b = 0.5f + 0.5f * sin(frequency * window_get_time() + 2.0f * M_PI / 3.0f);
+	background_color.g = 0.5f + 0.5f * sin(frequency * window_get_time() + 4.0f * M_PI / 3.0f);
+	window_change_bgcolor(background_color);
 	
 	texture_active_slot(GL_TEXTURE0);
 	bind_texture(&shget(ecs_get_sprite(block)->textures, "block"));

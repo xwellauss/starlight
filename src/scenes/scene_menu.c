@@ -21,10 +21,10 @@ static void init()
 static void render()
 {
 	const float frequency = 0.5f;
-	background_color.b = 0.5f + 0.5f * sin(frequency * glfwGetTime());
-	background_color.r = 0.5f + 0.5f * sin(frequency * glfwGetTime() + 2.0f * M_PI / 3.0f);
-	background_color.g = 0.5f + 0.5f * sin(frequency * glfwGetTime() + 4.0f * M_PI / 3.0f);
-	change_window_color(background_color);
+	background_color.b = 0.5f + 0.5f * sin(frequency * window_get_time());
+	background_color.r = 0.5f + 0.5f * sin(frequency * window_get_time() + 2.0f * M_PI / 3.0f);
+	background_color.g = 0.5f + 0.5f * sin(frequency * window_get_time() + 4.0f * M_PI / 3.0f);
+	window_change_bgcolor(background_color);
 
 	ImGui_Begin("Menu", NULL, ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoBackground);
 	{

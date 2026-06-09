@@ -48,7 +48,7 @@ void font_renderer_init(const char* font_path, int character_size)
 	current_window = &game_engine.current_window;
 
 	init_shader_program(&shader_program, FONT_VERTEX_SHADER_PATH, FONT_FRAGMENT_SHADER_PATH);
-	init_vertex_attributes(&vertex_attributes, NULL, sizeof(Quad), indices, sizeof(indices), true, false);
+	init_vertex_attributes(&vertex_attributes, NULL, sizeof(VertexQuad), indices, sizeof(indices), true, false);
 
 	//  Loading the .ttf file
 	buffer = (unsigned char*)read_file(font_path, "rb");
@@ -97,8 +97,9 @@ void font_renderer_init(const char* font_path, int character_size)
 void font_renderer_render_text(char* text, float x, float y, float scale, char* hex_color, float opacity)
 {
 	bind_shader_program(&shader_program);
-	mat4s projection = glms_mat4_identity();
+	
 	projection = glms_ortho(0.0f, current_window->width, 0.0f, current_window->height, -1.0f, 1.0f);
+
 
 	uniform_mat4(&shader_program, "projection", projection);
 	uniform_vec4(&shader_program, "text_color", hex_to_rbg(hex_color, opacity));
@@ -122,9 +123,9 @@ void font_renderer_render_text(char* text, float x, float y, float scale, char* 
 			0 1 2 0 2 3
 		*/
 
-		Quad quad[1] =
+		VertexQuad quad[1] =
 		{
-			(Quad)
+			(VertexQuad)
 			{
 				{
 				{{x, y + h, 0.0f}, {0.0f, 0.0f, 0.0f, 0.0f}, {0.0f, 0.0f}},
@@ -136,9 +137,9 @@ void font_renderer_render_text(char* text, float x, float y, float scale, char* 
 		};
 
 		/*
-		Quad quad[1] =
+		VertexQuad quad[1] =
 		{
-			(Quad)
+			(VertexQuad)
 			{
 				{
 				{{{1.0f, 1.0f, 0.0f}}, {{0.0f, 0.0f, 0.0f, 0.0f}}, {{1.0f, 1.0f}}},

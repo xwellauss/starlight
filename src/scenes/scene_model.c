@@ -142,7 +142,7 @@ static void render()
 	ui_component_joystick("Input", "Joystick", joystick_box_size, joystick_radius, joystick_color, &joystick_angle, &is_joystick_active);
 #endif
 
-	change_window_color(hex_to_rbg("#222222", 1.0f));
+	window_change_bgcolor(hex_to_rbg("#222222", 1.0f));
 	
 	// Light Cube
 	mat4s light_source_transform = GLMS_MAT4_IDENTITY_INIT;

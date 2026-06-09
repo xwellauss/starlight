@@ -27,10 +27,11 @@ typedef struct
 	InputSystem input_system;
 } Window;
 
-void init_window(Window* window);
-int should_window_close(Window* window);
+void window_init(Window* window);
+int window_should_close(Window* window);
 void window_poll_events();
+double window_get_time();
 void window_swap_buffers(Window* window);
-void change_window_color(vec4s color);
-void destroy_window(Window* window);
+void window_change_bgcolor(vec4s color);
+void window_destroy(Window* window);
 

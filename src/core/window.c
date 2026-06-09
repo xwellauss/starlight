@@ -56,7 +56,7 @@ static void framebuffer_size_callback(GLFWwindow* window, int width, int height)
 	glViewport(0, 0, width, height);
 }
 
-void init_window(Window* window)
+void window_init(Window* window)
 {
 	current_window = window;
 
@@ -100,6 +100,11 @@ void init_window(Window* window)
 	glfwSetFramebufferSizeCallback(window->handle, framebuffer_size_callback);
 }
 
+double window_get_time()
+{
+	return glfwGetTime();
+}
+
 void window_poll_events()
 {
 	current_window->input_system.key_pressed = false;
@@ -112,17 +117,17 @@ void window_swap_buffers(Window* window)
 	glfwSwapBuffers(window->handle);
 }
 
-int should_window_close(Window* window)
+int window_should_close(Window* window)
 {
 	return glfwWindowShouldClose(window->handle);
 }
 
-void change_window_color(vec4s color)
+void window_change_bgcolor(vec4s color)
 {
 	glClearColor(color.r, color.g, color.b, color.a);
 }
 
-void destroy_window(Window* window)
+void window_destroy(Window* window)
 {
 	glfwDestroyWindow(window->handle);
 	glfwTerminate();

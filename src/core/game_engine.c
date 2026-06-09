@@ -2,10 +2,10 @@
 #include "window.h"
 #include "font_renderer.h"
 #include "ecs.h"
+#include "texture_atlas.h"
 
 #include "../utils/utils.h"
 #include "../utils/ui_imgui.h"
-#include "../utils/spritesheet.h"
 
 #include "../network/network.h"
 
@@ -39,7 +39,7 @@ static float last_frame = 0.0f;
 
 GameEngine game_engine = (GameEngine){};
 
-static void init()
+static void engine_init()
 {
 	game_engine.current_window.title = WINDOW_TITLE;
 
@@ -62,8 +62,9 @@ static void init()
 	chdir(ASSETS_DIR);
 #endif
 
-	init_window(&game_engine.current_window);
-	change_window_color(hex_to_rbg("#333333", 1.0f));
+	window_init(&game_engine.current_window);
+	window_change_bgcolor(hex_to_rbg("#333333", 1.0f));
+
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	glEnable(GL_BLEND);
 	glEnable(GL_DEPTH_TEST);
@@ -72,21 +73,21 @@ static void init()
 
 	ecs_init();
 
-	init_spritesheet();
+	texture_atlas_init();
 	font_renderer_init("fonts/font.ttf", 96);
-	imgui_init("fonts/font.ttf", 20, "", "#version 100");
-	init_network();
+	imgui_init("fonts/font.ttf", 20, "", "#version 300 es");
+	network_init();
 //	ImGui_GetIO()->ConfigFlags |= ImGuiConfigFlags_DockingEnable;
 
 	// Scene
-	load_scenes();
-	scene_switch("SceneDefault");
+	scenes_load_registered();
+	scene_switch("SceneMenu");
 }
 
-static void render_frame()
+static void engine_render_frame()
 {
 	{
-		current_frame = glfwGetTime();
+		current_frame = window_get_time();
 		game_engine.deltatime = current_frame - last_frame;
 		last_frame = current_frame;
 	}
@@ -109,33 +110,33 @@ static void render_frame()
 	window_swap_buffers(&game_engine.current_window);
 }
 
-static void cleanup()
+static void engine_destroy()
 {
 	audio_destroy(&game_engine.audio_engine);
-	destroy_network();
+	network_destroy();
 
 	ecs_destroy();
 	scene_destroy_all();
 
-	destroy_spriteSheet();
+	texture_atlas_destroy();
 
 	font_renderer_destroy();
 	imgui_destroy();
-	destroy_window(&game_engine.current_window);
+	window_destroy(&game_engine.current_window);
 }
 
-void run_application()
+void engine_run()
 {
-	init();
+	engine_init();
 	
 #if !defined(_PLATFORM_WEB)
-	while(!should_window_close(&game_engine.current_window))
+	while(!window_should_close(&game_engine.current_window))
 	{
-		render_frame();
+		engine_render_frame();
 	}
 #else
-	emscripten_set_main_loop(render_frame, 0, true);
+	emscripten_set_main_loop(engine_render_frame, 0, true);
 #endif
 
-	cleanup();
+	engine_destroy();
 }

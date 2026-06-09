@@ -15,4 +15,4 @@ typedef struct
 
 extern GameEngine game_engine;
 
-void run_application();
+void engine_run();
