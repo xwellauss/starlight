@@ -2,8 +2,6 @@
 
 #include "../core/game_engine.h"
 #include "../core/ecs.h"
-#include "../core/font_renderer.h"
-#include "../core/renderer.h"
 #include "../core/camera.h"
 #include "../core/texture_atlas.h"
 #include "../utils/ui_imgui.h"

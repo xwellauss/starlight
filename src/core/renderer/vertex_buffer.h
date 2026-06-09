@@ -1,6 +1,6 @@
 #pragma once
 
-#include "platform.h"
+#include "../platform.h"
 
 #include <stdbool.h>
 #include <stddef.h>

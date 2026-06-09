@@ -1,20 +1,14 @@
 #include "font_renderer.h"
-#include "cglm/struct/mat4.h"
 #include "game_engine.h"
-#include "renderer.h"
+#include "renderer/renderer.h"
 #include "../utils/utils.h"
 
-#if defined(_PLATFORM_DESKTOP)
-	#include <glad/gles2.h>
-#elif defined(_PLATFORM_WEB)
-	#include <emscripten.h>
-	#include <GLES3/gl3.h>
-#elif defined(_PLATFORM_ANDROID)
-	#include <GLES3/gl3.h>
-#endif
+#include "platform.h"
 
 #include <stb_truetype.h>
 #include <stb_ds.h>
+
+#include <cglm/struct.h>
 
 #define FONT_VERTEX_SHADER_PATH "shaders/font-vertex-shader.glsl"
 #define FONT_FRAGMENT_SHADER_PATH "shaders/font-fragment-shader.glsl"

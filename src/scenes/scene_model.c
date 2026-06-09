@@ -4,7 +4,6 @@
 #include "../core/ecs.h"
 #include "../core/font_renderer.h"
 #include "../utils/utils.h"
-#include "../core/renderer.h"
 #include "../core/camera.h"
 #include "../utils/ui_imgui.h"
 #include "../core/model_loader/model_loader.h"

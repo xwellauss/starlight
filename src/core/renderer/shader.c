@@ -1,5 +1,5 @@
 #include "shader.h"
-#include "../utils/utils.h"
+#include "../../utils/utils.h"
 
 static void shader_check_for_errors(unsigned int id, int status)
 {

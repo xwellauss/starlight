@@ -1,5 +1,5 @@
 #include "vertex_buffer.h"
-#include "../utils/utils.h"
+#include "../../utils/utils.h"
 
 void vertex_buffer_init(VertexBuffer* vb, void* vertex_data, size_t vertex_data_size, void* index_data, size_t index_data_size, bool indexed)
 {

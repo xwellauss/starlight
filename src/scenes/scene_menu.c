@@ -2,7 +2,7 @@
 #include "../core/game_engine.h"
 #include "../utils/ui_imgui.h"
 #include "../core/window.h"
-#include "../core/renderer.h"
+#include "../core/renderer/renderer.h"
 
 #include "cimgui.h"
 
