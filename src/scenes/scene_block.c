@@ -4,6 +4,7 @@
 #include "../core/ecs.h"
 #include "../core/camera.h"
 #include "../core/texture_atlas.h"
+#include "../core/font_renderer.h"
 #include "../utils/ui_imgui.h"
 #include "../utils/json_helper.h"
 #include "../utils/utils.h"
