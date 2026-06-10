@@ -85,7 +85,6 @@ static void engine_render_frame()
 
 	scene_process_input(game_engine.current_scene);
 	scene_update(game_engine.current_scene);
-
 	
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	

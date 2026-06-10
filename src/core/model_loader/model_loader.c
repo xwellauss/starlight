@@ -27,5 +27,8 @@ void model_load_from_file(Model* model, const char* filepath, enum ModelFileType
 void model_free(Model* model)
 {
 	texture2d_array_destroy(&model->textures);
+
+	arrfree(model->meshes);
+	arrfree(model->vertex_data);
 }
 
