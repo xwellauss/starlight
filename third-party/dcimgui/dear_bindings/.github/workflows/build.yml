@@ -1,0 +1,110 @@
+# This workflow performs nightly builds
+
+name: build
+
+on:
+  push:
+  pull_request:
+  workflow_run:
+    # Use a workflow as a trigger of scheduled builds. Forked repositories can disable scheduled builds by disabling
+    # "scheduled" workflow, while maintaining ability to perform local CI builds.
+    workflows:
+      - scheduled
+    types:
+      - requested
+
+jobs:
+  Linux:
+    runs-on: ubuntu-22.04
+
+    strategy:
+      fail-fast: false
+      matrix:
+        branch:
+          - master
+          - docking
+        compiler:
+          - gcc
+          - clang
+        flag_nogeneratedefaultargfunctions:
+          - nogeneratedefaultargfunctions
+          - withgeneratedefaultargfunctions
+
+    steps:
+    # Checkout both repositories
+    - uses: actions/checkout@v4
+      id: dear_bindings_checkout
+    - uses: actions/checkout@v4
+      id: imgui_checkout
+      with:
+        path: imgui
+        repository: ocornut/imgui
+        ref: ${{ matrix.branch }}
+        fetch-depth: 1
+
+    - name: Dependencies
+      run: |
+        sudo pip3 install ply
+
+    - name: Generate dcimgui
+      run: >- 
+        ${{ 
+          format('python3 dear_bindings.py --output dcimgui {0} --generateunformattedfunctions imgui/imgui.h', 
+            matrix.flag_nogeneratedefaultargfunctions == 'nogeneratedefaultargfunctions' && '--nogeneratedefaultargfunctions' || '') 
+        }}
+    - name: Generate dcimgui_internal	
+      run: >- 
+        ${{ 
+          format('python3 dear_bindings.py --output dcimgui_internal {0} --generateunformattedfunctions --include imgui/imgui.h imgui/imgui_internal.h', 
+            matrix.flag_nogeneratedefaultargfunctions == 'nogeneratedefaultargfunctions' && '--nogeneratedefaultargfunctions' || '') 
+        }}
+    - name: Generate dcimgui_impl_xxx backends
+      run: |
+        mkdir backends
+        python3 dear_bindings.py --backend --include imgui/imgui.h --output backends/dcimgui_impl_allegro5      imgui/backends/imgui_impl_allegro5.h
+        python3 dear_bindings.py --backend --include imgui/imgui.h --output backends/dcimgui_impl_android       imgui/backends/imgui_impl_android.h
+        python3 dear_bindings.py --backend --include imgui/imgui.h --output backends/dcimgui_impl_dx9           imgui/backends/imgui_impl_dx9.h
+        python3 dear_bindings.py --backend --include imgui/imgui.h --output backends/dcimgui_impl_dx10          imgui/backends/imgui_impl_dx10.h
+        python3 dear_bindings.py --backend --include imgui/imgui.h --output backends/dcimgui_impl_dx11          imgui/backends/imgui_impl_dx11.h
+        python3 dear_bindings.py --backend --include imgui/imgui.h --output backends/dcimgui_impl_dx12          imgui/backends/imgui_impl_dx12.h
+        python3 dear_bindings.py --backend --include imgui/imgui.h --output backends/dcimgui_impl_glfw          imgui/backends/imgui_impl_glfw.h
+        python3 dear_bindings.py --backend --include imgui/imgui.h --output backends/dcimgui_impl_glut          imgui/backends/imgui_impl_glut.h
+        python3 dear_bindings.py --backend --include imgui/imgui.h --output backends/dcimgui_impl_null          imgui/backends/imgui_impl_null.h
+        python3 dear_bindings.py --backend --include imgui/imgui.h --output backends/dcimgui_impl_opengl2       imgui/backends/imgui_impl_opengl2.h
+        python3 dear_bindings.py --backend --include imgui/imgui.h --output backends/dcimgui_impl_opengl3       imgui/backends/imgui_impl_opengl3.h
+        python3 dear_bindings.py --backend --include imgui/imgui.h --output backends/dcimgui_impl_sdl2          imgui/backends/imgui_impl_sdl2.h
+        python3 dear_bindings.py --backend --include imgui/imgui.h --output backends/dcimgui_impl_sdlrenderer2  imgui/backends/imgui_impl_sdlrenderer2.h
+        python3 dear_bindings.py --backend --include imgui/imgui.h --output backends/dcimgui_impl_sdl3          imgui/backends/imgui_impl_sdl3.h
+        python3 dear_bindings.py --backend --include imgui/imgui.h --output backends/dcimgui_impl_sdlgpu3       imgui/backends/imgui_impl_sdlgpu3.h
+        python3 dear_bindings.py --backend --include imgui/imgui.h --output backends/dcimgui_impl_sdlrenderer3  imgui/backends/imgui_impl_sdlrenderer3.h
+        python3 dear_bindings.py --backend --include imgui/imgui.h --output backends/dcimgui_impl_vulkan        imgui/backends/imgui_impl_vulkan.h
+        python3 dear_bindings.py --backend --include imgui/imgui.h --output backends/dcimgui_impl_wgpu          imgui/backends/imgui_impl_wgpu.h
+        python3 dear_bindings.py --backend --include imgui/imgui.h --output backends/dcimgui_impl_win32         imgui/backends/imgui_impl_win32.h
+    - name: Build
+      run: |
+        ${{ matrix.compiler }}                  \
+          -D${{ matrix.flag_nogeneratedefaultargfunctions == 'withgeneratedefaultargfunctions' && 'CIMGUI_WITH_GENERATE_DEFAULT_ARG_FUNCTIONS' || 'CIMGUI_NO_GENERATE_DEFAULT_ARG_FUNCTIONS' }} \
+          -DCIMGUI_WITH_GENERATE_UNFORMATTED_FUNCTIONS \
+          -o example_null                       \
+          -Iimgui -I.                           \
+          -x c examples/example_null/main.c     \
+          -x c++ dcimgui.cpp                     \
+          -x c++ dcimgui_internal.cpp            \
+          imgui/imgui.cpp                       \
+          imgui/imgui_demo.cpp                  \
+          imgui/imgui_draw.cpp                  \
+          imgui/imgui_tables.cpp                \
+          imgui/imgui_widgets.cpp               \
+          -lm -lstdc++
+
+    - name: Run
+      run: ./example_null
+
+    - uses: actions/upload-artifact@v4
+      with:
+        name: dear_bindings_${{ matrix.branch }}_${{ matrix.compiler }}_${{ matrix.flag_nogeneratedefaultargfunctions }}
+        path: |
+          dcimgui.*
+          dcimgui_internal.*
+          backends/dcimgui_impl*.cpp
+          backends/dcimgui_impl*.h

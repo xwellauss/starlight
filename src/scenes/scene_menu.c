@@ -4,8 +4,6 @@
 #include "../core/window.h"
 #include "../core/renderer/renderer.h"
 
-#include "cimgui.h"
-
 #include <math.h>
 #include <stb_ds.h>
 

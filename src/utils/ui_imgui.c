@@ -1,9 +1,9 @@
 #include "ui_imgui.h"
 #include "../core/game_engine.h"
 
-#include "cimgui.h"
-#include "cimgui_impl_glfw.h"
-#include "cimgui_impl_opengl3.h"
+#include "dcimgui.h"
+#include "dcimgui_impl_glfw.h"
+#include "dcimgui_impl_opengl3.h"
 
 #include <string.h>
 
@@ -19,6 +19,10 @@ void imgui_init(const char* font_path, int font_size, const char* chars_add, con
 
 	imgui_io->IniFilename = "/data/data/io.github.techieguy.mistlib/files/imgui.ini";
 
+	cImGui_ImplGlfw_InitForOpenGL(game_engine.current_window.handle, true);
+	cImGui_ImplOpenGL3_InitEx(glsl_version);
+
+	// load fonts
 	ImVector_ImWchar ranges;
 	ImVector_Construct(&ranges);
 	ImFontGlyphRangesBuilder builder;
@@ -38,9 +42,6 @@ void imgui_init(const char* font_path, int font_size, const char* chars_add, con
 	ImFontAtlas_Build(imgui_io->Fonts);
 
 	ImVector_Destruct(&ranges);
-
-	cImGui_ImplGlfw_InitForOpenGL(game_engine.current_window.handle, true);
-	cImGui_ImplOpenGL3_InitEx(glsl_version);
 }
 
 ImFont* ui_get_font(const char* name)

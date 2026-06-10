@@ -132,7 +132,10 @@ project "starlight"
 	{
 		"m",
 		"stdc++",
-		"cimgui",
+		"cglm",
+		"glad",
+		"single_headers",
+		"dcimgui",
 		"glfw",
 		"enet",
 		"miniaudio"
@@ -145,24 +148,17 @@ project "starlight"
 		"third-party/stb/include",
 		"third-party/glad/include",
 		"third-party/cJSON",
-		"third-party/cimgui",
-		"third-party/cimgui/imgui",
-		"third-party/cimgui/imgui/backends",
+		"third-party/dcimgui",
+		"third-party/dcimgui/imgui",
+		"third-party/dcimgui/imgui/backends",
 		"third-party/enet/include",
 		"third-party/cgltf",
-		"third-party/tinyobjloader-c",
 		"third-party/miniaudio",
 	}
 
 	files 
 	{ 
 		"src/**.h", "src/**.c",
-		"third-party/cglm/src/**.c", "third-party/cglm/include/**.h",
-		"third-party/cJSON/cJSON.c", "third-party/cJSON/cJSON.h",
-		"third-party/glad/src/glad.c", "third-party/glad/include/glad/gles2.h",
-		"third-party/cgltf/cgltf.h", "third-party/cgltf/cgltf_write.h",
-		"third-party/stb/src/*.c", "third-party/stb/include/*.h",
-		"third-party/miniaudio/miniaudio.c", "third-party/miniaudio/miniaudio.h",
 	}
 
 	removefiles
@@ -365,7 +361,7 @@ project "glfw"
 		removefiles { "third-party/glfw/src/**.c" }
 	filter {}
 
-project "cimgui"
+project "dcimgui"
 	kind "StaticLib"
 	language "C++"
 	targetdir "bin/%{outputdir}/%{prj.name}"
@@ -392,28 +388,28 @@ project "cimgui"
 	includedirs
 	{
 		"third-party/glfw/include",
-		"third-party/cimgui/imgui",
-		"third-party/cimgui/imgui/backends",
+		"third-party/dcimgui/imgui",
+		"third-party/dcimgui/imgui/backends",
 	}
 
 	files
 	{
-		"third-party/cimgui/cimgui.h",
-		"third-party/cimgui/cimgui.cpp",
-		"third-party/cimgui/cimgui_impl_opengl3.h",
-		"third-party/cimgui/cimgui_impl_opengl3.cpp",
-		"third-party/cimgui/cimgui_impl_glfw.h",
-		"third-party/cimgui/cimgui_impl_glfw.cpp",
-		"third-party/cimgui/imgui/imgui.cpp",
-		"third-party/cimgui/imgui/imgui_demo.cpp",
-		"third-party/cimgui/imgui/imgui_draw.cpp",
-		"third-party/cimgui/imgui/imgui_tables.cpp",
-		"third-party/cimgui/imgui/imgui_widgets.cpp",
-		"third-party/cimgui/imgui/imconfig.h",
-		"third-party/cimgui/imgui/backends/imgui_impl_opengl3.h",
-		"third-party/cimgui/imgui/backends/imgui_impl_opengl3.cpp",
-		"third-party/cimgui/imgui/backends/imgui_impl_glfw.h",
-		"third-party/cimgui/imgui/backends/imgui_impl_glfw.cpp",
+		"third-party/dcimgui/dcimgui.h",
+		"third-party/dcimgui/dcimgui.cpp",
+		"third-party/dcimgui/dcimgui_impl_opengl3.h",
+		"third-party/dcimgui/dcimgui_impl_opengl3.cpp",
+		"third-party/dcimgui/dcimgui_impl_glfw.h",
+		"third-party/dcimgui/dcimgui_impl_glfw.cpp",
+		"third-party/dcimgui/imgui/imgui.cpp",
+		"third-party/dcimgui/imgui/imgui_demo.cpp",
+		"third-party/dcimgui/imgui/imgui_draw.cpp",
+		"third-party/dcimgui/imgui/imgui_tables.cpp",
+		"third-party/dcimgui/imgui/imgui_widgets.cpp",
+		"third-party/dcimgui/imgui/imconfig.h",
+		"third-party/dcimgui/imgui/backends/imgui_impl_opengl3.h",
+		"third-party/dcimgui/imgui/backends/imgui_impl_opengl3.cpp",
+		"third-party/dcimgui/imgui/backends/imgui_impl_glfw.h",
+		"third-party/dcimgui/imgui/backends/imgui_impl_glfw.cpp",
 	}
 
 project "enet"
@@ -464,3 +460,93 @@ project "miniaudio"
 		"third-party/miniaudio/miniaudio.c",
 	}
 
+project "cglm"
+	kind "StaticLib"
+	language "C"
+
+	targetdir "bin/%{outputdir}/%{prj.name}"
+	objdir "bin/%{outputdir}/%{prj.name}/obj"
+	location "build"
+
+	links
+	{
+		"m",
+	}
+
+	includedirs
+	{
+		"third-party/cglm/include"
+	}
+
+	files
+	{
+		"third-party/cglm/src/**.c",
+		"third-party/cglm/include/**.h",
+	}
+
+project "glad"
+	kind "StaticLib"
+	language "C"
+
+	targetdir "bin/%{outputdir}/%{prj.name}"
+	objdir "bin/%{outputdir}/%{prj.name}/obj"
+	location "build"
+
+	filter { "platforms:Desktop" }
+		defines
+		{
+			"_PLATFORM_DESKTOP",
+		}
+	filter {}
+
+	filter { "platforms:Android" }
+		defines
+		{
+			"_PLATFORM_ANDROID",
+		}
+	filter {}
+
+	filter { "platforms:Web" }
+		defines
+		{
+			"_PLATFORM_WEB",
+		}
+	filter {}
+
+
+	includedirs
+	{
+		"third-party/glad/include",
+	}
+
+	files
+	{
+		"third-party/glad/src/glad.c",
+		"third-party/glad/include/glad/gles2.h",
+	}
+
+
+project "single_headers"
+	kind "StaticLib"
+	language "C"
+
+	targetdir "bin/%{outputdir}/%{prj.name}"
+	objdir "bin/%{outputdir}/%{prj.name}/obj"
+	location "build"
+
+	includedirs
+	{
+		"third-party/cJSON",
+		"third-party/stb/include",
+		"third-party/cgltf"
+	}
+
+	files
+	{
+		"third-party/cJSON/cJSON.c",
+		"third-party/cJSON/cJSON.h",
+		"third-party/cgltf/cgltf.h",
+		"third-party/cgltf/cgltf_write.h",
+		"third-party/stb/src/*.c",
+		"third-party/stb/include/*.h",
+	}

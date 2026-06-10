@@ -8,8 +8,7 @@
 #include "../utils/ui_imgui.h"
 #include "../core/model_loader/model_loader.h"
 
-#include "cglm/struct/mat4.h"
-#include "cimgui.h"
+#include <cglm/struct.h>
 
 #include <stb_ds.h>
 

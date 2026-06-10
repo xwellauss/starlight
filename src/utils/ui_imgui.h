@@ -1,7 +1,7 @@
 #pragma once
 
 #include <cglm/struct.h>
-#include "cimgui.h"
+#include "dcimgui.h"
 
 void imgui_init(const char* font_path, int font_size, const char* chars_add, const char* glsl_version);
 void imgui_new_frame();
