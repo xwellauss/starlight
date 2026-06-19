@@ -1,5 +1,10 @@
 #include "window.h"
 
+#if defined(_PLATFORM_ANDROID)
+	#define GLFW_EXPOSE_NATIVE_ANDROID
+	#include <GLFW/glfw3native.h>
+#endif
+
 #include "platform.h"
 
 #include "../utils/utils.h"

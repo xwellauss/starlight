@@ -9,7 +9,9 @@ static ImGuiIO* imgui_io = NULL;
 
 static vec3s camera_direction;
 static float last_x, last_y;
+
 static bool first_mouse = true;
+static bool prev_clicking = false;
 
 void init_camera(Camera* camera)
 {
@@ -36,7 +38,7 @@ void update_camera(Camera* camera)
 
 void move_camera(Camera* camera, InputState input_state, float deltatime)
 {
-	if((camera->camera_type & WALK_AROUND) && !imgui_io->WantCaptureKeyboard)
+	if(camera->camera_type & WALK_AROUND)
 	{
 		if(input_state.up)
 			camera->position = glms_vec3_add(camera->position, glms_vec3_scale(camera->front, camera->speed * deltatime));
@@ -51,13 +53,19 @@ void move_camera(Camera* camera, InputState input_state, float deltatime)
 		if(input_state.l_ctrl)
 			camera->position = glms_vec3_add(camera->position, glms_vec3_scale(camera->up, -camera->speed * deltatime));
 	}
+
 	if((camera->camera_type & LOOK_AROUND) && !imgui_io->WantCaptureMouse)
 	{
+		bool clicking = (game_engine.current_window.input_system.mouse_clicked_data[GLFW_MOUSE_BUTTON_LEFT])
 #if defined(_PLATFORM_ANDROID) || defined(_PLATFORM_WEB)
-		if(game_engine.current_window.input_system.mouse_position.x >= game_engine.current_window.width/2.0f && game_engine.current_window.input_system.mouse_clicked_data[GLFW_MOUSE_BUTTON_LEFT])
-#else
-		if(game_engine.current_window.input_system.mouse_clicked_data[GLFW_MOUSE_BUTTON_LEFT])
+		&& (game_engine.current_window.input_system.mouse_position.x >= game_engine.current_window.width/2.0f)
 #endif
+		;
+
+		if(!prev_clicking && clicking) first_mouse = true;
+		prev_clicking = clicking;
+
+		if(clicking)
 		{
 			glfwSetInputMode(game_engine.current_window.handle, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 

@@ -9,6 +9,4 @@
 #elif defined(_PLATFORM_ANDROID)
 	#include <GLES3/gl3.h>
 	#include <android/native_window.h>
-	#define GLFW_EXPOSE_NATIVE_ANDROID
-	#include <GLFW/glfw3native.h>
 #endif

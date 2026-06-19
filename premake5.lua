@@ -47,6 +47,9 @@ project "starlight"
 			"/usr/include/freetype2",
 			"/usr/include/libpng16"
 		}
+
+		buildoptions { "-fsanitize=address" }
+		linkoptions  { "-fsanitize=address" }
 	filter {}
 
 	filter { "platforms:Android" }
@@ -124,9 +127,6 @@ project "starlight"
 		"WINDOW_TITLE=\"%{window_title}\"",
 		"ASSETS_DIR=\"%{assets_dir}\"",
 	}
-
-	buildoptions { "-fsanitize=address" }
-	linkoptions  { "-fsanitize=address" }
 
 	links
 	{
@@ -443,11 +443,13 @@ project "miniaudio"
 	objdir "bin/%{outputdir}/%{prj.name}/obj"
 	location "build"
 
-	links
-	{
-		"pthread",
-		"m",
-	}
+	filter { "platforms:Desktop" }
+		links
+		{
+			"pthread",
+			"m",
+		}
+	filter {}
 
 	includedirs
 	{
@@ -516,6 +518,7 @@ project "glad"
 
 	includedirs
 	{
+		"third-party/glfw/include",
 		"third-party/glad/include",
 	}
 

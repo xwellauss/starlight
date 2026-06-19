@@ -74,7 +74,7 @@ void ui_component_joystick(const char* joystick_box_tag, const char* joystick_ci
 
 		ImDrawList_AddCircleFilled(ImGui_GetWindowDrawList(), joystick_circle_pos, joystick_radius, ImGui_ColorConvertFloat4ToU32(joystick_color), 32);
 		ImGui_InvisibleButton(joystick_circle_tag, (ImVec2){joystick_radius*4, joystick_radius*4}, ImGuiButtonFlags_MouseButtonLeft);
-		ImGui_SetCursorPos(joystick_circle_pos);
+		//ImGui_SetCursorPos(joystick_circle_pos);
 		if(ImGui_IsItemActive() && ImGui_IsMouseDragging(0, -1.0f))
 		{
 			*is_joystick_active = true;

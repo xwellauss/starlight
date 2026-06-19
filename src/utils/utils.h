@@ -29,17 +29,6 @@ typedef struct
 	Vertex vertices[4];
 } VertexQuad;
 
-
-typedef struct
-{
-	char name[20];
-	int id;
-
-	mat4s transform;
-	
-	Vertex vertex_data[6];
-} PlayerPacket;
-
 typedef struct
 {
 	bool left;
