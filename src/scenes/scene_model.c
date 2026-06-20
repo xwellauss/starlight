@@ -156,7 +156,7 @@ static void render()
 
 	//bind_vertex_buffer(&ecs_get_sprite(light_source)->vertex_buffer, VAO);
 	vertex_buffer_bind(&ecs_get_sprite(light_source)->vertex_buffer, BUFFER_VAO);
-	glDrawElements(GL_TRIANGLES, light_model.index_count, GL_UNSIGNED_INT, 0);
+	vertex_buffer_draw_indexed(&ecs_get_sprite(light_source)->vertex_buffer, GL_TRIANGLES, GL_UNSIGNED_INT, light_model.index_count, 0);
 
 	// Model
 
@@ -203,7 +203,7 @@ static void render()
 		shader_uniform_mat4(&ecs_get_sprite(model_scene)->shader, "transform", model_transform);
 		shader_uniform_mat3(&ecs_get_sprite(model_scene)->shader, "transform_normal", glms_mat3_transpose(glms_mat3_inv(glms_mat4_pick3(model_transform))));
 		
-		glDrawElements(GL_TRIANGLES, mesh->index_count, GL_UNSIGNED_INT, (void*)(mesh->index_offset * sizeof(GLuint)));
+		vertex_buffer_draw_indexed(&ecs_get_sprite(model_scene)->vertex_buffer, GL_TRIANGLES, GL_UNSIGNED_INT, mesh->index_count, (void*)(mesh->index_offset * sizeof(GLuint)));
 	}
 
 

@@ -54,7 +54,7 @@ static void render_planet_model(Entity* e)
 	shader_uniform_mat4(&ecs_get_sprite(e)->shader, "transform", ecs_get_transform(e)->transform);
 	
 	vertex_buffer_bind(&ecs_get_sprite(e)->vertex_buffer, BUFFER_VAO);
-	glDrawElements(GL_TRIANGLES, sphere_model.index_count, GL_UNSIGNED_INT, 0);
+	vertex_buffer_draw_indexed(&ecs_get_sprite(e)->vertex_buffer, GL_TRIANGLES, GL_UNSIGNED_INT, sphere_model.index_count, 0);
 }
 
 void update_physics()

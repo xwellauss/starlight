@@ -73,6 +73,22 @@ void vertex_buffer_unbind_all()
 	vertex_buffer_unbind(BUFFER_EBO);
 }
 
+void vertex_buffer_update(VertexBuffer* vb, void* data, long size, int offset)
+{
+	glBufferSubData(GL_ARRAY_BUFFER, offset, size, data);
+}
+
+void vertex_buffer_draw(VertexBuffer* vb, GLenum mode, int count, int offset)
+{
+	glDrawArrays(mode, offset, count);
+}
+
+void vertex_buffer_draw_indexed(VertexBuffer* vb, GLenum mode, GLenum type, int count, void* offset)
+{
+	glDrawElements(mode, count, type, offset);
+}
+
+
 void vertex_buffer_destroy(VertexBuffer* vb)
 {
 	glDeleteVertexArrays(1, &vb->VAO);

@@ -417,21 +417,12 @@ static void render()
 		{
 			generate_map();
 		}
-		if(ImGui_Button("Save"))
-		{
-			save_terrain();
-		}
-		if(ImGui_Button("Load"))
-		{
-			load_terrain("../vertex_data.json");
-		}
 	}
 	ImGui_End();
 
 	vertex_buffer_bind(&ecs_get_sprite(block)->vertex_buffer, BUFFER_VAO);
-	//glBufferData(GL_ARRAY_BUFFER, sizeof(Vertex)*arrlen(vertex_render_data), vertex_render_data, GL_STATIC_DRAW);
-	glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(Vertex)*arrlen(vertex_render_data), vertex_render_data);
-	glDrawArrays(GL_TRIANGLES, 0, arrlen(vertex_render_data));
+	vertex_buffer_update(&ecs_get_sprite(block)->vertex_buffer, vertex_render_data, sizeof(Vertex)*arrlen(vertex_render_data), 0);
+	vertex_buffer_draw(&ecs_get_sprite(block)->vertex_buffer, GL_TRIANGLES, arrlen(vertex_render_data), 0);
 	
 	font_renderer_render_text("Starlight", 0.0f, 0.0f, 1.0f, "#ffffff", 1.0f);
 }

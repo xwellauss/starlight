@@ -27,5 +27,8 @@ void vertex_buffer_init(VertexBuffer* vb, void* vertex_data, size_t vertex_data_
 void vertex_buffer_bind(VertexBuffer* vb, enum Buffers buffer);
 void vertex_buffer_unbind(enum Buffers buffer);
 void vertex_buffer_unbind_all();
+void vertex_buffer_update(VertexBuffer* vb, void* data, long size, int offset);
+void vertex_buffer_draw(VertexBuffer* vb, GLenum mode, int count, int offset);
+void vertex_buffer_draw_indexed(VertexBuffer* vb, GLenum mode, GLenum type, int count, void* offset);
 void vertex_buffer_destroy(VertexBuffer* vb);
 

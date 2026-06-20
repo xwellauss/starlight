@@ -149,9 +149,9 @@ void font_renderer_render_text(char* text, float x, float y, float scale, char* 
 		texture2d_bind(&ch.texture);
         // update content of VBO memory
 		vertex_buffer_bind(&vertex_buffer, BUFFER_VBO);
-        glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(quad), quad);
+		vertex_buffer_update(&vertex_buffer, quad, sizeof(quad), 0);
         // render quad
-		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_SHORT, 0);
+		vertex_buffer_draw_indexed(&vertex_buffer, GL_TRIANGLES, GL_UNSIGNED_SHORT, 6, 0);
         x += (float)ch.advance;
 	}
 
