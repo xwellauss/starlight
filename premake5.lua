@@ -42,12 +42,6 @@ project "starlight"
 			"_PLATFORM_DESKTOP",
 		}
 
-		includedirs
-		{
-			"/usr/include/freetype2",
-			"/usr/include/libpng16"
-		}
-
 		buildoptions { "-fsanitize=address" }
 		linkoptions  { "-fsanitize=address" }
 	filter {}
@@ -154,6 +148,7 @@ project "starlight"
 		"third-party/enet/include",
 		"third-party/cgltf",
 		"third-party/miniaudio",
+		"third-party/clay",
 	}
 
 	files 

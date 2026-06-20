@@ -3,6 +3,7 @@
 #include "font_renderer.h"
 #include "ecs.h"
 #include "texture_atlas.h"
+#include "ui/ui.h"
 
 #include "../utils/utils.h"
 #include "../utils/ui_imgui.h"
@@ -63,6 +64,7 @@ static void engine_init()
 
 	texture_atlas_init();
 	font_renderer_init("fonts/font.ttf", 96);
+	ui_init();
 	imgui_init("fonts/font.ttf", 20, "", "#version 300 es");
 	network_init();
 //	ImGui_GetIO()->ConfigFlags |= ImGuiConfigFlags_DockingEnable;
@@ -109,6 +111,7 @@ static void engine_destroy()
 
 	font_renderer_destroy();
 	imgui_destroy();
+	ui_destroy();
 	window_destroy(&game_engine.current_window);
 }
 

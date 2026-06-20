@@ -33,3 +33,6 @@
 [submodule "third-party/miniaudio"]
 	path = third-party/miniaudio
 	url = https://github.com/mackron/miniaudio.git
+[submodule "third-party/clay"]
+	path = third-party/clay
+	url = git@github.com:nicbarker/clay.git
