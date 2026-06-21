@@ -34,7 +34,7 @@ void ui_init()
 	ui_font_init(UI_FONT_FILE, 1024, 1024, 32.0f);
 	ui_backend_init();
 
-	Clay_SetDebugModeEnabled(false);
+	Clay_SetDebugModeEnabled(true);
 
 	g_demo_data = ClayVideoDemo_Initialize();
 }
