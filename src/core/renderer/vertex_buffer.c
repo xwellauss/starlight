@@ -1,7 +1,7 @@
 #include "vertex_buffer.h"
 #include "../../utils/utils.h"
 
-void vertex_buffer_init(VertexBuffer* vb, void* vertex_data, size_t vertex_data_size, void* index_data, size_t index_data_size, bool indexed)
+void vertex_buffer_init_with_layout(VertexBuffer* vb, void* vertex_data, size_t vertex_data_size, void* index_data, size_t index_data_size, bool indexed, VertexLayout layout)
 {
 	vb->indexed = indexed;
 
@@ -12,17 +12,12 @@ void vertex_buffer_init(VertexBuffer* vb, void* vertex_data, size_t vertex_data_
 	vertex_buffer_bind(vb, BUFFER_VBO);
 	glBufferData(GL_ARRAY_BUFFER, vertex_data_size, vertex_data, GL_DYNAMIC_DRAW);
 
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, position));
-	glEnableVertexAttribArray(0);
-
-	glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, color));
-	glEnableVertexAttribArray(1);
-
-	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, tex_coord));
-	glEnableVertexAttribArray(2);
-
-	glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, normal));
-	glEnableVertexAttribArray(3);
+	for(int i = 0; i < layout.attrib_count; i++)
+	{
+		VertexAttrib* vat = &layout.attribs[i];
+		glVertexAttribPointer(vat->location, vat->count, vat->type, GL_FALSE, layout.stride, (void*)vat->offset);
+		glEnableVertexAttribArray(vat->location);
+	}
 
 	if(vb->indexed)
 	{
@@ -32,37 +27,42 @@ void vertex_buffer_init(VertexBuffer* vb, void* vertex_data, size_t vertex_data_
 	}
 
 	vertex_buffer_unbind_all();
+}
+
+void vertex_buffer_3d_init(VertexBuffer* vb, void* vertex_data, size_t vertex_data_size, void* index_data, size_t index_data_size, bool indexed)
+{
+	VertexAttrib attribs[] =
+	{
+		{0, 3, GL_FLOAT, offsetof(Vertex3D, position)},
+		{1, 4, GL_FLOAT, offsetof(Vertex3D, color)},
+		{2, 2, GL_FLOAT, offsetof(Vertex3D, tex_coord)},
+		{3, 3, GL_FLOAT, offsetof(Vertex3D, normal)},
+	};
+
+	VertexLayout layout = {attribs, 4, sizeof(Vertex3D)};
+	vertex_buffer_init_with_layout(vb, vertex_data, vertex_data_size, index_data, index_data_size, indexed, layout);
 }
 
 void vertex_buffer_2d_init(VertexBuffer* vb, void* vertex_data, size_t vertex_data_size, void* index_data, size_t index_data_size, bool indexed)
 {
-	vb->indexed = indexed;
-
-	glGenVertexArrays(1, &vb->VAO);
-	vertex_buffer_bind(vb, BUFFER_VAO);
-
-	glGenBuffers(1, &vb->VBO);
-	vertex_buffer_bind(vb, BUFFER_VBO);
-	glBufferData(GL_ARRAY_BUFFER, vertex_data_size, vertex_data, GL_DYNAMIC_DRAW);
-
-	glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex2D), (void*)offsetof(Vertex2D, position));
-	glEnableVertexAttribArray(0);
-
-	glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, sizeof(Vertex2D), (void*)offsetof(Vertex2D, color));
-	glEnableVertexAttribArray(1);
-
-	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex2D), (void*)offsetof(Vertex2D, tex_coord));
-	glEnableVertexAttribArray(2);
-
-	if(vb->indexed)
+	VertexAttrib attribs[] =
 	{
-		glGenBuffers(1, &vb->EBO);
-		vertex_buffer_bind(vb, BUFFER_EBO);
-		glBufferData(GL_ELEMENT_ARRAY_BUFFER, index_data_size, index_data, GL_DYNAMIC_DRAW);
-	}
+		{0, 2, GL_FLOAT, offsetof(Vertex2D, position)},
+		{1, 4, GL_FLOAT, offsetof(Vertex2D, color)},
+		{2, 2, GL_FLOAT, offsetof(Vertex2D, tex_coord)},
+	};
 
-	vertex_buffer_unbind_all();
+	VertexLayout layout = {attribs, 3, sizeof(Vertex2D)};
+	vertex_buffer_init_with_layout(vb, vertex_data, vertex_data_size, index_data, index_data_size, indexed, layout);
 }
+
+// TODO: Compatibility
+void vertex_buffer_init(VertexBuffer* vb, void* vertex_data, size_t vertex_data_size, void* index_data, size_t index_data_size, bool indexed)
+{
+	vertex_buffer_3d_init(vb, vertex_data, vertex_data_size, index_data, index_data_size, indexed);
+}
+
+
 
 void vertex_buffer_bind(VertexBuffer* vb, enum Buffers buffer)
 {

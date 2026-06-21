@@ -56,10 +56,6 @@ void ui_render_frame()
 {
     Clay_RenderCommandArray cmds = ClayVideoDemo_CreateLayout(&g_demo_data);
 	ui_backend_render(cmds);
-
-    //Gles3_Render(&g_gles3, cmds, g_stbFonts);
-
-	//ui_font_render_text("Hello World", 50.0f, 50.0f, 32.0f, hex_to_rbg("#ffffff", 1.0f))
 }
 
 void ui_destroy()

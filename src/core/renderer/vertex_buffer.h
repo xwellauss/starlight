@@ -9,6 +9,21 @@
 
 typedef struct
 {
+	int location;
+	int count;
+	GLenum type;
+	size_t offset;
+} VertexAttrib;
+
+typedef struct
+{
+	VertexAttrib* attribs;
+	int attrib_count;
+	size_t stride;
+} VertexLayout;
+
+typedef struct
+{
 	vec3s position;
 	vec4s color;
 	vec2s tex_coord;
@@ -47,13 +62,20 @@ enum Buffers
 	BUFFER_EBO
 };
 
+void vertex_buffer_init_with_layout(VertexBuffer* vb, void* vertex_data, size_t vertex_data_size, void* index_data, size_t index_data_size, bool indexed, VertexLayout layout);
+
 void vertex_buffer_init(VertexBuffer* vb, void* vertex_data, size_t vertex_data_size, void* index_data, size_t index_data_size, bool indexed);
+void vertex_buffer_3d_init(VertexBuffer* vb, void* vertex_data, size_t vertex_data_size, void* index_data, size_t index_data_size, bool indexed);
 void vertex_buffer_2d_init(VertexBuffer* vb, void* vertex_data, size_t vertex_data_size, void* index_data, size_t index_data_size, bool indexed);
+
+
 void vertex_buffer_bind(VertexBuffer* vb, enum Buffers buffer);
 void vertex_buffer_unbind(enum Buffers buffer);
 void vertex_buffer_unbind_all();
+
 void vertex_buffer_update(VertexBuffer* vb, void* data, long size, int offset);
 void vertex_buffer_draw(VertexBuffer* vb, GLenum mode, int count, int offset);
 void vertex_buffer_draw_indexed(VertexBuffer* vb, GLenum mode, GLenum type, int count, void* offset);
+
 void vertex_buffer_destroy(VertexBuffer* vb);
 
