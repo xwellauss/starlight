@@ -1,4 +1,5 @@
 #include "window.h"
+#include "GLFW/glfw3.h"
 
 #if defined(_PLATFORM_ANDROID)
 	#define GLFW_EXPOSE_NATIVE_ANDROID
@@ -40,7 +41,12 @@ static void mouse_button_callback(GLFWwindow* window, int button, int action, in
 	{
 		current_window->input_system.mouse_clicked_data[button] = (action == GLFW_PRESS) || (action == GLFW_REPEAT);
 	}
+}
 
+static void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
+{
+	current_window->input_system.mouse_scroll_delta.x += (float)xoffset;
+	current_window->input_system.mouse_scroll_delta.y += (float)yoffset;
 }
 
 static void framebuffer_size_callback(GLFWwindow* window, int width, int height)
@@ -92,6 +98,7 @@ void window_init(Window* window)
 	glfwSetKeyCallback(window->handle, key_callback);
 	glfwSetCursorPosCallback(window->handle, mouse_callback);
 	glfwSetMouseButtonCallback(window->handle, mouse_button_callback);
+	glfwSetScrollCallback(window->handle, scroll_callback);
 	glfwSetFramebufferSizeCallback(window->handle, framebuffer_size_callback);
 }
 
@@ -105,6 +112,11 @@ void window_poll_events()
 	current_window->input_system.key_pressed = false;
 	current_window->input_system.mouse_moved = false;
 	glfwPollEvents();
+
+	current_window->input_system.mouse_scroll_delta = (vec2s){0, 0};
+	current_window->input_system.mouse_clicked = false;
+	current_window->input_system.mouse_moved = false;
+	current_window->input_system.key_pressed = false;
 }
 
 void window_swap_buffers(Window* window)

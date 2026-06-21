@@ -1,6 +1,5 @@
 #include "scene_default.h"
 
-#include "../core/font_renderer.h"
 
 static void init()
 {
@@ -16,7 +15,7 @@ static void update()
 
 static void render()
 {
-	font_renderer_render_text("Starlight", 0.0f, 0.0f, 1.0f, "#ffffff", 1.0f);
+	//font_renderer_render_text("Starlight", 0.0f, 0.0f, 1.0f, "#ffffff", 1.0f);
 }
 
 static void process_input()

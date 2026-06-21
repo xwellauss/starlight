@@ -15,8 +15,8 @@ void scenes_load_registered()
 //	add_scene(&scene_play_server);
 //	add_scene(&scene_play_client);
 	scene_register(&scene_default);
-	scene_register(&scene_block);
-	scene_register(&scene_model);
-	scene_register(&scene_gravity);
-	scene_register(&scene_menu);
+	//scene_register(&scene_block);
+	//scene_register(&scene_model);
+	//scene_register(&scene_gravity);
+	//scene_register(&scene_menu);
 }

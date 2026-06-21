@@ -1,15 +1,19 @@
 #include "ui.h"
+#include "ui_font.h"
+#include "ui_backend.h"
 #include "../game_engine.h"
-#include "../font_renderer.h"
 #include "../../utils/utils.h"
+#include "../platform.h"
 
 #include <stdint.h>
 
 #define CLAY_IMPLEMENTATION
-#include "clay.h"
+#include <clay/clay.h>
+#include "clay/examples/shared-layouts/clay-video-demo.c"
 
-static uint64_t total_memory_size = 0;
-static Clay_Arena clay_arena;
+#define UI_FONT_FILE "fonts/monocraft.ttf"
+
+static ClayVideoDemo_Data g_demo_data;
 
 void handle_clay_errors(Clay_ErrorData error_data)
 {
@@ -19,17 +23,47 @@ void handle_clay_errors(Clay_ErrorData error_data)
 
 void ui_init()
 {
-	total_memory_size = Clay_MinMemorySize();
+	size_t clay_required_memory = Clay_MinMemorySize();
+	Clay_Arena clay_arena = Clay_CreateArenaWithCapacityAndMemory(clay_required_memory, malloc(clay_required_memory));
 
-	clay_arena = Clay_CreateArenaWithCapacityAndMemory(total_memory_size, malloc(total_memory_size));
+	Clay_Context* clay_ctx = Clay_Initialize(clay_arena, (Clay_Dimensions){ .width=(float)game_engine.current_window.width, .height=(float)game_engine.current_window.height}, (Clay_ErrorHandler){ .errorHandlerFunction=handle_clay_errors });
 
-	Clay_Initialize(clay_arena, (Clay_Dimensions){game_engine.current_window.width, game_engine.current_window.height}, (Clay_ErrorHandler){ handle_clay_errors });
+	Clay_SetCurrentContext(clay_ctx);
+	Clay_SetMeasureTextFunction(ui_font_clay_measure_text, NULL);
+	
+	ui_font_init(UI_FONT_FILE, 1024, 1024, 32.0f);
+	ui_backend_init();
+
+	Clay_SetDebugModeEnabled(false);
+
+	g_demo_data = ClayVideoDemo_Initialize();
 }
 
-void ui_render()
+void ui_process_input()
 {
+	Clay_Vector2 mouse_pos = {game_engine.current_window.input_system.mouse_position.x, game_engine.current_window.input_system.mouse_position.y};
+
+    bool mouse_pressed = game_engine.current_window.input_system.mouse_clicked_data[GLFW_MOUSE_BUTTON_LEFT];	
+
+	Clay_SetPointerState(mouse_pos, mouse_pressed);
+
+	Clay_UpdateScrollContainers(true, (Clay_Vector2){game_engine.current_window.input_system.mouse_scroll_delta.x, game_engine.current_window.input_system.mouse_scroll_delta.y}, game_engine.deltatime*1000.0f);
+    
+	Clay_SetLayoutDimensions((Clay_Dimensions){(float)game_engine.current_window.width, (float)game_engine.current_window.height});
+}
+
+void ui_render_frame()
+{
+    Clay_RenderCommandArray cmds = ClayVideoDemo_CreateLayout(&g_demo_data);
+	ui_backend_render(cmds);
+
+    //Gles3_Render(&g_gles3, cmds, g_stbFonts);
+
+	//ui_font_render_text("Hello World", 50.0f, 50.0f, 32.0f, hex_to_rbg("#ffffff", 1.0f))
 }
 
 void ui_destroy()
 {
+	ui_font_destroy();
+	ui_backend_destroy();
 }

@@ -2,7 +2,6 @@
 
 #include "../core/game_engine.h"
 #include "../core/ecs.h"
-#include "../core/font_renderer.h"
 #include "../utils/utils.h"
 #include "../core/camera.h"
 #include "../utils/ui_imgui.h"
@@ -227,7 +226,7 @@ static void render()
 	}
 	ImGui_End();
 	
-	font_renderer_render_text("Starlight", 0.0f, 0.0f, 1.0f, "#ffffff", 1.0f);
+	//font_renderer_render_text("Starlight", 0.0f, 0.0f, 1.0f, "#ffffff", 1.0f);
 }
 
 static void update()

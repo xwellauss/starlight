@@ -34,6 +34,36 @@ void vertex_buffer_init(VertexBuffer* vb, void* vertex_data, size_t vertex_data_
 	vertex_buffer_unbind_all();
 }
 
+void vertex_buffer_2d_init(VertexBuffer* vb, void* vertex_data, size_t vertex_data_size, void* index_data, size_t index_data_size, bool indexed)
+{
+	vb->indexed = indexed;
+
+	glGenVertexArrays(1, &vb->VAO);
+	vertex_buffer_bind(vb, BUFFER_VAO);
+
+	glGenBuffers(1, &vb->VBO);
+	vertex_buffer_bind(vb, BUFFER_VBO);
+	glBufferData(GL_ARRAY_BUFFER, vertex_data_size, vertex_data, GL_DYNAMIC_DRAW);
+
+	glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex2D), (void*)offsetof(Vertex2D, position));
+	glEnableVertexAttribArray(0);
+
+	glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, sizeof(Vertex2D), (void*)offsetof(Vertex2D, color));
+	glEnableVertexAttribArray(1);
+
+	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex2D), (void*)offsetof(Vertex2D, tex_coord));
+	glEnableVertexAttribArray(2);
+
+	if(vb->indexed)
+	{
+		glGenBuffers(1, &vb->EBO);
+		vertex_buffer_bind(vb, BUFFER_EBO);
+		glBufferData(GL_ELEMENT_ARRAY_BUFFER, index_data_size, index_data, GL_DYNAMIC_DRAW);
+	}
+
+	vertex_buffer_unbind_all();
+}
+
 void vertex_buffer_bind(VertexBuffer* vb, enum Buffers buffer)
 {
 	switch(buffer)

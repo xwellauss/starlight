@@ -2,7 +2,6 @@
 
 #include "../../core/game_engine.h"
 #include "../../core/ecs.h"
-#include "../../core/font_renderer.h"
 #include "../../utils/utils.h"
 #include "../../core/camera.h"
 #include "../../core/model_loader/model_loader.h"

@@ -4,7 +4,6 @@
 #include "../core/ecs.h"
 #include "../core/camera.h"
 #include "../core/texture_atlas.h"
-#include "../core/font_renderer.h"
 #include "../utils/ui_imgui.h"
 #include "../utils/json_helper.h"
 #include "../utils/utils.h"
@@ -424,7 +423,7 @@ static void render()
 	vertex_buffer_update(&ecs_get_sprite(block)->vertex_buffer, vertex_render_data, sizeof(Vertex)*arrlen(vertex_render_data), 0);
 	vertex_buffer_draw(&ecs_get_sprite(block)->vertex_buffer, GL_TRIANGLES, arrlen(vertex_render_data), 0);
 	
-	font_renderer_render_text("Starlight", 0.0f, 0.0f, 1.0f, "#ffffff", 1.0f);
+	//font_renderer_render_text("Starlight", 0.0f, 0.0f, 1.0f, "#ffffff", 1.0f);
 }
 
 static void activate()

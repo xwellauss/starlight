@@ -1,6 +1,7 @@
 #pragma once
 
 #include "../utils/utils.h"
+#include "window.h"
 #include <cglm/struct.h>
 
 enum CameraType

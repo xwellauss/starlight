@@ -149,6 +149,7 @@ project "starlight"
 		"third-party/cgltf",
 		"third-party/miniaudio",
 		"third-party/clay",
+		"third-party",
 	}
 
 	files 

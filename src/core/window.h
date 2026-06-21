@@ -7,6 +7,17 @@
 
 typedef struct
 {
+	bool left;
+	bool right;
+	bool up;
+	bool down;
+	bool space;
+	bool l_ctrl;
+	bool key_press;
+} InputState;
+
+typedef struct
+{
 	bool key_pressed;
 	bool key_pressed_data[GLFW_KEY_LAST];
 
@@ -15,6 +26,8 @@ typedef struct
 
 	bool mouse_clicked;
 	bool mouse_clicked_data[GLFW_MOUSE_BUTTON_LAST];
+
+	vec2s mouse_scroll_delta;
 } InputSystem;
 
 typedef struct

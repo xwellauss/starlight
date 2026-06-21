@@ -1,6 +1,7 @@
 #pragma once
 
 #include "../utils/utils.h"
+#include "../core/renderer/vertex_buffer.h"
 
 #include <cglm/struct.h>
 
@@ -48,4 +49,4 @@ TextureAtlas* texture_atlas_get(const char* name);
 
 void atlas_get_uv(AtlasUV* atlas_uv, TextureAtlas* texture_atlas, AtlasRegion* atlas_region);
 void atlas_get_frame_verts(Vertex vertex_render_data[], int start, TextureAtlas* texture_atlas, AtlasRegion* atlas_region, int frame);
-void atlas_get_frame(VertexQuad* quad, TextureAtlas* texture_atlas, AtlasRegion* atlas_region, int frame);
+void atlas_get_frame(Vertex2DQuad* quad, TextureAtlas* texture_atlas, AtlasRegion* atlas_region, int frame);

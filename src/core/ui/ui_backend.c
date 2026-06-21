@@ -1,0 +1,234 @@
+#include "ui_backend.h"
+#include "ui_font.h"
+#include "../renderer/renderer.h"
+#include "../game_engine.h"
+#include "../platform.h"
+
+#include <stb_ds.h>
+
+#define MAX_RECTS 1024
+#define MAX_GLYPHS 4096
+
+#define RECT_VERTEX_SHADER_PATH "shaders/ui/rect-vertex-shader.glsl"
+#define RECT_FRAGMENT_SHADER_PATH "shaders/ui/rect-fragment-shader.glsl"
+#define FONT_VERTEX_SHADER_PATH "shaders/ui/font-vertex-shader.glsl"
+#define FONT_FRAGMENT_SHADER_PATH "shaders/ui/font-fragment-shader.glsl"
+
+static Window* current_window;
+
+static mat4s projection = GLMS_MAT4_IDENTITY_INIT;
+
+static VertexBuffer rect_vertex_buffer;
+static Shader rect_shader;
+
+static Vertex2DQuad rect_vertex_data[MAX_RECTS];
+static GLushort rect_indices[MAX_RECTS * 6];
+static size_t rect_count = 0;
+
+static VertexBuffer glyph_vertex_buffer;
+static Shader glyph_shader;
+
+static Vertex2DQuad glyph_vertex_data[MAX_GLYPHS];
+static GLushort glyph_indices[MAX_GLYPHS * 6];
+static size_t glyph_count = 0;
+
+static void fill_indices()
+{
+	// 0 1 2 0 2 3
+	
+	for(size_t i = 0; i < MAX_RECTS; i++)
+	{
+		rect_indices[i*6+0] = i*4 + 0;
+		rect_indices[i*6+1] = i*4 + 1;
+		rect_indices[i*6+2] = i*4 + 2;
+		rect_indices[i*6+3] = i*4 + 0;
+		rect_indices[i*6+4] = i*4 + 2;
+		rect_indices[i*6+5] = i*4 + 3;
+	}
+
+	for(size_t i = 0; i < MAX_GLYPHS; i++)
+	{
+		glyph_indices[i*6+0] = i*4 + 0;
+		glyph_indices[i*6+1] = i*4 + 1;
+		glyph_indices[i*6+2] = i*4 + 2;
+		glyph_indices[i*6+3] = i*4 + 0;
+		glyph_indices[i*6+4] = i*4 + 2;
+		glyph_indices[i*6+5] = i*4 + 3;
+	}
+}
+
+void ui_backend_init()
+{
+	current_window = &game_engine.current_window;
+
+	fill_indices();
+
+	vertex_buffer_2d_init(&rect_vertex_buffer, NULL, MAX_RECTS * sizeof(Vertex2DQuad), rect_indices, sizeof(rect_indices), true);
+	shader_init(&rect_shader, RECT_VERTEX_SHADER_PATH, RECT_FRAGMENT_SHADER_PATH);
+
+	vertex_buffer_2d_init(&glyph_vertex_buffer, NULL, MAX_GLYPHS * sizeof(Vertex2DQuad), glyph_indices, sizeof(glyph_indices), true);
+	shader_init(&glyph_shader, FONT_VERTEX_SHADER_PATH, FONT_FRAGMENT_SHADER_PATH);	
+}
+
+void ui_backend_render(Clay_RenderCommandArray cmds)
+{
+	projection = glms_ortho(0.0f, current_window->width, current_window->height, 0.0f, -1.0f, 1.0f); // Top left origin
+
+	shader_bind(&rect_shader);	
+	shader_uniform_mat4(&rect_shader, "projection", projection);
+	shader_bind(&glyph_shader);	
+	shader_uniform_mat4(&glyph_shader, "projection", projection);
+	shader_unbind();
+
+	GLboolean depth_test_was_enabled = glIsEnabled(GL_DEPTH_TEST);
+    GLboolean depth_mask;
+    glGetBooleanv(GL_DEPTH_WRITEMASK, &depth_mask);
+
+	glDisable(GL_DEPTH_TEST);
+    glDepthMask(GL_FALSE);
+
+	for(int i = 0; i < cmds.length; i++)
+	{
+		Clay_RenderCommand* cmd = Clay_RenderCommandArray_Get(&cmds, i);
+		Clay_BoundingBox bounding_box = (Clay_BoundingBox)
+		{
+			.x = roundf(cmd->boundingBox.x),
+			.y = roundf(cmd->boundingBox.y),
+			.width = roundf(cmd->boundingBox.width),
+			.height = roundf(cmd->boundingBox.height),
+		};
+
+		bool scissor_changed = false;
+
+		switch(cmd->commandType)
+		{
+		case CLAY_RENDER_COMMAND_TYPE_TEXT:
+		{
+			if(glyph_count >= MAX_GLYPHS) break;
+
+			const Clay_TextRenderData* tr = &cmd->renderData.text;
+
+			vec4s color;
+			color.r = tr->textColor.r/255.0f;
+			color.g = tr->textColor.g/255.0f;
+			color.b = tr->textColor.b/255.0f;
+			color.a = tr->textColor.a/255.0f;
+
+			Clay_StringSlice ss = tr->stringContents;
+			const char* txt = ss.chars;
+
+			float x = cmd->boundingBox.x;
+			float y = cmd->boundingBox.y;
+
+			ui_font_build_glyphs(txt, x, y, tr->fontSize, color, glyph_vertex_data, &glyph_count, MAX_GLYPHS);
+			break;
+		}
+		case CLAY_RENDER_COMMAND_TYPE_RECTANGLE:
+		{
+			if(rect_count >= MAX_RECTS) break;
+
+			Clay_RectangleRenderData* rd = &cmd->renderData.rectangle;
+			float x0 = bounding_box.x;
+			float y0 = bounding_box.y;
+			float x1 = bounding_box.x + bounding_box.width;
+			float y1 = bounding_box.y + bounding_box.height;
+			
+			vec4s color;
+			color.r = rd->backgroundColor.r/255.0f;
+			color.g = rd->backgroundColor.g/255.0f;
+			color.b = rd->backgroundColor.b/255.0f;
+			color.a = rd->backgroundColor.a/255.0f;
+
+			rect_vertex_data[rect_count++] = (Vertex2DQuad)
+			{{
+				{{x0, y0}, color, {0.0f, 0.0f}},
+				{{x1, y0}, color, {1.0f, 0.0f}},
+				{{x1, y1}, color, {1.0f, 1.0f}},
+				{{x0, y1}, color, {0.0f, 1.0f}},
+			}};
+
+			break;
+		}
+		case CLAY_RENDER_COMMAND_TYPE_IMAGE:
+		{
+			break;
+		}
+        case CLAY_RENDER_COMMAND_TYPE_SCISSOR_START:
+		{
+			scissor_changed = true;
+			break;
+		}
+        case CLAY_RENDER_COMMAND_TYPE_SCISSOR_END:
+		{
+            scissor_changed = true;
+			break;
+		}
+        case CLAY_RENDER_COMMAND_TYPE_BORDER:
+		{
+			break;
+		}
+        case CLAY_RENDER_COMMAND_TYPE_CUSTOM:
+		{
+			break;
+		}
+        default:
+		{
+			break;
+		}
+		}
+        
+		if (i == cmds.length - 1 || scissor_changed)
+		{
+			if(rect_count != 0)
+			{
+				shader_bind(&rect_shader);	
+				vertex_buffer_bind(&rect_vertex_buffer, BUFFER_VAO);
+				vertex_buffer_bind(&rect_vertex_buffer, BUFFER_VBO);
+				vertex_buffer_update(&rect_vertex_buffer, rect_vertex_data, rect_count * sizeof(Vertex2DQuad), 0);
+				vertex_buffer_draw_indexed(&rect_vertex_buffer, GL_TRIANGLES, GL_UNSIGNED_SHORT, rect_count * 6, 0);
+
+			}
+			rect_count = 0;
+
+			if(glyph_count != 0)
+			{
+				shader_bind(&glyph_shader);	
+				ui_font_bind_atlas_texture();
+
+				vertex_buffer_bind(&glyph_vertex_buffer, BUFFER_VAO);
+				vertex_buffer_bind(&glyph_vertex_buffer, BUFFER_VBO);
+				vertex_buffer_update(&glyph_vertex_buffer, glyph_vertex_data, glyph_count*sizeof(Vertex2DQuad), 0);
+				vertex_buffer_draw_indexed(&glyph_vertex_buffer, GL_TRIANGLES, GL_UNSIGNED_SHORT, glyph_count*6, 0);
+			}
+			glyph_count = 0;
+
+			if(scissor_changed)
+			{
+				if(cmd->commandType == CLAY_RENDER_COMMAND_TYPE_SCISSOR_START)
+				{
+					GLint x = (GLint)bounding_box.x;
+					GLint y = (GLint)(current_window->height - (bounding_box.y + bounding_box.height));
+
+					glEnable(GL_SCISSOR_TEST);
+					glScissor(x, y, (GLsizei)bounding_box.width, (GLsizei)bounding_box.height);
+				}
+				else
+				{
+					glDisable(GL_SCISSOR_TEST);
+				}
+			}
+		}
+	}
+
+	if (depth_test_was_enabled) glEnable(GL_DEPTH_TEST);
+	glDepthMask(depth_mask);
+}
+
+void ui_backend_destroy()
+{
+	vertex_buffer_destroy(&rect_vertex_buffer);
+	shader_destroy(&rect_shader);
+
+	vertex_buffer_destroy(&glyph_vertex_buffer);
+	shader_destroy(&glyph_shader);
+}

@@ -10,3 +10,5 @@
 	#include <GLES3/gl3.h>
 	#include <android/native_window.h>
 #endif
+
+#define GLSL_VERSION "#version 300 es"

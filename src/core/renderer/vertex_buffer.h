@@ -5,6 +5,30 @@
 #include <stdbool.h>
 #include <stddef.h>
 
+#include <cglm/struct.h>
+
+typedef struct
+{
+	vec3s position;
+	vec4s color;
+	vec2s tex_coord;
+	vec3s normal;
+} Vertex3D;
+
+typedef Vertex3D Vertex;
+
+typedef struct
+{
+	vec2s position;
+	vec4s color;
+	vec2s tex_coord;
+} Vertex2D;
+
+typedef struct
+{
+	Vertex2D vertices[4];
+} Vertex2DQuad;
+
 typedef struct
 {
 	unsigned int VAO;
@@ -24,6 +48,7 @@ enum Buffers
 };
 
 void vertex_buffer_init(VertexBuffer* vb, void* vertex_data, size_t vertex_data_size, void* index_data, size_t index_data_size, bool indexed);
+void vertex_buffer_2d_init(VertexBuffer* vb, void* vertex_data, size_t vertex_data_size, void* index_data, size_t index_data_size, bool indexed);
 void vertex_buffer_bind(VertexBuffer* vb, enum Buffers buffer);
 void vertex_buffer_unbind(enum Buffers buffer);
 void vertex_buffer_unbind_all();

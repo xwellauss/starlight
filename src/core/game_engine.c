@@ -1,6 +1,5 @@
 #include "game_engine.h"
 #include "window.h"
-#include "font_renderer.h"
 #include "ecs.h"
 #include "texture_atlas.h"
 #include "ui/ui.h"
@@ -63,15 +62,15 @@ static void engine_init()
 	ecs_init();
 
 	texture_atlas_init();
-	font_renderer_init("fonts/font.ttf", 96);
+	//font_renderer_init("fonts/font.ttf", 96);
 	ui_init();
-	imgui_init("fonts/font.ttf", 20, "", "#version 300 es");
+	//imgui_init("fonts/font.ttf", 20, "", GLSL_VERSION);
 	network_init();
 //	ImGui_GetIO()->ConfigFlags |= ImGuiConfigFlags_DockingEnable;
 
 	// Scene
 	scenes_load_registered();
-	scene_switch("SceneMenu");
+	scene_switch("SceneDefault");
 }
 
 static void engine_render_frame()
@@ -84,17 +83,18 @@ static void engine_render_frame()
 
 	window_poll_events();
 
-
+	ui_process_input();
 	scene_process_input(game_engine.current_scene);
 	scene_update(game_engine.current_scene);
 	
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	
-	imgui_new_frame();
+	//imgui_new_frame();
+	ui_render_frame();
 
 	scene_render(game_engine.current_scene);
 
-	imgui_render_frame();
+	//imgui_render_frame();
 	
 	window_swap_buffers(&game_engine.current_window);
 }
@@ -109,8 +109,8 @@ static void engine_destroy()
 
 	texture_atlas_destroy();
 
-	font_renderer_destroy();
-	imgui_destroy();
+	//font_renderer_destroy();
+	//imgui_destroy();
 	ui_destroy();
 	window_destroy(&game_engine.current_window);
 }

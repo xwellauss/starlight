@@ -78,7 +78,7 @@ TextureAtlas* texture_atlas_get(const char* name)
 	return shget(texture_atlas_hashmap, name);
 }
 
-void atlas_get_frame(VertexQuad* quad, TextureAtlas* texture_atlas, AtlasRegion* atlas_region, int frame)
+void atlas_get_frame(Vertex2DQuad* quad, TextureAtlas* texture_atlas, AtlasRegion* atlas_region, int frame)
 {
 	float x1, x2, y1, y2;
 

@@ -1,5 +1,6 @@
 #include "net_packer.h"
 #include "../utils/utils.h"
+#include "../core/renderer/vertex_buffer.h"
 
 #include <stdint.h>
 #include <stdarg.h>
