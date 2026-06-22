@@ -1,4 +1,5 @@
 #include "ui_font.h"
+#include "ui_font_internal.h"
 #include "../game_engine.h"
 #include "../renderer/renderer.h"
 #include "../../utils/utils.h"
@@ -11,25 +12,9 @@
 #include <cglm/struct.h>
 
 
-typedef struct
-{
-	int width;
-	int height;
-
-	float baked_font_size;
-	
-	stbtt_packedchar glyph_ascii[96]; // ASCII 32-127
-	
-	float ascent;
-	float descent;
-	float line_gap;
-
-	Texture2D texture;
-} FontAtlas;
-
 static Window* current_window;
 
-static FontAtlas font_atlas;
+FontAtlas font_atlas = {0};
 
 void ui_font_init(const char* filepath, int atlas_w, int atlas_h, float backed_font_size)
 {
@@ -137,48 +122,6 @@ void ui_font_render_text(const char* text, float x, float y, float requested_sca
 	vertex_buffer_draw_indexed(&glyph_vertex_buffer, GL_TRIANGLES, GL_UNSIGNED_SHORT, glyph_count*6, 0);
 }
 */
-
-void ui_font_bind_atlas_texture()
-{
-	texture_active_slot(GL_TEXTURE0);
-	texture2d_bind(&font_atlas.texture);
-}
-
-void ui_font_build_glyphs(const char* text, float x, float y, float requested_scale, vec4s color, Vertex2DQuad* vertex_data, size_t* current_glyph_count, size_t max_capacity)
-{
-	float render_scale = requested_scale / font_atlas.baked_font_size;
-	y += font_atlas.ascent * render_scale;
-
-	for(const char* c = text; *c != '\0'; c++)
-	{
-		if(*current_glyph_count >= max_capacity) break;
-
-		unsigned char ch = *c;
-		if(ch < 32 || ch > 127) continue;
-
-		stbtt_packedchar* pc = &font_atlas.glyph_ascii[ch - 32];
-
-		float x0 = x + pc->xoff * render_scale;
-		float y0 = y + pc->yoff * render_scale;
-		float x1 = x + pc->xoff2 * render_scale;
-		float y1 = y + pc->yoff2 * render_scale;
-
-		float u0 = pc->x0 / (float)font_atlas.width;
-		float v0 = pc->y0 / (float)font_atlas.height;
-		float u1 = pc->x1 / (float)font_atlas.width;
-		float v1 = pc->y1 / (float)font_atlas.height;	
-
-		vertex_data[(*current_glyph_count)++] = (Vertex2DQuad)
-		{{
-			{{x0, y0}, color, {u0, v0}},
-			{{x1, y0}, color, {u1, v0}},
-			{{x1, y1}, color, {u1, v1}},
-			{{x0, y1}, color, {u0, v1}}
-		}};
-		
-		x += pc->xadvance * render_scale;
-	}
-}
 
 Clay_Dimensions ui_font_clay_measure_text(Clay_StringSlice glyph_vtx_array, Clay_TextElementConfig* config, void* user_data)
 {
