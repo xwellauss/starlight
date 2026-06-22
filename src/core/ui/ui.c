@@ -9,11 +9,22 @@
 
 #define CLAY_IMPLEMENTATION
 #include <clay/clay.h>
-#include "clay/examples/shared-layouts/clay-video-demo.c"
 
 #define UI_FONT_FILE "fonts/monocraft.ttf"
 
-static ClayVideoDemo_Data g_demo_data;
+
+static Clay_Color hex_to_clay_color(char colorcode[7], float alpha)
+{
+	vec4s color_vec = hex_to_rgb(colorcode, alpha);
+
+	Clay_Color clay_color;
+	clay_color.r = color_vec.r * 255.0f;
+	clay_color.g = color_vec.g * 255.0f;
+	clay_color.b = color_vec.b * 255.0f;
+	clay_color.a = color_vec.a * 255.0f;
+
+	return clay_color;
+}
 
 void handle_clay_errors(Clay_ErrorData error_data)
 {
@@ -31,12 +42,10 @@ void ui_init()
 	Clay_SetCurrentContext(clay_ctx);
 	Clay_SetMeasureTextFunction(ui_font_clay_measure_text, NULL);
 	
-	ui_font_init(UI_FONT_FILE, 1024, 1024, 32.0f);
+	ui_font_init(UI_FONT_FILE, 1024, 1024, 45.0f);
 	ui_backend_init();
 
 	Clay_SetDebugModeEnabled(true);
-
-	g_demo_data = ClayVideoDemo_Initialize();
 }
 
 void ui_process_input()
@@ -52,10 +61,19 @@ void ui_process_input()
 	Clay_SetLayoutDimensions((Clay_Dimensions){(float)game_engine.current_window.width, (float)game_engine.current_window.height});
 }
 
+void ui_begin_frame()
+{
+	Clay_BeginLayout();
+
+	CLAY(CLAY_ID("Button"), { .layout = { .padding = CLAY_PADDING_ALL(8) }, .backgroundColor = Clay_Hovered() ? hex_to_clay_color("#0000ff", 1.0f) : hex_to_clay_color("#ff0000", 1.0f), .cornerRadius = CLAY_CORNER_RADIUS(4)})
+	{
+    	CLAY_TEXT(Clay_Hovered() ? CLAY_STRING("Hovered") : CLAY_STRING("Hover me!"), CLAY_TEXT_CONFIG({ .fontId = 0, .fontSize = 16, .textColor = hex_to_clay_color("#ffffff", 1.0f)}));
+	}
+}
+
 void ui_render_frame()
 {
-    Clay_RenderCommandArray cmds = ClayVideoDemo_CreateLayout(&g_demo_data);
-	ui_backend_render(cmds);
+	ui_backend_render(Clay_EndLayout(game_engine.deltatime*1000.0f));
 }
 
 void ui_destroy()

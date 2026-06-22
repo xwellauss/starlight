@@ -129,7 +129,6 @@ project "starlight"
 		"cglm",
 		"glad",
 		"single_headers",
-		"dcimgui",
 		"glfw",
 		"enet",
 		"miniaudio"
@@ -142,9 +141,6 @@ project "starlight"
 		"third-party/stb/include",
 		"third-party/glad/include",
 		"third-party/cJSON",
-		"third-party/dcimgui",
-		"third-party/dcimgui/imgui",
-		"third-party/dcimgui/imgui/backends",
 		"third-party/enet/include",
 		"third-party/cgltf",
 		"third-party/miniaudio",
@@ -356,57 +352,6 @@ project "glfw"
 	filter { "platforms:Web" }
 		removefiles { "third-party/glfw/src/**.c" }
 	filter {}
-
-project "dcimgui"
-	kind "StaticLib"
-	language "C++"
-	targetdir "bin/%{outputdir}/%{prj.name}"
-	objdir "bin/%{outputdir}/%{prj.name}/obj"
-	location "build"
-
-	filter { "platforms:Android" }
-		buildoptions
-		{
-			"-include ../../src/utils/android_fopen.h"
-		}
-
-		defines
-		{
-			"_PLATFORM_ANDROID"
-		}
-
-		links
-		{
-			"android_fopen",
-		}
-	filter{}
-
-	includedirs
-	{
-		"third-party/glfw/include",
-		"third-party/dcimgui/imgui",
-		"third-party/dcimgui/imgui/backends",
-	}
-
-	files
-	{
-		"third-party/dcimgui/dcimgui.h",
-		"third-party/dcimgui/dcimgui.cpp",
-		"third-party/dcimgui/dcimgui_impl_opengl3.h",
-		"third-party/dcimgui/dcimgui_impl_opengl3.cpp",
-		"third-party/dcimgui/dcimgui_impl_glfw.h",
-		"third-party/dcimgui/dcimgui_impl_glfw.cpp",
-		"third-party/dcimgui/imgui/imgui.cpp",
-		"third-party/dcimgui/imgui/imgui_demo.cpp",
-		"third-party/dcimgui/imgui/imgui_draw.cpp",
-		"third-party/dcimgui/imgui/imgui_tables.cpp",
-		"third-party/dcimgui/imgui/imgui_widgets.cpp",
-		"third-party/dcimgui/imgui/imconfig.h",
-		"third-party/dcimgui/imgui/backends/imgui_impl_opengl3.h",
-		"third-party/dcimgui/imgui/backends/imgui_impl_opengl3.cpp",
-		"third-party/dcimgui/imgui/backends/imgui_impl_glfw.h",
-		"third-party/dcimgui/imgui/backends/imgui_impl_glfw.cpp",
-	}
 
 project "enet"
 	kind "StaticLib"

@@ -1,6 +1,5 @@
 #include "scene_menu.h"
 #include "../core/game_engine.h"
-#include "../utils/ui_imgui.h"
 #include "../core/window.h"
 #include "../core/renderer/renderer.h"
 
@@ -9,11 +8,8 @@
 
 static vec4s background_color = (vec4s){0.0f, 0.0f, 0.0f, 1.0f};
 
-static ImGuiIO* imgui_io = NULL;
-
 static void init()
 {
-	imgui_io = ImGui_GetIO();
 }
 
 static void render()
@@ -23,7 +19,7 @@ static void render()
 	background_color.r = 0.5f + 0.5f * sin(frequency * window_get_time() + 2.0f * M_PI / 3.0f);
 	background_color.g = 0.5f + 0.5f * sin(frequency * window_get_time() + 4.0f * M_PI / 3.0f);
 	window_change_bgcolor(background_color);
-
+/*
 	ImGui_Begin("Menu", NULL, ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoBackground);
 	{
 		ImGui_SetWindowPos((ImVec2){imgui_io->DisplaySize.x * 0.4, 0.0f}, ImGuiCond_Always);
@@ -62,6 +58,7 @@ static void render()
 		ImGui_EndChild();
 	}
 	ImGui_End();
+	*/
 }
 
 static void update()

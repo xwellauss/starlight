@@ -5,7 +5,6 @@
 #include "ui/ui.h"
 
 #include "../utils/utils.h"
-#include "../utils/ui_imgui.h"
 
 #include "../network/network.h"
 
@@ -51,7 +50,7 @@ static void engine_init()
 #endif
 
 	window_init(&game_engine.current_window);
-	window_change_bgcolor(hex_to_rbg("#333333", 1.0f));
+	window_change_bgcolor(hex_to_rgb("#333333", 1.0f));
 
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	glEnable(GL_BLEND);
@@ -62,11 +61,8 @@ static void engine_init()
 	ecs_init();
 
 	texture_atlas_init();
-	//font_renderer_init("fonts/font.ttf", 96);
 	ui_init();
-	//imgui_init("fonts/font.ttf", 20, "", GLSL_VERSION);
 	network_init();
-//	ImGui_GetIO()->ConfigFlags |= ImGuiConfigFlags_DockingEnable;
 
 	// Scene
 	scenes_load_registered();
@@ -76,7 +72,7 @@ static void engine_init()
 static void engine_render_frame()
 {
 	{
-		current_frame = window_get_time();
+		current_frame = (float)window_get_time();
 		game_engine.deltatime = current_frame - last_frame;
 		last_frame = current_frame;
 	}
@@ -89,12 +85,11 @@ static void engine_render_frame()
 	
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	
-	//imgui_new_frame();
-	ui_render_frame();
-
 	scene_render(game_engine.current_scene);
 
-	//imgui_render_frame();
+	ui_begin_frame();
+	scene_build_ui(game_engine.current_scene);
+	ui_render_frame();
 	
 	window_swap_buffers(&game_engine.current_window);
 }
@@ -109,8 +104,6 @@ static void engine_destroy()
 
 	texture_atlas_destroy();
 
-	//font_renderer_destroy();
-	//imgui_destroy();
 	ui_destroy();
 	window_destroy(&game_engine.current_window);
 }

@@ -1,11 +1,8 @@
 #include "camera.h"
 #include "game_engine.h"
-#include "../utils/ui_imgui.h"
 
 #include <GLFW/glfw3.h>
 #include <cglm/struct.h>
-
-static ImGuiIO* imgui_io = NULL;
 
 static vec3s camera_direction;
 static float last_x, last_y;
@@ -19,9 +16,7 @@ void init_camera(Camera* camera)
 	last_y = game_engine.current_window.height/2.0f;
 
 	camera->projection_matrix = (mat4s)GLMS_MAT4_IDENTITY_INIT;
-	camera->view_matrix = (mat4s)GLMS_MAT4_IDENTITY_INIT;
-	
-	imgui_io = ImGui_GetIO();
+	camera->view_matrix = (mat4s)GLMS_MAT4_IDENTITY_INIT;	
 }
 
 void update_camera(Camera* camera)
@@ -54,7 +49,7 @@ void move_camera(Camera* camera, InputState input_state, float deltatime)
 			camera->position = glms_vec3_add(camera->position, glms_vec3_scale(camera->up, -camera->speed * deltatime));
 	}
 
-	if((camera->camera_type & LOOK_AROUND) && !imgui_io->WantCaptureMouse)
+	if(camera->camera_type & LOOK_AROUND)
 	{
 		bool clicking = (game_engine.current_window.input_system.mouse_clicked_data[GLFW_MOUSE_BUTTON_LEFT])
 #if defined(_PLATFORM_ANDROID) || defined(_PLATFORM_WEB)

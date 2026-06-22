@@ -2,23 +2,19 @@
 
 #include "../core/game_engine.h"
 #include "../core/ecs.h"
-#include "../utils/utils.h"
 #include "../core/camera.h"
-#include "../utils/ui_imgui.h"
 #include "../core/model_loader/model_loader.h"
+#include "../utils/utils.h"
 
 #include <cglm/struct.h>
 
 #include <stb_ds.h>
 
-static ImGuiIO* imgui_io = NULL;
-
-
 static float joystick_angle = 0.0f;
 static bool is_joystick_active = false;
-static ImVec2 joystick_box_size = {400.0f, 400.0f};
+static vec2s joystick_box_size = {400.0f, 400.0f};
 static float joystick_radius = 70.0f;
-static ImVec4 joystick_color = {225.0f, 225.0f, 225.0f, 100.0f};
+static vec4s joystick_color = {225.0f, 225.0f, 225.0f, 100.0f};
 
 
 static Model model;
@@ -129,9 +125,11 @@ static void init()
 	camera.pitch = 0.0f;
 	camera.yaw = -90.0f;
 	camera.camera_type =  WALK_AROUND | LOOK_AROUND;
-	init_camera(&camera);
-	
-	imgui_io = ImGui_GetIO();
+	init_camera(&camera);	
+}
+
+static void build_ui()
+{
 }
 
 static void render()
@@ -140,7 +138,7 @@ static void render()
 	ui_component_joystick("Input", "Joystick", joystick_box_size, joystick_radius, joystick_color, &joystick_angle, &is_joystick_active);
 #endif
 
-	window_change_bgcolor(hex_to_rbg("#222222", 1.0f));
+	window_change_bgcolor(hex_to_rgb("#222222", 1.0f));
 	
 	// Light Cube
 	mat4s light_source_transform = glms_mat4_identity();
@@ -205,7 +203,7 @@ static void render()
 		vertex_buffer_draw_indexed(&ecs_get_sprite(model_scene)->vertex_buffer, GL_TRIANGLES, GL_UNSIGNED_INT, mesh->index_count, (void*)(mesh->index_offset * sizeof(GLuint)));
 	}
 
-
+/*
 	// Imgui
 	ImGui_Begin("Scene Controls", NULL, ImGuiWindowFlags_None);
 	{
@@ -225,8 +223,7 @@ static void render()
 		ImGui_DragFloat3Ex("Light Color", light_color.raw, 0.05f, -1.0f, 1.0f, "%.3f", 0);
 	}
 	ImGui_End();
-	
-	//font_renderer_render_text("Starlight", 0.0f, 0.0f, 1.0f, "#ffffff", 1.0f);
+	*/
 }
 
 static void update()
@@ -290,4 +287,4 @@ static void destroy()
 }
 
 
-Scene scene_model = {"SceneModel", init, destroy, activate, deactivate, update, render, process_input};
+Scene scene_model = {"SceneModel", init, destroy, activate, deactivate, update, render, build_ui, process_input};

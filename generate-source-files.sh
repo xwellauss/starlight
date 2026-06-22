@@ -1,16 +1,5 @@
 echo "Generating Source Files..."
 
-echo "Generating DCImgui Source Files"
-cd third-party/dcimgui > /dev/null 2>&1
-
-python3 dear_bindings/dear_bindings.py -o dcimgui imgui/imgui.h --imconfig-path imgui/imconfig.h
-
-python3 dear_bindings/dear_bindings.py --backend --include imgui/imgui.h -o dcimgui_impl_glfw imgui/backends/imgui_impl_glfw.h --imconfig-path imgui/imconfig.h
-python3 dear_bindings/dear_bindings.py --backend --include imgui/imgui.h -o dcimgui_impl_opengl3 imgui/backends/imgui_impl_opengl3.h --imconfig-path imgui/imconfig.h
-
-cd - > /dev/null 2>&1
-echo "Generated Source Files for DCImgui.\n"
-
 echo "Generating GLFW Wayland Source Files..."
 if [ "$XDG_SESSION_TYPE" = "wayland" ]; then
 	echo "Wayland Session Detected, Generating Source Files..."

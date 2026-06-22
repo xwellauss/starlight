@@ -38,6 +38,12 @@ void scene_render(Scene* scene)
 	scene->render();
 }
 
+void scene_build_ui(Scene* scene)
+{
+	scene->build_ui();
+}
+
+
 void scene_process_input(Scene* scene)
 {
 	scene->process_input();

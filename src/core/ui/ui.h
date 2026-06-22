@@ -2,6 +2,7 @@
 
 void ui_init();
 void ui_process_input();
+void ui_begin_frame();
 void ui_render_frame();
 
 void ui_draw_text(const char* text);

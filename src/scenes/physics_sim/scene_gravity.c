@@ -2,10 +2,9 @@
 
 #include "../../core/game_engine.h"
 #include "../../core/ecs.h"
-#include "../../utils/utils.h"
 #include "../../core/camera.h"
 #include "../../core/model_loader/model_loader.h"
-#include "../../utils/ui_imgui.h"
+#include "../../utils/utils.h"
 
 #include <cglm/struct.h>
 #include <math.h>
@@ -21,11 +20,9 @@ static Camera camera;
 
 static float joystick_angle = 0.0f;
 static bool is_joystick_active = false;
-static ImVec2 joystick_box_size = {400.0f, 400.0f};
+static vec2s joystick_box_size = {400.0f, 400.0f};
 static float joystick_radius = 70.0f;
-static ImVec4 joystick_color = {225.0f, 225.0f, 225.0f, 100.0f};
-
-static ImGuiIO* imgui_io;
+static vec4s joystick_color = {225.0f, 225.0f, 225.0f, 100.0f};
 
 static Model sphere_model;
 
@@ -96,7 +93,7 @@ static void init()
 	ecs_get_transform(planet1_entity)->position = (vec3s){0.0f, 0.0f, 0.0f};
 	ecs_get_transform(planet1_entity)->rotation = (vec3s){0.0f, 0.0f, 0.0f};
 	ecs_get_transform(planet1_entity)->scale = (vec3s){1.0f, 1.0f, 1.0f};
-	ecs_get_sprite(planet1_entity)->color = hex_to_rbg("#32a852", 1.0f);
+	ecs_get_sprite(planet1_entity)->color = hex_to_rgb("#32a852", 1.0f);
 	ecs_get_physics(planet1_entity)->mass = 10.0f;
 
 	vertex_buffer_init(&ecs_get_sprite(planet1_entity)->vertex_buffer, sphere_model.vertex_data, sphere_model.vertex_count*sizeof(Vertex), sphere_model.index_data, sphere_model.index_count*sizeof(GLuint), true);
@@ -111,7 +108,7 @@ static void init()
 	ecs_get_transform(planet2_entity)->position = (vec3s){10.0f, 0.0f, 0.0f};
 	ecs_get_transform(planet2_entity)->rotation = (vec3s){0.0f, 0.0f, 0.0f};
 	ecs_get_transform(planet2_entity)->scale = (vec3s){1.0f, 1.0f, 1.0f};
-	ecs_get_sprite(planet2_entity)->color = hex_to_rbg("#c79910", 1.0f);
+	ecs_get_sprite(planet2_entity)->color = hex_to_rgb("#c79910", 1.0f);
 	ecs_get_physics(planet2_entity)->mass = 10.0f;
 
 	vertex_buffer_init(&ecs_get_sprite(planet2_entity)->vertex_buffer, sphere_model.vertex_data, sphere_model.vertex_count*sizeof(Vertex), sphere_model.index_data, sphere_model.index_count*sizeof(GLuint), true);
@@ -131,9 +128,11 @@ static void init()
 	camera.pitch = 0.0f;
 	camera.yaw = -90.0f;
 	camera.camera_type =  WALK_AROUND | LOOK_AROUND;
-	init_camera(&camera);
-	
-	imgui_io = ImGui_GetIO();
+	init_camera(&camera);	
+}
+
+static void build_ui()
+{
 }
 
 static void render()
@@ -142,12 +141,12 @@ static void render()
 	ui_component_joystick("Input", "Joystick", joystick_box_size, joystick_radius, joystick_color, &joystick_angle, &is_joystick_active);
 #endif
 	
-	window_change_bgcolor(hex_to_rbg("#111111", 1.0f));
+	window_change_bgcolor(hex_to_rgb("#111111", 1.0f));
 	
 	render_planet_model(planet1_entity);
 	render_planet_model(planet2_entity);
 
-
+/*
 	ImGui_Begin("Scene Controls", NULL, ImGuiWindowFlags_None);
 	{
 //		ImGui_SetWindowSize((ImVec2){150.0f, 500.0f}, ImGuiCond_Once);
@@ -172,7 +171,7 @@ static void render()
 
 	}
 	ImGui_End();
-
+*/
 }
 
 static void update()
@@ -232,4 +231,4 @@ static void destroy()
 	ecs_destroy_entity(planet2_entity);
 }
 
-Scene scene_gravity = {"SceneGravity", init, destroy, activate, deactivate, update, render, process_input};
+Scene scene_gravity = {"SceneGravity", init, destroy, activate, deactivate, update, render, build_ui, process_input};

@@ -4,7 +4,6 @@
 #include "../core/ecs.h"
 #include "../core/camera.h"
 #include "../core/texture_atlas.h"
-#include "../utils/ui_imgui.h"
 #include "../utils/json_helper.h"
 #include "../utils/utils.h"
 
@@ -28,9 +27,9 @@ static Block* blocks;
 
 static float joystick_angle = 0.0f;
 static bool is_joystick_active = false;
-static ImVec2 joystick_box_size = {400.0f, 400.0f};
+static vec2s joystick_box_size = {400.0f, 400.0f};
 static float joystick_radius = 70.0f;
-static ImVec4 joystick_color = {225.0f, 225.0f, 225.0f, 100.0f};
+static vec4s joystick_color = {225.0f, 225.0f, 225.0f, 100.0f};
 
 static Window* current_window;
 static Camera camera;
@@ -380,6 +379,10 @@ static void process_input()
 	move_camera(&camera, input_state, game_engine.deltatime);
 }
 
+static void build_ui()
+{
+}
+
 static void render()
 {
 #if defined(_PLATFORM_ANDROID) || defined(_PLATFORM_WEB)
@@ -400,7 +403,7 @@ static void render()
 	shader_uniform_mat4(&ecs_get_sprite(block)->shader, "view", camera.view_matrix);
 	shader_uniform_int(&ecs_get_sprite(block)->shader, "texture_sampler", 0);
 
-
+/*
 	//ImGui_Begin("Scene Controls", NULL, ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoScrollWithMouse);
 	ImGui_Begin("Scene Controls", NULL, ImGuiWindowFlags_None);
 	{
@@ -418,12 +421,11 @@ static void render()
 		}
 	}
 	ImGui_End();
+	*/
 
 	vertex_buffer_bind(&ecs_get_sprite(block)->vertex_buffer, BUFFER_VAO);
 	vertex_buffer_update(&ecs_get_sprite(block)->vertex_buffer, vertex_render_data, sizeof(Vertex)*arrlen(vertex_render_data), 0);
-	vertex_buffer_draw(&ecs_get_sprite(block)->vertex_buffer, GL_TRIANGLES, arrlen(vertex_render_data), 0);
-	
-	//font_renderer_render_text("Starlight", 0.0f, 0.0f, 1.0f, "#ffffff", 1.0f);
+	vertex_buffer_draw(&ecs_get_sprite(block)->vertex_buffer, GL_TRIANGLES, arrlen(vertex_render_data), 0);	
 }
 
 static void activate()
@@ -454,4 +456,4 @@ static void destroy()
 }
 
 
-Scene scene_block = {"SceneBlock", init, destroy, activate, deactivate, update, render, process_input};
+Scene scene_block = {"SceneBlock", init, destroy, activate, deactivate, update, render, build_ui, process_input};

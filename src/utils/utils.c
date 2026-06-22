@@ -45,7 +45,7 @@ void write_to_file(const char* filepath, char* data)
 	}
 }
 
-vec4s hex_to_rbg(char colorcode[7], float alpha)
+vec4s hex_to_rgb(char colorcode[7], float alpha)
 {
 	char hex_string[9] = {};
 

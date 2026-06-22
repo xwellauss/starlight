@@ -7,13 +7,6 @@
 [submodule "premake-emcc"]
 	path = third-party/premake5-emcc
 	url = https://github.com/TurkeyMan/premake-emscripten.git
-[submodule "third-party/dcimgui/dear_bindings"]
-	path = third-party/dcimgui/dear_bindings
-	url = https://github.com/dearimgui/dear_bindings.git
-[submodule "third-party/dcimgui/imgui"]
-	path = third-party/dcimgui/imgui
-	url = https://github.com/ocornut/imgui
-	branch = docking
 [submodule "third-party/glfw"]
 	path = third-party/glfw
 	url = git@github.com:techie-guy/GLFW.git
