@@ -145,7 +145,6 @@ static void build_glyphs(const char* text, float x, float y, float requested_sca
 		
 		x += pc->xadvance * render_scale;
 	}
-
 }
 
 void ui_backend_init()

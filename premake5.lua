@@ -447,6 +447,16 @@ project "miniaudio"
 		}
 	filter {}
 
+	-- TODO: Make miniaudio work with Emscripten and Android
+	filter { "platforms:Web" }
+		buildoptions
+    	{
+        	"-matomics",
+        	"-mbulk-memory",
+    	}
+	filter {}
+
+
 	includedirs
 	{
 		"third-party/miniaudio"
@@ -532,6 +542,15 @@ project "single_headers"
 	targetdir "bin/%{outputdir}/%{prj.name}"
 	objdir "bin/%{outputdir}/%{prj.name}/obj"
 	location "build"
+
+	filter { "platforms:Web" }
+		buildoptions
+    	{
+        	"-matomics",
+        	"-mbulk-memory",
+    	}
+	filter {}
+
 
 	includedirs
 	{
