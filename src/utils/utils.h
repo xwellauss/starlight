@@ -8,6 +8,10 @@
 
 #include <cglm/struct.h>
 
+#ifndef M_PI
+#define M_PI 3.14159265358979323846
+#endif
+
 #if defined(_PLATFORM_ANDROID)
 	#include <android/log.h>
 	#define LOG(...) ((void)__android_log_print(ANDROID_LOG_INFO, "STARLIGHT", __VA_ARGS__))	

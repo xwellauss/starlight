@@ -7,7 +7,6 @@
 static EMSCRIPTEN_WEBSOCKET_T bridgeSocket = 0;
 #endif
 
-#define ENET_IMPLEMENTATION
 #include "network.h"
 #include "../utils/utils.h"
 #include "net_packer.h"

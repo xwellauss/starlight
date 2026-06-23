@@ -1,6 +1,6 @@
 #pragma once
 
-#include <clay/clay.h>
+#include <clay.h>
 #include <cglm/struct.h>
 
 #include "../renderer/renderer.h"

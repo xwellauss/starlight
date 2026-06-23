@@ -1,6 +1,6 @@
 #pragma once
 
-#include <clay/clay.h>
+#include <clay.h>
 
 void ui_backend_init();
 void ui_backend_render(Clay_RenderCommandArray cmds);

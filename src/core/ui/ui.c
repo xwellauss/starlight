@@ -7,8 +7,7 @@
 
 #include <stdint.h>
 
-#define CLAY_IMPLEMENTATION
-#include <clay/clay.h>
+#include <clay.h>
 
 #define UI_FONT_FILE "fonts/monocraft.ttf"
 

@@ -1,4 +1,3 @@
-#define CGLTF_IMPLEMENTATION
 #include "gltf.h"
 
 #include <stb_ds.h>

@@ -1,0 +1,7 @@
+option('window_width',  type : 'integer', value : 1280)
+option('window_height', type : 'integer', value : 720)
+option('window_title',  type : 'string',  value : 'Starlight')
+option('assets_dir',  type : 'string',  value : 'assets')
+
+
+option('linux_windowing', type : 'combo', choices : ['x11', 'wayland'], value : 'x11')

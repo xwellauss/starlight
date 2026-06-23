@@ -9,6 +9,7 @@
 
 #include <string.h>
 #include <time.h>
+#include <math.h>
 
 #include <cglm/struct.h>
 #include <stb_ds.h>
