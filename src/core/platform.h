@@ -12,3 +12,7 @@
 #endif
 
 #define GLSL_VERSION "#version 300 es"
+
+#include <stdio.h>
+
+FILE* platform_fopen(const char* path, const char* mode);

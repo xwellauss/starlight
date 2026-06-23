@@ -135,7 +135,7 @@ static void build_ui()
 static void render()
 {
 #if defined(_PLATFORM_ANDROID) || defined(_PLATFORM_WEB)
-	ui_component_joystick("Input", "Joystick", joystick_box_size, joystick_radius, joystick_color, &joystick_angle, &is_joystick_active);
+	//ui_component_joystick("Input", "Joystick", joystick_box_size, joystick_radius, joystick_color, &joystick_angle, &is_joystick_active);
 #endif
 
 	window_change_bgcolor(hex_to_rgb("#222222", 1.0f));

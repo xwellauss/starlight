@@ -1,6 +1,4 @@
-#if defined(_PLATFORM_ANDROID)
-
-#include "android_fopen.h"
+#include "../core/platform.h"
 
 #include <android/asset_manager.h>
 #include <errno.h>
@@ -30,7 +28,7 @@ static int android_close(void* cookie)
 	return 0;
 }
 
-FILE* android_fopen(const char* filename, const char* mode)
+FILE* platform_fopen(const char* filename, const char* mode)
 {
 	if(mode[0] == 'w') return NULL;
 	
@@ -42,4 +40,3 @@ FILE* android_fopen(const char* filename, const char* mode)
 	return funopen(asset, android_read, android_write, android_seek, android_close);
 }
 
-#endif

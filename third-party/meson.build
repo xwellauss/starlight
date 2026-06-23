@@ -147,7 +147,7 @@ enet_inc = include_directories('enet/include')
 enet_src = files(
   'enet_impl.c'
 )
-enet_c_args = ['-DHAS_SOCKLEN_T']
+enet_c_args = ['-DHAS_SOCKLEN_T', '-pthread']
 
 enet_lib = static_library('enet', enet_src, include_directories: enet_inc, c_args: enet_c_args, override_options: vendor_opts + ['c_std=none'])
 enet_dep = declare_dependency(link_with: enet_lib, include_directories: enet_inc)
@@ -158,9 +158,10 @@ miniaudio_inc = include_directories('miniaudio')
 miniaudio_src = files(
   'miniaudio/miniaudio.c'
 )
-miniaudio_deps = [cc.find_library('m'), cc.find_library('pthread')]
+miniaudio_deps = [cc.find_library('m')]
+miniaudio_c_args = ['-pthread']
 
-miniaudio_lib = static_library('miniaudio', miniaudio_src, include_directories: miniaudio_inc, override_options: vendor_opts)
+miniaudio_lib = static_library('miniaudio', miniaudio_src, include_directories: miniaudio_inc, c_args: miniaudio_c_args, override_options: vendor_opts)
 miniaudio_dep = declare_dependency(link_with: miniaudio_lib, include_directories: miniaudio_inc)
 
 
@@ -200,5 +201,11 @@ stb_src = files(
   'stb/src/stb_rect_pack.c',
   'stb/src/stb_truetype.c', 
 )
-stb_lib = static_library('stb', stb_src, include_directories: stb_inc, override_options: vendor_opts)
+stb_c_args = []
+
+if host_machine.system() == 'emscripten'
+  stb_c_args += '-pthread'
+endif
+
+stb_lib = static_library('stb', stb_src, include_directories: stb_inc, c_args: stb_c_args, override_options: vendor_opts)
 stb_dep = declare_dependency(link_with: stb_lib, include_directories: stb_inc)

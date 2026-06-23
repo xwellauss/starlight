@@ -1,4 +1,5 @@
 #include "utils.h"
+#include "../core/platform.h"
 
 char* read_file(const char* filepath, const char* mode)
 {
@@ -13,7 +14,7 @@ char* read_file(const char* filepath, const char* mode)
 	char* buffer = NULL;
 	long length;
 
-	FILE* file = fopen(filepath, mode);
+	FILE* file = platform_fopen(filepath, mode);
 
 	if(file)
 	{
@@ -37,7 +38,7 @@ char* read_file(const char* filepath, const char* mode)
 
 void write_to_file(const char* filepath, char* data)
 {
-	FILE* file = fopen(filepath, "w+");
+	FILE* file = platform_fopen(filepath, "w+");
 	if(file)
 	{
 		fprintf(file, "%s", data);

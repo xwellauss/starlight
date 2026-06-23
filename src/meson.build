@@ -47,7 +47,28 @@ starlight_deps = [
 
 
 if host_machine.system() == 'android'
+  starlight_src += 'platform/platform_android.c'
 elif host_machine.system() == 'emscripten'
+  starlight_src += 'platform/platform_web.c'
+
+  web_c_args = ['-pthread']
+  web_link_args = [
+    '-pthread',
+    '-sPROXY_POSIX_SOCKETS',
+    '-sUSE_GLFW=3',
+    '-sWASM=1',
+    '-sMAX_WEBGL_VERSION=2',
+    '-sMIN_WEBGL_VERSION=2',
+    '-sTOTAL_MEMORY=262144000',
+    '-sALLOW_MEMORY_GROWTH=1',
+    '-sASSERTIONS=1',
+    '--embed-file', assets_dir + '@/',
+    '--shell-file', assets_dir + '/index.html',
+  ]
+
+  starlight_exe = executable('starlight', starlight_src, include_directories: starlight_includes, c_args: starlight_c_args + web_c_args, link_args: starlight_link_args + web_link_args, dependencies: starlight_deps, name_suffix: 'html')
 else
-  starlight_exe = executable('starlight', starlight_src, include_directories: [starlight_includes], c_args: starlight_c_args, link_args: starlight_link_args, dependencies: starlight_deps)
+  starlight_src += 'platform/platform_desktop.c'
+
+  starlight_exe = executable('starlight', starlight_src, include_directories: starlight_includes, c_args: starlight_c_args, link_args: starlight_link_args, dependencies: starlight_deps)
 endif
