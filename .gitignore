@@ -16,6 +16,7 @@ build
 tmp/
 *.pem
 .rgignore
+*.backup
 
 assets/3d-models/*.blend1
 
