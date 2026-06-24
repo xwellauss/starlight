@@ -21,7 +21,7 @@ After cloning the repo recursively, `cd` into it.
 In `meson_options.txt`, set `linux_windowing` to `x11` or `wayland` as needed.
 ```
 CC=clang CXX=clang++ meson setup bin/desktop-debug --buildtype="debug"
-cd bin/desktop-debug && ninja
+meson compile -C bin/desktop-debug
 ```
 
 Run:
@@ -34,7 +34,7 @@ Run:
 Source emsdk first, then:
 ```
 meson setup bin/web-debug --cross-file cross/emscripten.ini --buildtype="debug"
-cd bin/web-debug && ninja
+meson compile -C bin/web-debug
 ```
 
 Serve locally:
@@ -59,7 +59,7 @@ Build the shared library.
 
 ```
 meson setup bin/android-arm64-debug --cross-file cross/android-arm64.ini --buildtype=debug
-cd bin/android-arm64-debug && ninja
+meson compile -C bin/android-arm64-debug
 ```
 
 Build the apk.
