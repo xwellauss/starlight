@@ -8,12 +8,12 @@ A lightweight graphics framework written in C. Supports Desktop, Web and Android
 
 Clone this repository recursively to pull in the submodules
 
-**To Build the Project, You will need:**
+**To build the project, you will need:**
 
-* A C and C++ Compiler: Clang, GCC, Emscripten, Android NDK
+* A C Compiler: Clang, GCC, Emscripten, Android NDK
 * Meson + Ninja
 
-You can Download them from your package manager
+You can download them from your package manager
 
 After cloning the repo recursively, `cd` into it.
 
