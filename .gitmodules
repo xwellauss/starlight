@@ -4,25 +4,16 @@
 [submodule "third-party/cJSON"]
 	path = third-party/cJSON
 	url = https://github.com/DaveGamble/cJSON.git
-[submodule "premake-emcc"]
-	path = third-party/premake5-emcc
-	url = https://github.com/TurkeyMan/premake-emscripten.git
 [submodule "third-party/glfw"]
 	path = third-party/glfw
 	url = git@github.com:techie-guy/GLFW.git
 	branch = android-support
-[submodule "third-party/premake-androidndk"]
-	path = third-party/premake-androidndk
-	url = https://github.com/Triang3l/premake-androidndk.git
 [submodule "third-party/enet"]
 	path = third-party/enet
 	url = https://github.com/zpl-c/enet.git
 [submodule "third-party/cgltf"]
 	path = third-party/cgltf
 	url = https://github.com/jkuhlmann/cgltf
-[submodule "third-party/tinyobjloader-c"]
-	path = third-party/tinyobjloader-c
-	url = https://github.com/syoyo/tinyobjloader-c
 [submodule "third-party/miniaudio"]
 	path = third-party/miniaudio
 	url = https://github.com/mackron/miniaudio.git
