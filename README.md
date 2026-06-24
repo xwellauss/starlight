@@ -8,12 +8,12 @@ A lightweight graphics framework written in C. Supports Desktop, Web and Android
 
 Clone this repository recursively to pull in the submodules
 
-**To Build the Project, You will need:**
+**To build the project, you will need:**
 
-* A C and C++ Compiler: Clang, GCC, Emscripten, Android NDK
+* A C Compiler: Clang, GCC, Emscripten, Android NDK
 * Meson + Ninja
 
-You can Download them from your package manager
+You can download them from your package manager
 
 After cloning the repo recursively, `cd` into it.
 
@@ -21,7 +21,8 @@ After cloning the repo recursively, `cd` into it.
 In `meson_options.txt`, set `linux_windowing` to `x11` or `wayland` as needed.
 ```
 CC=clang CXX=clang++ meson setup bin/desktop-debug --buildtype="debug"
-meson compile -C bin/desktop-debug```
+meson compile -C bin/desktop-debug
+```
 
 Run:
 ```
@@ -34,7 +35,7 @@ Source emsdk first, then:
 ```
 meson setup bin/web-debug --cross-file cross/emscripten.ini --buildtype="debug"
 meson compile -C bin/web-debug
-```Debug
+```
 
 Serve locally:
 ```
@@ -92,3 +93,4 @@ The generated apk will be in `android-project/app/build/outputs/apk/debug/app-de
 
 ## Credits and Attribution
 Font used: [Monocraft](https://github.com/IdreesInc/Monocraft)
+
