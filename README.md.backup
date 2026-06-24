@@ -1,6 +1,6 @@
 # starlight
 
-A lightweight graphics framework written in C. Supports Desktop, Web and Android.
+A lightweight 'graphics' framework written in C. Supports Desktop, Web and Android.
 
 
 ## Building the Project
@@ -53,7 +53,7 @@ mkcert -install && mkcert 0.0.0.0
 
 
 ### Android
-Requires Android SDK, NDK, and Gradle. Set `ndk_home` in `meson_options.txt` and in `cross/android-arm64.ini`.
+Requires Android SDK, NDK, and Gradle. Set `ndk_home` in `meson_options.txt`.
 
 Build the shared library.
 
