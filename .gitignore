@@ -9,6 +9,7 @@ Makefile
 imgui.ini
 android-project-tmp
 android-project/app/build
+android-project/app/src/main/jniLibs
 android-project/app/src/main/assets
 android-project/.gradle
 build

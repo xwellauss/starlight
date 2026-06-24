@@ -1,3 +1,4 @@
+#define __USE_BSD
 #include "../core/platform.h"
 
 #include <android/asset_manager.h>

@@ -48,6 +48,14 @@ starlight_deps = [
 
 if host_machine.system() == 'android'
   starlight_src += 'platform/platform_android.c'
+
+  android_c_args = []
+  #android_link_args = ['-llog', '-landroid', '-u ANativeActivity_onCreate']
+  android_link_args = [] 
+  android_deps = [android_glue_dep]
+
+  starlight_lib = shared_library('starlight', starlight_src, include_directories: starlight_includes, c_args: starlight_c_args + android_c_args, link_args: starlight_link_args + android_link_args, dependencies: starlight_deps + android_deps)
+
 elif host_machine.system() == 'emscripten'
   starlight_src += 'platform/platform_web.c'
 
@@ -67,6 +75,7 @@ elif host_machine.system() == 'emscripten'
   ]
 
   starlight_exe = executable('starlight', starlight_src, include_directories: starlight_includes, c_args: starlight_c_args + web_c_args, link_args: starlight_link_args + web_link_args, dependencies: starlight_deps, name_suffix: 'html')
+
 else
   starlight_src += 'platform/platform_desktop.c'
 

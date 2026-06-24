@@ -1,9 +1,14 @@
 project('starlight', 'c', version: '0.1.0', default_options: ['c_std=gnu11', 'warning_level=2'])
 
-window_width  = get_option('window_width')
+window_width = get_option('window_width')
 window_height = get_option('window_height')
-window_title  = get_option('window_title')
-assets_dir  = meson.project_source_root() / get_option('assets_dir')
+window_title = get_option('window_title')
+
+if host_machine.system() != 'android'
+  assets_dir = meson.project_source_root() / get_option('assets_dir')
+else
+  assets_dir = ''
+endif
 
 global_defines = [
   '-DWINDOW_WIDTH=' + window_width.to_string(),

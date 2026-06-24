@@ -2,6 +2,13 @@ plugins {
     id 'com.android.application'
 }
 
+task copyNativeLib(type: Copy) {
+    from '../../bin/android-debug/src/libstarlight.so'
+    into 'src/main/jniLibs/arm64-v8a/'
+}
+
+preBuild.dependsOn copyNativeLib
+
 android {
     compileSdk 30 //
     ndkVersion '25.1.8937393'	
@@ -10,11 +17,6 @@ android {
         applicationId = 'io.github.techieguy.starlight'
         minSdkVersion 30
         targetSdkVersion 30
-		externalNativeBuild {
-            ndkBuild {
-                arguments 'PREMAKE_ANDROIDNDK_PLATFORMS+=Android'
-            }
-        }
         ndk {
             abiFilters 'arm64-v8a'
         }
@@ -22,38 +24,23 @@ android {
     buildTypes {
         release {
             minifyEnabled false
-            proguardFiles getDefaultProguardFile('proguard-android.txt'),
-                    'proguard-rules.pro'
-
-			externalNativeBuild {
-				ndkBuild {
-					arguments 'PREMAKE_ANDROIDNDK_CONFIGURATIONS:=Release'
-            	}
-        	}
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
 		}
 		debug {
             debuggable true
+        }
+    }
 
-            externalNativeBuild {
-                ndkBuild {
-                    arguments 'PREMAKE_ANDROIDNDK_CONFIGURATIONS:=Debug'
-                }
-            }
+	sourceSets {
+        main {
+            assets.srcDirs = ['../../assets']
         }
     }
-	preBuild {
-		copy {
-			from '../../assets'
-			into './src/main/assets'
-		}
-	}
-	externalNativeBuild {
-        ndkBuild {
-            path file('../../starlight.wks.Android.mk')
-        }
-    }
-    lintOptions {
+	
+	lintOptions {
 		abortOnError false
     }
+
 	namespace 'io.github.techieguy.starlight'
 }
+

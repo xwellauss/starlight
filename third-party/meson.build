@@ -2,6 +2,13 @@
 vendor_opts = ['warning_level=0']
 
 
+if host_machine.system() == 'android'
+  ndk_home = get_option('ndk_home')
+
+  android_glue_src = ndk_home / 'sources/android/native_app_glue/android_native_app_glue.c'
+  android_glue_lib = static_library('android_native_app_glue', android_glue_src, include_directories: ndk_home / 'sources/android/native_app_glue')
+  android_glue_dep = declare_dependency(link_with: android_glue_lib, link_args: ['-llog', '-landroid', '-Wl,-u,ANativeActivity_onCreate'], include_directories: ndk_home / 'sources/android/native_app_glue')
+endif
 
 # glfw
 glfw_inc = include_directories('glfw/include')
@@ -29,7 +36,8 @@ if host_machine.system() != 'emscripten'
     'glfw/src/null_joystick.c',
   )
 
-  glfw_defines = []
+  glfw_c_args = []
+  glfw_link_args = []
   glfw_deps = []
 
   if host_machine.system() == 'linux' or host_machine.system() == 'android'
@@ -56,7 +64,7 @@ if host_machine.system() != 'emscripten'
         'glfw/src/linux_joystick.h',
         'glfw/src/linux_joystick.c',
       )
-      glfw_defines += '-D_GLFW_WAYLAND'
+      glfw_c_args += '-D_GLFW_WAYLAND'
     else
       glfw_src += files(
         'glfw/src/x11_platform.h',
@@ -69,11 +77,29 @@ if host_machine.system() != 'emscripten'
         'glfw/src/linux_joystick.h',
         'glfw/src/linux_joystick.c',
       )
-      glfw_defines += '-D_GLFW_X11'
+      glfw_c_args += '-D_GLFW_X11'
     endif
   endif
 
-  glfw_lib = static_library('glfw', glfw_src, include_directories: glfw_inc, c_args: glfw_defines, dependencies: glfw_deps, override_options: ['c_std=gnu99'] + vendor_opts)
+  if host_machine.system() == 'android'
+    glfw_src += files(
+      'glfw/src/android_platform.h',
+      'glfw/src/android_init.c',
+      'glfw/src/android_monitor.c',
+      'glfw/src/android_window.c',
+      android_glue_src
+    )
+    glfw_c_args += '-D_GLFW_ANDROID'
+    glfw_deps += [
+      cc.find_library('EGL'),
+      cc.find_library('GLESv1_CM'),
+      cc.find_library('GLESv2'),
+      cc.find_library('GLESv3'),
+      android_glue_dep,
+    ]
+  endif
+
+  glfw_lib = static_library('glfw', glfw_src, include_directories: glfw_inc, c_args: glfw_c_args, link_args: glfw_link_args, dependencies: glfw_deps, override_options: ['c_std=gnu99'] + vendor_opts)
   glfw_dep = declare_dependency(link_with: glfw_lib, include_directories: glfw_inc)
 else
   glfw_dep = declare_dependency()
