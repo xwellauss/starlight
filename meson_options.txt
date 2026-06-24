@@ -4,6 +4,6 @@ option('window_title',  type: 'string',  value: 'Starlight')
 option('assets_dir',  type: 'string',  value: 'assets')
 
 
-option('linux_windowing', type: 'combo', choices: ['x11', 'wayland'], value: 'x11')
+option('linux_windowing', type: 'combo', choices: ['x11', 'wayland'], value: 'wayland')
 
 option('ndk_home', type: 'string', value: '/home/techie-guy/dev/programs/Android_SDK/ndk/25.1.8937393')

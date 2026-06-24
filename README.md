@@ -11,16 +11,18 @@ Clone this repository recursively to pull in the submodules
 
 **To Build the Project, You will need:**
 
-* A C and C++ Compiler: Clang, GCC or Emscripten
-* Premake5
+* A C and C++ Compiler: Clang, GCC, Emscripten, Android NDK
+* Meson
 * GLFW3
-* make
+* ninja
 
 You can Download them from your package manager
 
 After cloning the repo recursively, `cd` into it.
 
-Then, use `sh generate-source-files.sh` to generate some source files
+## Desktop
+## Web (Emscripten)
+## Android
 
 Use `premake5 gmake2` to generate the project build files.
 
@@ -40,3 +42,6 @@ Then `cd` into `android-project` and use `gradle build`
 Use `premake5 androidndk` to generate the build files
 
 Then, use `ndk-build NDK_PROJECT_PATH=./ APP_BUILD_SCRIPT=starlight.wks.Android.mk PREMAKE_ANDROIDNDK_CONFIGURATIONS=Debug PREMAKE_ANDROIDNDK_PLATFORMS:=Android APP_PLATFORM=android-30` to build the .so file
+
+
+

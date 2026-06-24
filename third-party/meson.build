@@ -5,13 +5,14 @@ vendor_opts = ['warning_level=0']
 if host_machine.system() == 'android'
   ndk_home = get_option('ndk_home')
 
-  android_glue_src = ndk_home / 'sources/android/native_app_glue/android_native_app_glue.c'
-  android_glue_lib = static_library('android_native_app_glue', android_glue_src, include_directories: ndk_home / 'sources/android/native_app_glue')
-  android_glue_dep = declare_dependency(link_with: android_glue_lib, link_args: ['-llog', '-landroid', '-Wl,-u,ANativeActivity_onCreate'], include_directories: ndk_home / 'sources/android/native_app_glue')
+  android_glue_dir = ndk_home / 'sources/android/native_app_glue'
+  android_glue_src = android_glue_dir / 'android_native_app_glue.c'
+  android_glue_lib = static_library('android_native_app_glue', android_glue_src, include_directories: android_glue_dir)
+  android_glue_dep = declare_dependency(link_with: android_glue_lib, link_args: ['-llog', '-landroid', '-Wl,-u,ANativeActivity_onCreate'], include_directories: android_glue_dir)
 endif
 
 # glfw
-glfw_inc = include_directories('glfw/include')
+glfw_inc = [include_directories('glfw/include')]
 if host_machine.system() != 'emscripten'
   glfw_src = files(
     'glfw/include/GLFW/glfw3.h',
@@ -54,6 +55,31 @@ if host_machine.system() != 'emscripten'
 
   if host_machine.system() == 'linux'
     if get_option('linux_windowing') == 'wayland'
+      wayland_scanner = find_program('wayland-scanner')
+      wl_protos = dependency('wayland-protocols')
+      wl_client = dependency('wayland-client')
+
+      protocols_dir = wl_protos.get_variable(pkgconfig: 'pkgdatadir')
+      client_dir = wl_client.get_variable(pkgconfig: 'pkgdatadir')
+
+      wayland_xml_files = [
+        [client_dir    / 'wayland.xml', 'wayland-client-protocol'],
+        [protocols_dir / 'stable/xdg-shell/xdg-shell.xml', 'wayland-xdg-shell-client-protocol'],
+        [protocols_dir / 'stable/viewporter/viewporter.xml', 'wayland-viewporter-client-protocol'],
+        [protocols_dir / 'unstable/xdg-decoration/xdg-decoration-unstable-v1.xml', 'wayland-xdg-decoration-client-protocol'],
+        [protocols_dir / 'unstable/relative-pointer/relative-pointer-unstable-v1.xml', 'wayland-relative-pointer-unstable-v1-client-protocol'],
+        [protocols_dir / 'unstable/pointer-constraints/pointer-constraints-unstable-v1.xml', 'wayland-pointer-constraints-unstable-v1-client-protocol'],
+        [protocols_dir / 'unstable/idle-inhibit/idle-inhibit-unstable-v1.xml', 'wayland-idle-inhibit-unstable-v1-client-protocol'],
+      ]
+
+      foreach entry : wayland_xml_files
+        xml = entry[0]
+        name = entry[1]
+
+        glfw_src += custom_target(name + '-header', input: xml, output: name + '.h', command: [wayland_scanner, 'client-header', '@INPUT@', '@OUTPUT@'])
+        glfw_src += custom_target(name + '-code', input: xml, output: name + '-code.h', command: [wayland_scanner, 'private-code', '@INPUT@', '@OUTPUT@'])
+      endforeach
+
       glfw_src += files(
         'glfw/src/wl_platform.h',
         'glfw/src/xkb_unicode.h',
@@ -64,6 +90,7 @@ if host_machine.system() != 'emscripten'
         'glfw/src/linux_joystick.h',
         'glfw/src/linux_joystick.c',
       )
+
       glfw_c_args += '-D_GLFW_WAYLAND'
     else
       glfw_src += files(
