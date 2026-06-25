@@ -129,6 +129,13 @@ int window_should_close(Window* window)
 	return glfwWindowShouldClose(window->handle);
 }
 
+int window_is_valid(Window* window)
+{
+#if defined(_PLATFORM_ANDROID)
+	return glfwIsAndroidWindowValid();
+#endif
+}
+
 void window_change_bgcolor(vec4s color)
 {
 	glClearColor(color.r, color.g, color.b, color.a);

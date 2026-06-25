@@ -79,6 +79,8 @@ static void engine_render_frame()
 
 	window_poll_events();
 
+	if(!window_is_valid(&game_engine.current_window)) return;
+
 	ui_process_input();
 	scene_process_input(game_engine.current_scene);
 	scene_update(game_engine.current_scene);

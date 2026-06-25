@@ -42,6 +42,7 @@ typedef struct
 
 void window_init(Window* window);
 int window_should_close(Window* window);
+int window_is_valid(Window* window);
 void window_poll_events();
 double window_get_time();
 void window_swap_buffers(Window* window);
