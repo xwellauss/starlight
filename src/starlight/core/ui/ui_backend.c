@@ -1,7 +1,7 @@
 #include "ui_backend.h"
 
 #include <starlight/core/renderer/renderer.h>
-#include <starlight/core/game_engine.h>
+#include <starlight/core/window/window.h>
 #include <starlight/utils/logger.h>
 #include <starlight/utils/math_utils.h>
 
@@ -37,7 +37,7 @@ typedef struct
 	Vertex2D vertices[6];
 } GlyphQuad;
 
-static const Window* current_window;
+static float window_width, window_height;
 
 static mat4s projection = GLMS_MAT4_IDENTITY_INIT;
 
@@ -150,7 +150,8 @@ static void build_glyphs(const char* text, float x, float y, float requested_sca
 
 void ui_backend_init()
 {
-	current_window = engine_window_get();
+	window_width = (float)window_get_width();
+	window_height = (float)window_get_height();
 
 	{
 		VertexAttrib attribs[] =
@@ -176,7 +177,7 @@ void ui_backend_init()
 
 void ui_backend_render(Clay_RenderCommandArray cmds)
 {
-	projection = glms_ortho(0.0f, current_window->width, current_window->height, 0.0f, -1.0f, 1.0f); // Top left origin
+	projection = glms_ortho(0.0f, window_width, window_height, 0.0f, -1.0f, 1.0f); // Top left origin
 
 	shader_bind(&rect_shader);	
 	shader_uniform_mat4(&rect_shader, "projection", projection);
@@ -328,7 +329,7 @@ void ui_backend_render(Clay_RenderCommandArray cmds)
 				if(cmd->commandType == CLAY_RENDER_COMMAND_TYPE_SCISSOR_START)
 				{
 					GLint x = (GLint)bounding_box.x;
-					GLint y = (GLint)(current_window->height - (bounding_box.y + bounding_box.height));
+					GLint y = (GLint)(window_height - (bounding_box.y + bounding_box.height));
 
 					glEnable(GL_SCISSOR_TEST);
 					glScissor(x, y, (GLsizei)bounding_box.width, (GLsizei)bounding_box.height);

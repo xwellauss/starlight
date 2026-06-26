@@ -1,4 +1,4 @@
-#include <starlight/platform.h>
+#include <starlight/platform/platform.h>
 #include <starlight/utils/logger.h>
 
 #include <unistd.h>

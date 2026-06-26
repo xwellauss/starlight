@@ -1,5 +1,5 @@
 #define __USE_BSD
-#include <starlight/platform.h>
+#include <starlight/platform/platform.h>
 
 #include <android/asset_manager.h>
 #include <errno.h>

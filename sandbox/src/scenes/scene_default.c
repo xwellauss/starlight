@@ -1,10 +1,13 @@
 #include "scene_default.h"
 
+#include <starlight/core/window/input.h>
+#include <starlight/audio/audio.h>
 #include <starlight/utils/logger.h>
 
 
 static void init()
 {
+	//audio_play(ASSETS_DIR"sounds/song1.wav");
 }
 
 static void activate()
@@ -21,11 +24,14 @@ static void build_ui()
 
 static void render()
 {
-	//font_renderer_render_text("Starlight", 0.0f, 0.0f, 1.0f, "#ffffff", 1.0f);
 }
 
 static void process_input()
 {
+	if(window_input_key_is_down(INPUT_KEY_A))
+	{
+		log_debug("A CLicked\n");
+	}
 }
 
 static void deactivate()

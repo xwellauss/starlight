@@ -1,4 +1,5 @@
-#include <starlight/core/game_engine.h>
+#include <starlight/starlight.h>
+#include <starlight/audio/audio.h>
 #include <stdlib.h>
 
 #include "scenes/scene_default.h"
@@ -20,8 +21,8 @@ int main()
 	config.font_path = UI_FONT_FILE;
 
 	engine_init(config);
-	engine_scene_register(&scene_default);
-	engine_scene_switch("SceneDefault");
+	scene_manager_register_scene(&scene_default);
+	scene_manager_switch_scene("SceneDefault");
 
 	engine_run();
 

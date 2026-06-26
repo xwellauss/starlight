@@ -3,29 +3,36 @@
 
 #include <miniaudio.h>
 
-void audio_init(Audio_Engine* audio_engine)
+typedef struct
+{
+	ma_engine engine;
+} AudioEngine;
+
+static AudioEngine audio_engine = {0};
+
+void audio_init()
 {
 	ma_result result;
 
-    result = ma_engine_init(NULL, &audio_engine->engine);
+    result = ma_engine_init(NULL, &audio_engine.engine);
     if(result != MA_SUCCESS)
 	{
         log_debug("Failed to init audio!\n");
     }
 }
 
-void audio_play(Audio_Engine* audio_engine, char* filename)
+void audio_play(const char* filename)
 {
 	ma_result result;
 
-	result = ma_engine_play_sound(&audio_engine->engine, filename, NULL);
+	result = ma_engine_play_sound(&audio_engine.engine, filename, NULL);
 	if(result != MA_SUCCESS)
 	{
-        log_debug("File not found!\n");
+        log_error("File not found!\n");
     }
 }
 
-void audio_destroy(Audio_Engine* audio_engine)
+void audio_destroy()
 {
-	ma_engine_uninit(&audio_engine->engine);
+	ma_engine_uninit(&audio_engine.engine);
 }

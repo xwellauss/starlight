@@ -1,4 +1,4 @@
-#include <starlight/platform.h>
+#include <starlight/platform/platform.h>
 
 FILE* platform_fopen(const char* path, const char* mode)
 {

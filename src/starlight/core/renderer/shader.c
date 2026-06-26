@@ -1,6 +1,6 @@
 #include <starlight/core/renderer/shader.h>
 #include <starlight/utils/logger.h>
-#include <starlight/platform.h>
+#include <starlight/platform/platform.h>
 
 #include "../gl_platform.h"
 

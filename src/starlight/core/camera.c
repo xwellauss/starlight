@@ -1,5 +1,6 @@
 #include <starlight/core/camera.h>
-#include <starlight/core/game_engine.h>
+#include <starlight/core/window/window.h>
+#include <starlight/core/window/input.h>
 
 #include <cglm/struct.h>
 
@@ -9,14 +10,12 @@ static float last_x, last_y;
 static bool first_mouse = true;
 static bool prev_clicking = false;
 
-static const Window* current_window;
 static float window_width, window_height;
 
 void init_camera(Camera* camera)
 {
-	current_window = engine_window_get();
-	window_width = (float)engine_window_get_width();
-	window_height = (float)engine_window_get_height();
+	window_width = (float)window_get_width();
+	window_height = (float)window_get_height();
 
 	last_x = window_width/2.0f;
 	last_y = window_height/2.0f;
@@ -34,9 +33,11 @@ void update_camera(Camera* camera)
 	camera->view_matrix = glms_lookat(camera->position, glms_vec3_add(camera->position, camera->front), camera->up);
 }
 
-void move_camera(Camera* camera, InputState input_state, float deltatime)
+void move_camera(Camera* camera, KeyInputState input_state, float deltatime)
 {
-	if(camera->camera_type & WALK_AROUND)
+	vec2s mouse_position = window_input_mouse_get_position();
+
+	if(camera->camera_type & CAMERA_WALK_AROUND)
 	{
 		if(input_state.up)
 			camera->position = glms_vec3_add(camera->position, glms_vec3_scale(camera->front, camera->speed * deltatime));
@@ -52,11 +53,11 @@ void move_camera(Camera* camera, InputState input_state, float deltatime)
 			camera->position = glms_vec3_add(camera->position, glms_vec3_scale(camera->up, -camera->speed * deltatime));
 	}
 
-	if(camera->camera_type & LOOK_AROUND)
+	if(camera->camera_type & CAMERA_LOOK_AROUND)
 	{
-		bool clicking = (current_window->input_system.mouse_clicked_data[GLFW_MOUSE_BUTTON_LEFT])
+		bool clicking = window_input_mouse_btn_is_down(INPUT_MOUSE_BUTTON_LEFT)
 #if defined(_PLATFORM_ANDROID) || defined(_PLATFORM_WEB)
-		&& (current_window->input_system.mouse_position.x >= window_width/2.0f)
+		&& (mouse_position.x >= window_width/2.0f)
 #endif
 		;
 
@@ -65,9 +66,7 @@ void move_camera(Camera* camera, InputState input_state, float deltatime)
 
 		if(clicking)
 		{
-			glfwSetInputMode(current_window->handle, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
-
-			vec2s mouse_position = current_window->input_system.mouse_position;
+			window_set_cursor_mode(CURSOR_MODE_DISABLED);
 
 			if(first_mouse)
 			{
@@ -100,7 +99,7 @@ void move_camera(Camera* camera, InputState input_state, float deltatime)
 		else
 		{
 			first_mouse = true;
-			glfwSetInputMode(current_window->handle, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+			window_set_cursor_mode(CURSOR_MODE_NORMAL);
 		}
 	}
 }

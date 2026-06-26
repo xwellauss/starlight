@@ -1,6 +1,6 @@
 #include <starlight/utils/json_helper.h>
 #include <starlight/utils/logger.h>
-#include <starlight/platform.h>
+#include <starlight/platform/platform.h>
 
 #include <stdlib.h>
 #include <cJSON.h>

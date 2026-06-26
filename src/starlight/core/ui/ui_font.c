@@ -1,9 +1,9 @@
 #include "ui_font.h"
 
 #include <starlight/core/renderer/renderer.h>
-#include <starlight/core/game_engine.h>
+#include <starlight/core/window/window.h>
 #include <starlight/utils/logger.h>
-#include <starlight/platform.h>
+#include <starlight/platform/platform.h>
 
 #include "ui_font_internal.h"
 #include "../gl_platform.h"
@@ -14,15 +14,10 @@
 
 #include <cglm/struct.h>
 
-
-static const Window* current_window;
-
 FontAtlas font_atlas = {0};
 
 void ui_font_init(const char* filepath, int atlas_w, int atlas_h, float backed_font_size)
 {
-	current_window = engine_window_get();
-
 	unsigned char* font_file_buffer = (unsigned char*)platform_read_file(filepath, "rb");
 
 	font_atlas.width = atlas_w;

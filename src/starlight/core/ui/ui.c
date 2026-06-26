@@ -1,5 +1,7 @@
 #include <starlight/core/ui/ui.h>
-#include <starlight/core/game_engine.h>
+#include <starlight/core/window/window.h>
+#include <starlight/core/window/input.h>
+#include <starlight/core/engine.h>
 #include <starlight/utils/logger.h>
 #include <starlight/utils/math_utils.h>
 
@@ -11,7 +13,6 @@
 
 #include <clay.h>
 
-static const Window* current_window;
 static float window_width, window_height;
 
 static Clay_Color hex_to_clay_color(char colorcode[7], float alpha)
@@ -35,9 +36,8 @@ void handle_clay_errors(Clay_ErrorData error_data)
 
 void ui_init(const char* font_path)
 {
-	current_window = engine_window_get();
-	window_width = (float)engine_window_get_width();
-	window_height = (float)engine_window_get_height();
+	window_width = (float)window_get_width();
+	window_height = (float)window_get_height();
 
 	size_t clay_required_memory = Clay_MinMemorySize();
 	Clay_Arena clay_arena = Clay_CreateArenaWithCapacityAndMemory(clay_required_memory, malloc(clay_required_memory));
@@ -55,13 +55,13 @@ void ui_init(const char* font_path)
 
 void ui_process_input()
 {
-	Clay_Vector2 mouse_pos = {current_window->input_system.mouse_position.x, current_window->input_system.mouse_position.y};
-
-    bool mouse_pressed = current_window->input_system.mouse_clicked_data[GLFW_MOUSE_BUTTON_LEFT];	
+	Clay_Vector2 mouse_pos = {window_input_mouse_get_position().x, window_input_mouse_get_position().y};
+	vec2s mouse_scroll_delta = window_input_mouse_get_scroll();
+    bool mouse_pressed = window_input_mouse_btn_is_down(INPUT_MOUSE_BUTTON_LEFT);	
 
 	Clay_SetPointerState(mouse_pos, mouse_pressed);
 
-	Clay_UpdateScrollContainers(true, (Clay_Vector2){current_window->input_system.mouse_scroll_delta.x, current_window->input_system.mouse_scroll_delta.y}, engine_get_deltatime()*1000.0f);
+	Clay_UpdateScrollContainers(true, (Clay_Vector2){mouse_scroll_delta.x, mouse_scroll_delta.y}, engine_get_deltatime()*1000.0f);
     
 	Clay_SetLayoutDimensions((Clay_Dimensions){window_width, window_height});
 }
