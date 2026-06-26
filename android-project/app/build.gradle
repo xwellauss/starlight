@@ -3,7 +3,7 @@ plugins {
 }
 
 task copyNativeLib(type: Copy) {
-    from '../../bin/android-arm64-debug/src/libstarlight.so'
+    from '../../bin/android-arm64-debug/sandbox/src/libstarlight_sandbox.so'
     into 'src/main/jniLibs/arm64-v8a/'
 }
 
@@ -11,7 +11,7 @@ preBuild.dependsOn copyNativeLib
 
 android {
     compileSdk 30 //
-    ndkVersion '25.1.8937393'	
+    ndkVersion '25.1.8937393'
 
     defaultConfig {	
         applicationId = 'io.github.xwellauss.starlight'
@@ -33,7 +33,7 @@ android {
 
 	sourceSets {
         main {
-            assets.srcDirs = ['../../assets']
+            assets.srcDirs = ['../../sandbox/assets']
         }
     }
 	

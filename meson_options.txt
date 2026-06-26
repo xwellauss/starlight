@@ -1,10 +1,8 @@
-option('window_width',  type: 'integer', value: 1280)
-option('window_height', type: 'integer', value: 720)
-option('window_title',  type: 'string',  value: 'Starlight')
-option('assets_dir',  type: 'string',  value: 'assets')
-
 # Manually change desktop session
 option('linux_windowing', type: 'combo', choices: ['x11', 'wayland'], value: 'x11')
 
 # Add Android NDK path here
 option('ndk_home', type: 'string', value: '/home/techie-guy/dev/programs/Android_SDK/ndk/25.1.8937393')
+
+# Build Sandbox
+option('build_sandbox', type: 'boolean', value: true)

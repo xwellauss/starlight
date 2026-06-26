@@ -15,11 +15,6 @@ endif
 glfw_inc = [include_directories('glfw/include')]
 if host_machine.system() != 'emscripten'
   glfw_src = files(
-    'glfw/include/GLFW/glfw3.h',
-    'glfw/include/GLFW/glfw3native.h',
-    'glfw/src/internal.h',
-    'glfw/src/platform.h',
-    'glfw/src/mappings.h',
     'glfw/src/context.c',
     'glfw/src/init.c',
     'glfw/src/input.c',
@@ -29,8 +24,6 @@ if host_machine.system() != 'emscripten'
     'glfw/src/window.c',
     'glfw/src/egl_context.c',
     'glfw/src/osmesa_context.c',
-    'glfw/src/null_platform.h',
-    'glfw/src/null_joystick.h',
     'glfw/src/null_init.c',
     'glfw/src/null_monitor.c',
     'glfw/src/null_window.c',
@@ -43,12 +36,9 @@ if host_machine.system() != 'emscripten'
 
   if host_machine.system() == 'linux' or host_machine.system() == 'android'
     glfw_src += files(
-      'glfw/src/posix_time.h',
-      'glfw/src/posix_thread.h',
       'glfw/src/posix_module.c',
       'glfw/src/posix_time.c',
       'glfw/src/posix_thread.c',
-      'glfw/src/posix_poll.h',
       'glfw/src/posix_poll.c',
     )
   endif
@@ -81,27 +71,20 @@ if host_machine.system() != 'emscripten'
       endforeach
 
       glfw_src += files(
-        'glfw/src/wl_platform.h',
-        'glfw/src/xkb_unicode.h',
         'glfw/src/wl_init.c',
         'glfw/src/wl_monitor.c',
         'glfw/src/wl_window.c',
-        'glfw/src/xkb_unicode.c',
-        'glfw/src/linux_joystick.h',
         'glfw/src/linux_joystick.c',
       )
 
       glfw_c_args += '-D_GLFW_WAYLAND'
     else
       glfw_src += files(
-        'glfw/src/x11_platform.h',
-        'glfw/src/xkb_unicode.h',
         'glfw/src/x11_init.c',
         'glfw/src/x11_monitor.c',
         'glfw/src/x11_window.c',
         'glfw/src/xkb_unicode.c',
         'glfw/src/glx_context.c',
-        'glfw/src/linux_joystick.h',
         'glfw/src/linux_joystick.c',
       )
       glfw_c_args += '-D_GLFW_X11'
@@ -110,7 +93,6 @@ if host_machine.system() != 'emscripten'
 
   if host_machine.system() == 'android'
     glfw_src += files(
-      'glfw/src/android_platform.h',
       'glfw/src/android_init.c',
       'glfw/src/android_monitor.c',
       'glfw/src/android_window.c',
