@@ -50,7 +50,7 @@ void ui_init(const char* font_path)
 	ui_font_init(font_path, 1024, 1024, 45.0f);
 	ui_backend_init();
 
-	Clay_SetDebugModeEnabled(true);
+	Clay_SetDebugModeEnabled(false);
 }
 
 void ui_process_input()
@@ -69,11 +69,6 @@ void ui_process_input()
 void ui_begin_frame()
 {
 	Clay_BeginLayout();
-
-	CLAY(CLAY_ID("Button"), { .layout = { .padding = CLAY_PADDING_ALL(8) }, .backgroundColor = Clay_Hovered() ? hex_to_clay_color("#0000ff", 1.0f) : hex_to_clay_color("#ff0000", 1.0f), .cornerRadius = CLAY_CORNER_RADIUS(4)})
-	{
-    	CLAY_TEXT(Clay_Hovered() ? CLAY_STRING("Hovered") : CLAY_STRING("Hover me!"), CLAY_TEXT_CONFIG({ .fontId = 0, .fontSize = 16, .textColor = hex_to_clay_color("#ffffff", 1.0f)}));
-	}
 }
 
 void ui_render_frame()

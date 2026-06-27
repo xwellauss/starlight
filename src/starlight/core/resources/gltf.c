@@ -1,5 +1,6 @@
 #include "gltf.h"
 
+#include <starlight/platform/platform.h>
 #include <starlight/utils/logger.h>
 
 #include <stb_ds.h>
@@ -7,6 +8,7 @@
 #include <stdint.h>
 
 #include "../gl_platform.h"
+#include "cgltf.h"
 
 typedef struct
 {
@@ -86,8 +88,8 @@ static void gltf_parse_primitive(Model* model, Mesh* model_mesh, cgltf_data* glt
 
 	for(size_t k = 0; k < position_accessor->count; k++)
 	{
-		Vertex vertex;
-		memset(&vertex, 0, sizeof(Vertex));
+		Vertex3D vertex;
+		memset(&vertex, 0, sizeof(Vertex3D));
 
 		if(position_accessor)
 		{
@@ -288,27 +290,47 @@ static void gltf_parse_data(Model* model, cgltf_data* gltf_data)
 	}
 }
 
+static cgltf_result cgltf_file_read(const cgltf_memory_options* memory, const cgltf_file_options* file, const char* path, cgltf_size* size, void** data)
+{
+	char* buffer = platform_read_file(path, FILE_READ_BINARY, size);
+	if(!buffer) return cgltf_result_file_not_found;
+
+	*data = buffer;
+	return cgltf_result_success;
+}
+
+static void cgltf_file_release(const cgltf_memory_options* memory, const cgltf_file_options* file, void* data, cgltf_size size)
+{
+	free(data);
+}
+
 void gltf_load_file(Model* model, const char* filepath)
 {
-	cgltf_options options = {0}; // Default for now
+	cgltf_options options =
+	{
+		.file.read = cgltf_file_read,
+		.file.release = cgltf_file_release
+	};
 	cgltf_data* data = NULL;
+	
+	size_t buffer_size;
+	unsigned char* buffer = (unsigned char*)platform_read_file(filepath, FILE_READ_BINARY, &buffer_size);
 
-	cgltf_result result = cgltf_parse_file(&options, filepath, &data);
+	cgltf_result result = cgltf_parse(&options, buffer, buffer_size, &data);
 
 	if(result == cgltf_result_success)
 	{
 		cgltf_load_buffers(&options, data, filepath);
 
 		gltf_parse_data(model, data);
-
-		cgltf_free(data);
 	}
 	else
 	{
 		log_debug("Couldn't Load GLTF Model: %d\n", result);
-
-		cgltf_free(data);
 	}
+
+	free(buffer);
+	cgltf_free(data);
 }
 
 void gltf_model_free(Model *model)

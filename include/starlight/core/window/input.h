@@ -126,7 +126,8 @@ typedef enum
 
 typedef enum 
 {
-	INPUT_MOUSE_BUTTON_1 = 0,
+	INPUT_MOUSE_BUTTON_UNKNOWN = 0,
+	INPUT_MOUSE_BUTTON_1,
 	INPUT_MOUSE_BUTTON_2,
 	INPUT_MOUSE_BUTTON_3,
 	INPUT_MOUSE_BUTTON_4,
@@ -143,6 +144,16 @@ typedef enum
 	INPUT_MOUSE_BUTTON_COUNT = INPUT_MOUSE_BUTTON_LAST+1,
 } InputMouseButton;
 
+typedef struct
+{
+	bool left;
+	bool right;
+	bool forward;
+	bool backward;
+	bool up;
+	bool down;
+} InputState;
+
 
 bool window_input_key_is_down(InputKey key);
 bool window_input_key_just_pressed(InputKey key);
@@ -153,3 +164,4 @@ bool window_input_mouse_btn_just_pressed(InputMouseButton btn);
 bool window_input_mouse_btn_just_released(InputMouseButton btn);
 vec2s window_input_mouse_get_position();
 vec2s window_input_mouse_get_scroll();
+bool window_input_mouse_has_moved();

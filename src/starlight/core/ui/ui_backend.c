@@ -7,9 +7,13 @@
 
 #include <stb_ds.h>
 
+#include "starlight/core/renderer/texture.h"
+#include "starlight/core/renderer/vertex_buffer.h"
 #include "ui_font.h"
 #include "ui_font_internal.h"
 #include "ui_shaders.h"
+
+// TODO: Maybe remove thuis, i.e remove opengl specific code
 #include "../gl_platform.h"
 
 
@@ -59,10 +63,8 @@ static void flush_rects()
 	if(rect_count == 0) return;
 
 	shader_bind(&rect_shader);	
-	vertex_buffer_bind(&rect_vertex_buffer, BUFFER_VAO);
-	vertex_buffer_bind(&rect_vertex_buffer, BUFFER_VBO);
 	vertex_buffer_update(&rect_vertex_buffer, rect_vertex_data, rect_count * sizeof(RectQuad), 0);
-	vertex_buffer_draw(&rect_vertex_buffer, GL_TRIANGLES, rect_count * 6, 0);
+	vertex_buffer_draw(&rect_vertex_buffer, PRIMITIVE_TRIANGLES, rect_count * 6, 0);
 	shader_unbind();
 	
 	rect_count = 0;
@@ -74,13 +76,11 @@ static void flush_glyphs()
 
 	shader_bind(&glyph_shader);
 	
-	texture_active_slot(GL_TEXTURE0);
+	texture_active_slot(TEXTURE_SLOT_0);
 	texture2d_bind(&font_atlas.texture);
 
-	vertex_buffer_bind(&glyph_vertex_buffer, BUFFER_VAO);
-	vertex_buffer_bind(&glyph_vertex_buffer, BUFFER_VBO);
 	vertex_buffer_update(&glyph_vertex_buffer, glyph_vertex_data, glyph_count*sizeof(GlyphQuad), 0);
-	vertex_buffer_draw(&glyph_vertex_buffer, GL_TRIANGLES, glyph_count * 6, 0);
+	vertex_buffer_draw(&glyph_vertex_buffer, PRIMITIVE_TRIANGLES, glyph_count * 6, 0);
 	shader_unbind();
 
 	glyph_count = 0;
@@ -168,11 +168,11 @@ void ui_backend_init()
 		VertexLayout layout = {attribs, 7, sizeof(RectVertex)};
 		vertex_buffer_init_with_layout(&rect_vertex_buffer, NULL, MAX_RECTS * sizeof(RectQuad), NULL, 0, false, layout);
 
-		shader_init(&rect_shader, UI_RECT_VERTEX_SHADER, UI_RECT_FRAGMENT_SHADER);
+		shader_init_from_source(&rect_shader, UI_RECT_VERTEX_SHADER, UI_RECT_FRAGMENT_SHADER);
 	}
 
 	vertex_buffer_2d_init(&glyph_vertex_buffer, NULL, MAX_GLYPHS * sizeof(GlyphQuad), NULL, 0, false);
-	shader_init(&glyph_shader, UI_FONT_VERTEX_SHADER, UI_FONT_FRAGMENT_SHADER);	
+	shader_init_from_source(&glyph_shader, UI_FONT_VERTEX_SHADER, UI_FONT_FRAGMENT_SHADER);	
 }
 
 void ui_backend_render(Clay_RenderCommandArray cmds)
@@ -286,7 +286,7 @@ void ui_backend_render(Clay_RenderCommandArray cmds)
 				push_rect(x0, x1, y0, y1, color, rect_pos, rect_size, corner_radius, border_width);	
 				shader_bind(&rect_shader);
 				shader_uniform_int(&rect_shader, "has_texture", true);
-				texture_active_slot(GL_TEXTURE0);
+				texture_active_slot(TEXTURE_SLOT_0);
 				texture2d_bind(texture);
 				flush_rects();
 				shader_bind(&rect_shader);

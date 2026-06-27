@@ -30,11 +30,11 @@ static void key_callback(GLFWwindow* handle, int key, int scancode, int action, 
 
 	if(action == GLFW_PRESS)
 	{
-		window.input_system.keys_held_down[input_key] = true;
+		window.input_system.keys[input_key] = true;
 	}
 	else if(action == GLFW_RELEASE)
 	{
-		window.input_system.keys_held_down[input_key] = false;
+		window.input_system.keys[input_key] = false;
 	}
 }
 
@@ -52,11 +52,11 @@ static void mouse_button_callback(GLFWwindow* handle, int button, int action, in
 
 	if(action == GLFW_PRESS)
 	{
-		window.input_system.mouse_btns_held_down[input_mouse_btn] = true;
+		window.input_system.mouse_btns[input_mouse_btn] = true;
 	}
 	else if(action == GLFW_RELEASE)
 	{
-		window.input_system.mouse_btns_held_down[input_mouse_btn] = false;
+		window.input_system.mouse_btns[input_mouse_btn] = false;
 	}
 }
 
@@ -79,8 +79,8 @@ void window_init(WindowConfig window_config)
 	window.config = window_config;
 
 #if defined(_PLATFORM_WEB)
-	window.config.title.width = 1920;
-	window.config.title.height = 1080;
+	window.config.width = 1920;
+	window.config.height = 1080;
 
 	emscripten_request_fullscreen_strategy("canvas", true, &(EmscriptenFullscreenStrategy)
 	{
@@ -117,9 +117,9 @@ void window_init(WindowConfig window_config)
 #endif
 
 #if defined(_PLATFORM_ANDROID)
-	window.width = ANativeWindow_getWidth(glfwGetAndroidApp()->window);
-	window.height = ANativeWindow_getHeight(glfwGetAndroidApp()->window);
-	glfwSetWindowSize(window.handle, window.width, window.height);
+	window.config.width = ANativeWindow_getWidth(glfwGetAndroidApp()->window);
+	window.config.height = ANativeWindow_getHeight(glfwGetAndroidApp()->window);
+	glfwSetWindowSize(window.handle, window.config.width, window.config.height);
 #endif
 	
 	glViewport(0, 0, window.config.width, window.config.height);
@@ -142,8 +142,10 @@ double window_get_time()
 
 void window_poll_events()
 {
-	memcpy(window.input_system.previous_keys_held, window.input_system.keys_held_down, sizeof(window.input_system.keys_held_down));
-	memcpy(window.input_system.previous_mouse_btns_held, window.input_system.mouse_btns_held_down, sizeof(window.input_system.mouse_btns_held_down));
+	memcpy(window.input_system.keys_prev, window.input_system.keys, sizeof(window.input_system.keys));
+	memcpy(window.input_system.mouse_btns_prev, window.input_system.mouse_btns, sizeof(window.input_system.mouse_btns));
+	window.input_system.mouse_scroll_delta = (vec2s){0};
+	window.input_system.mouse_moved = false;
 
 	glfwPollEvents();
 }

@@ -1,16 +1,21 @@
 #include <starlight/starlight.h>
-#include <starlight/audio/audio.h>
-#include <stdlib.h>
 
-#include "scenes/scene_default.h"
+#include <stdlib.h>
+#include <unistd.h>
+#include <string.h>
+
+
+#include "scenes.h"
 
 #define WINDOW_TITLE "Starlight Sandbox"
 #define WINDOW_WIDTH 1280
 #define WINDOW_HEIGHT 720
-#define UI_FONT_FILE ASSETS_DIR"fonts/monocraft.ttf"
+#define UI_FONT_FILE "fonts/monocraft.ttf"
 
 int main()
 {
+	if(strlen(ASSETS_DIR) > 0) chdir(ASSETS_DIR);
+
 	EngineConfig config = {0};
 	config.window_title = WINDOW_TITLE;
 	config.window_width = WINDOW_WIDTH;
@@ -21,8 +26,9 @@ int main()
 	config.font_path = UI_FONT_FILE;
 
 	engine_init(config);
-	scene_manager_register_scene(&scene_default);
-	scene_manager_switch_scene("SceneDefault");
+
+	sandbox_scenes();
+	scene_manager_switch_scene("SceneModel");
 
 	engine_run();
 

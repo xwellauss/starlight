@@ -1,0 +1,38 @@
+{
+	"name": "blocks",
+	"path": "textures/blocks.png",
+	"layout": 0,
+	"width": 96,
+	"height": 32,
+	"atlas_regions": [
+		{
+			"name": "grass",
+			"x": 0,
+			"y": 0,
+			"frame_speed": 20,
+			"frame_count": 1,
+			"width": 32,
+			"height": 32
+		},
+		{
+			"name": "stone",
+			"x": 1,
+			"y": 0,
+			"frame_speed": 20,
+			"frame_count": 1,
+			"width": 32,
+			"height": 32
+		},
+		{
+			"name": "water",
+			"x": 2,
+			"y": 0,
+			"frame_speed": 20,
+			"frame_count": 1,
+			"width": 32,
+			"height": 32
+		}
+	],
+	"default_region": "grass"
+}
+

@@ -7,7 +7,7 @@
 
 static void init()
 {
-	//audio_play(ASSETS_DIR"sounds/song1.wav");
+	//audio_play("sounds/song1.wav");
 }
 
 static void activate()
@@ -28,10 +28,6 @@ static void render()
 
 static void process_input()
 {
-	if(window_input_key_is_down(INPUT_KEY_A))
-	{
-		log_debug("A CLicked\n");
-	}
 }
 
 static void deactivate()

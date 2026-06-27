@@ -6,6 +6,17 @@
 #include <cglm/struct.h>
 #include <stdint.h>
 
+typedef enum
+{
+	PRIMITIVE_TRIANGLES = 0,
+	PRIMITIVE_TRIANGLE_STRIP,
+	PRIMITIVE_TRIANGLE_FAN,
+	PRIMITIVE_LINES,
+	PRIMITIVE_LINE_STRIP,
+	PRIMITIVE_LINE_LOOP,
+	PRIMITIVE_POINTS
+} DrawPrimitive;
+
 typedef struct
 {
 	int location;
@@ -28,8 +39,6 @@ typedef struct
 	vec2s tex_coord;
 	vec3s normal;
 } Vertex3D;
-
-typedef Vertex3D Vertex;
 
 typedef struct
 {
@@ -63,7 +72,6 @@ enum Buffers
 
 void vertex_buffer_init_with_layout(VertexBuffer* vb, void* vertex_data, size_t vertex_data_size, void* index_data, size_t index_data_size, bool indexed, VertexLayout layout);
 
-void vertex_buffer_init(VertexBuffer* vb, void* vertex_data, size_t vertex_data_size, void* index_data, size_t index_data_size, bool indexed);
 void vertex_buffer_3d_init(VertexBuffer* vb, void* vertex_data, size_t vertex_data_size, void* index_data, size_t index_data_size, bool indexed);
 void vertex_buffer_2d_init(VertexBuffer* vb, void* vertex_data, size_t vertex_data_size, void* index_data, size_t index_data_size, bool indexed);
 
@@ -73,8 +81,8 @@ void vertex_buffer_unbind(enum Buffers buffer);
 void vertex_buffer_unbind_all();
 
 void vertex_buffer_update(VertexBuffer* vb, void* data, long size, int offset);
-void vertex_buffer_draw(VertexBuffer* vb, uint32_t mode, int count, int offset);
-void vertex_buffer_draw_indexed(VertexBuffer* vb, uint32_t mode, uint32_t type, int count, void* offset);
+void vertex_buffer_draw(VertexBuffer* vb, DrawPrimitive primitive, int count, int offset);
+void vertex_buffer_draw_indexed(VertexBuffer* vb, DrawPrimitive primitive, int count, void* offset);
 
 void vertex_buffer_destroy(VertexBuffer* vb);
 

@@ -4,7 +4,7 @@
 
 typedef struct
 {
-	size_t id;
+	int id;
 	bool is_active;
 	char* tag;
 
@@ -16,8 +16,6 @@ typedef struct
 	vec3s position;
 	vec3s scale;
 	vec3s rotation;
-		
-	float speed; // FIXME: update this for other code using it like ScenePlay.
 
 	mat4s transform;
 } Transform_Component;
@@ -54,13 +52,13 @@ typedef enum
 void ecs_init();
 void ecs_destroy();
 
-Entity* ecs_create_entity(char* tag);
-void ecs_destroy_entity(Entity* e);
+void ecs_entity_init(Entity* e, char* tag);
+void ecs_entity_destroy(Entity* e);
 
-void ecs_add_component(Entity* e, Component_Type type);
-void ecs_remove_component(Entity* e, Component_Type type);
-bool ecs_has_component(Entity* e, Component_Type type);
+void ecs_entity_add_component(Entity* e, Component_Type type);
+void ecs_entity_remove_component(Entity* e, Component_Type type);
+bool ecs_entity_has_component(Entity* e, Component_Type type);
 
-Transform_Component* ecs_get_transform(Entity* e);
-Physics_Component* ecs_get_physics(Entity* e);
-Sprite_Component* ecs_get_sprite(Entity* e);
+Transform_Component* ecs_entity_get_transform(Entity* e);
+Physics_Component* ecs_entity_get_physics(Entity* e);
+Sprite_Component* ecs_entity_get_sprite(Entity* e);

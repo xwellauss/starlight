@@ -42,7 +42,7 @@ typedef struct
 	Mesh* meshes;
 	size_t mesh_count;
 
-	Vertex* vertex_data;
+	Vertex3D* vertex_data;
 	size_t vertex_count;
 
 	uint32_t* index_data;

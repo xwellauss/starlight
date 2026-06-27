@@ -1,13 +1,16 @@
 #include "scene_block.h"
 
-#include "../core/game_engine.h"
-#include "../core/ecs.h"
-#include "../core/camera.h"
-#include "../core/texture_atlas.h"
-#include "../utils/json_helper.h"
-#include "../utils/utils.h"
+#include <starlight/core/engine.h>
+#include <starlight/core/ecs.h>
+#include <starlight/core/window/window.h>
+#include <starlight/core/window/input.h>
+#include <starlight/core/camera.h>
+#include <starlight/core/resources/texture_atlas.h>
+#include <starlight/utils/logger.h>
 
+#include <stdint.h>
 #include <string.h>
+#include <sys/types.h>
 #include <time.h>
 #include <math.h>
 
@@ -21,7 +24,7 @@ typedef struct
 {
 	vec3s position;
 	bool is_transparent;
-	Vertex* vertex_data;
+	Vertex3D* vertex_data;
 } Block;
 
 static Block* blocks;
@@ -32,16 +35,15 @@ static vec2s joystick_box_size = {400.0f, 400.0f};
 static float joystick_radius = 70.0f;
 static vec4s joystick_color = {225.0f, 225.0f, 225.0f, 100.0f};
 
-static Window* current_window;
 static Camera camera;
+static InputState input_state;
 
-static Vertex* vertex_render_data = NULL;
+static Vertex3D* vertex_render_data = NULL;
 //static vec3s* block_positions;
 
-static TextureAtlas* blocks_texture_atlas;
+static TextureAtlas blocks_texture_atlas;
 
-static Entity* block;
-static InputState input_state;
+static Entity chunk;
 
 //static void add_block(vec3s origin, float block_size, char* sprite_name, Vertex** vertex_data)
 static void add_block(vec3s origin, float block_size, char* block_name, bool is_transparent)
@@ -62,7 +64,7 @@ static void add_block(vec3s origin, float block_size, char* block_name, bool is_
 		(vec3s){block_size, -block_size, -block_size},
 	};
 
-	GLushort cube_indices[36] =
+	uint32_t cube_indices[36] =
 	{
 		1, 0, 2, 3, 1, 2,    // Back face
 		5, 1, 3, 7, 5, 3,    // Right face
@@ -72,10 +74,10 @@ static void add_block(vec3s origin, float block_size, char* block_name, bool is_
 		3, 2, 6, 7, 3, 6     // Bottom face
 	};
 
-	AtlasRegion* atlas_region = shget(blocks_texture_atlas->atlas_region_map, block_name);
+	AtlasRegion* atlas_region = shget(blocks_texture_atlas.atlas_region_map, block_name);
 
 	AtlasUV uv_coords;
-	atlas_get_uv(&uv_coords, blocks_texture_atlas, atlas_region);
+	texture_atlas_get_uv(&uv_coords, &blocks_texture_atlas, atlas_region);
 
 	vec2s tex_coords[6];
 	tex_coords[0] = (vec2s){uv_coords.x2, uv_coords.y2};
@@ -88,11 +90,11 @@ static void add_block(vec3s origin, float block_size, char* block_name, bool is_
 
 	for(int i = 0; i < sizeof(cube_indices)/sizeof(cube_indices[0]); i++)
 	{
-		Vertex vertex;
+		Vertex3D vertex;
 
 		if(block.is_transparent)
 		{
-			vertex = (Vertex){};
+			vertex = (Vertex3D){};
 			arrput(block.vertex_data, vertex);
 			continue;
 		}
@@ -125,120 +127,45 @@ static void cull_faces(Block* block, float offset)
 		{
 			for(int j = 0; j < 6; j++)
 			{
-				block->vertex_data[18 + j] = (Vertex){};
+				block->vertex_data[18 + j] = (Vertex3D){};
 			}
 		}
 		if(glms_vec3_eqv((vec3s){block->position.x+offset, block->position.y, block->position.z}, blocks[i].position)) // right
 		{
 			for(int j = 0; j < 6; j++)
 			{
-				block->vertex_data[6 + j] = (Vertex){};
+				block->vertex_data[6 + j] = (Vertex3D){};
 			}
 		}
 		if(glms_vec3_eqv((vec3s){block->position.x, block->position.y+offset, block->position.z}, blocks[i].position)) // Top
 		{
 			for(int j = 0; j < 6; j++)
 			{
-				block->vertex_data[24 + j] = (Vertex){};
+				block->vertex_data[24 + j] = (Vertex3D){};
 			}
 		}
 		if(glms_vec3_eqv((vec3s){block->position.x, block->position.y-offset, block->position.z}, blocks[i].position)) // Bottom
 		{
 			for(int j = 0; j < 6; j++)
 			{
-				block->vertex_data[30 + j] = (Vertex){};
+				block->vertex_data[30 + j] = (Vertex3D){};
 			}
 		}
 		if(glms_vec3_eqv((vec3s){block->position.x, block->position.y, block->position.z-offset}, blocks[i].position)) // Front
 		{
 			for(int j = 0; j < 6; j++)
 			{
-				block->vertex_data[12 + j] = (Vertex){};
+				block->vertex_data[12 + j] = (Vertex3D){};
 			}
 		}
 		if(glms_vec3_eqv((vec3s){block->position.x, block->position.y, block->position.z+offset}, blocks[i].position)) // Back
 		{
 			for(int j = 0; j < 6; j++)
 			{
-				block->vertex_data[0 + j] = (Vertex){};
+				block->vertex_data[0 + j] = (Vertex3D){};
 			}
 		}
 	}
-}
-
-static void save_terrain()
-{
-	cJSON *root, *vertex_data_json;
-
-	root = json_create_object();
-	vertex_data_json = json_create_array();
-
-	json_add_item_to_object(root, "vertex_data", vertex_data_json);
-
-	for(int i = 0; i < arrlen(blocks); i++)
-	{
-		for(int j = 0; j < arrlen(blocks[i].vertex_data); j++)
-		{
-			cJSON* vertex_json = json_create_object();
-
-			json_add_item_to_object(vertex_json, "position", json_create_float_array(blocks[i].vertex_data[j].position.raw, 3));
-			json_add_item_to_object(vertex_json, "color", json_create_float_array(blocks[i].vertex_data[j].color.raw, 4));
-			json_add_item_to_object(vertex_json, "tex_coord", json_create_float_array(blocks[i].vertex_data[j].tex_coord.raw, 2));
-
-			json_add_item_to_array(vertex_data_json, vertex_json);
-		}
-	}
-
-	char* vertex_data_string = json_print(root);
-
-	write_to_file("../vertex_data.json", vertex_data_string);
-
-	free(vertex_data_string);
-
-	json_delete_object(root);
-}
-
-void load_terrain(char* filepath)
-{
-	char* terrain_json_string = read_file(filepath, "r");
-
-	cJSON* root = json_parse(terrain_json_string);
-
-	cJSON* vertex_data_json = json_get_object(root, "vertex_data");
-
-	if(vertex_render_data)
-	{
-//		arrdeln(vertex_render_data, 0, arrlen(vertex_render_data));
-		vertex_render_data = NULL;
-	}
-
-	cJSON* vertex_json;
-	cJSON_ArrayForEach(vertex_json, vertex_data_json)
-	{
-		Vertex vertex;
-
-		cJSON* position = json_get_object(vertex_json, "position");
-		cJSON* color = json_get_object(vertex_json, "color");
-		cJSON* tex_coord = json_get_object(vertex_json, "tex_coord");
-
-		vertex.position.x = json_get_array_item(position, 0)->valuedouble;
-		vertex.position.y = json_get_array_item(position, 1)->valuedouble;
-		vertex.position.z = json_get_array_item(position, 2)->valuedouble;
-
-		vertex.color.r = json_get_array_item(color, 0)->valuedouble;
-		vertex.color.g = json_get_array_item(color, 1)->valuedouble;
-		vertex.color.b = json_get_array_item(color, 2)->valuedouble;
-		vertex.color.a = json_get_array_item(color, 3)->valuedouble;
-		
-		vertex.tex_coord.x = json_get_array_item(tex_coord, 0)->valuedouble;
-		vertex.tex_coord.y = json_get_array_item(tex_coord, 1)->valuedouble;
-
-		arrput(vertex_render_data, vertex);
-	}
-
-	json_delete_object(root);
-
-	free(terrain_json_string);
 }
 
 static void generate_map()
@@ -322,20 +249,17 @@ static void generate_map()
 
 static void init()
 {
-	current_window = &game_engine.current_window;
+	ecs_entity_init(&chunk, "Chunk");
+	ecs_entity_add_component(&chunk, COMPONENT_TRANSFORM);
+	ecs_entity_add_component(&chunk, COMPONENT_SPRITE);
 
-	block = ecs_create_entity("Block");
-	ecs_add_component(block, COMPONENT_TRANSFORM);
-	ecs_add_component(block, COMPONENT_SPRITE);
-
-
-	blocks_texture_atlas = texture_atlas_get("tiles");
+	texture_atlas_init(&blocks_texture_atlas, "blocks.json");
 
 	generate_map();
 
-	texture2d_map_add_from_file(&ecs_get_sprite(block)->textures, "block", blocks_texture_atlas->path);
-	vertex_buffer_init(&ecs_get_sprite(block)->vertex_buffer, vertex_render_data, sizeof(Vertex)*arrlen(vertex_render_data), NULL, 0, false);
-	shader_init(&ecs_get_sprite(block)->shader, "shaders/block-vertex-shader.glsl", "shaders/block-fragment-shader.glsl");
+	texture2d_map_add_from_file(&ecs_entity_get_sprite(&chunk)->textures, "block", blocks_texture_atlas.path);
+	vertex_buffer_3d_init(&ecs_entity_get_sprite(&chunk)->vertex_buffer, vertex_render_data, sizeof(Vertex3D)*arrlen(vertex_render_data), NULL, 0, false);
+	shader_init_from_file(&ecs_entity_get_sprite(&chunk)->shader, "shaders/block-vertex-shader.glsl", "shaders/block-fragment-shader.glsl");
 
 	camera.position = (vec3s){{10.0f, 20.0f, 10.0f}};
 	camera.target = (vec3s){{0.0f, 0.0f, 0.0f}};
@@ -348,36 +272,33 @@ static void init()
 	camera.mouse_sensitivity = 0.1f;
 	camera.pitch = 0.0f;
 	camera.yaw = -90.0f;
-	camera.camera_type =  WALK_AROUND | LOOK_AROUND;
+	camera.camera_type =  CAMERA_WALK_AROUND | CAMERA_LOOK_AROUND;
 	init_camera(&camera);
 }
 
 static void update()
 {
 	update_camera(&camera);
+	move_camera(&camera, input_state);
 }
 
 static void process_input()
 {
-	InputSystem input_system = game_engine.current_window.input_system;
-
-	input_state.up = input_system.key_pressed_data[GLFW_KEY_UP] || input_system.key_pressed_data[GLFW_KEY_W];
-	input_state.down = input_system.key_pressed_data[GLFW_KEY_DOWN] || input_system.key_pressed_data[GLFW_KEY_S];
-	input_state.left = input_system.key_pressed_data[GLFW_KEY_LEFT] || input_system.key_pressed_data[GLFW_KEY_A];
-	input_state.right = input_system.key_pressed_data[GLFW_KEY_RIGHT] || input_system.key_pressed_data[GLFW_KEY_D];
-	input_state.space = input_system.key_pressed_data[GLFW_KEY_SPACE];
-	input_state.l_ctrl = input_system.key_pressed_data[GLFW_KEY_LEFT_CONTROL];
+	input_state.forward = window_input_key_is_down(INPUT_KEY_UP) || window_input_key_is_down(INPUT_KEY_W);
+	input_state.backward = window_input_key_is_down(INPUT_KEY_DOWN) || window_input_key_is_down(INPUT_KEY_S);
+	input_state.left = window_input_key_is_down(INPUT_KEY_LEFT) || window_input_key_is_down(INPUT_KEY_A);
+	input_state.right = window_input_key_is_down(INPUT_KEY_RIGHT) || window_input_key_is_down(INPUT_KEY_D);
+	input_state.up = window_input_key_is_down(INPUT_KEY_SPACE);
+	input_state.down = window_input_key_is_down(INPUT_KEY_LEFT_CONTROL);
 
 	// Joystick
 	if(is_joystick_active)
 	{
 		if(joystick_angle >= 315.0f || joystick_angle <= 45.0f) input_state.right = true;
-		else if(joystick_angle >= 45.0f && joystick_angle <= 135.0f) input_state.up = true;
+		else if(joystick_angle >= 45.0f && joystick_angle <= 135.0f) input_state.forward = true;
 		else if(joystick_angle >= 135.0f && joystick_angle <= 225.0f) input_state.left = true;
-		else if(joystick_angle >= 225.0f && joystick_angle <= 315.0f) input_state.down = true;
+		else if(joystick_angle >= 225.0f && joystick_angle <= 315.0f) input_state.backward = true;
 	}
-
-	move_camera(&camera, input_state, game_engine.deltatime);
 }
 
 static void build_ui()
@@ -396,37 +317,16 @@ static void render()
 	background_color.g = 0.5f + 0.5f * sin(frequency * window_get_time() + 4.0f * M_PI / 3.0f);
 	window_change_bgcolor(background_color);
 	
-	texture_active_slot(GL_TEXTURE0);
-	texture2d_bind(&shget(ecs_get_sprite(block)->textures, "block"));
+	texture_active_slot(TEXTURE_SLOT_0);
+	texture2d_bind(&shget(ecs_entity_get_sprite(&chunk)->textures, "block"));
 	
-	shader_bind(&ecs_get_sprite(block)->shader);
-	shader_uniform_mat4(&ecs_get_sprite(block)->shader, "projection", camera.projection_matrix);
-	shader_uniform_mat4(&ecs_get_sprite(block)->shader, "view", camera.view_matrix);
-	shader_uniform_int(&ecs_get_sprite(block)->shader, "texture_sampler", 0);
+	shader_bind(&ecs_entity_get_sprite(&chunk)->shader);
+	shader_uniform_mat4(&ecs_entity_get_sprite(&chunk)->shader, "projection", camera.projection_matrix);
+	shader_uniform_mat4(&ecs_entity_get_sprite(&chunk)->shader, "view", camera.view_matrix);
+	shader_uniform_int(&ecs_entity_get_sprite(&chunk)->shader, "texture_sampler", 0);
 
-/*
-	//ImGui_Begin("Scene Controls", NULL, ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoScrollWithMouse);
-	ImGui_Begin("Scene Controls", NULL, ImGuiWindowFlags_None);
-	{
-	//	ImGui_SetWindowSize((ImVec2){0.0f, 0.0f}, ImGuiCond_Always);
-	//	ImGui_SetWindowPos((ImVec2){0.0f, 0.0f}, ImGuiCond_Always);
-
-		if(ImGui_Button("Back to Menu"))
-		{
-			scene_switch("SceneMenu");
-		}
-
-		if(ImGui_Button("Generate"))
-		{
-			generate_map();
-		}
-	}
-	ImGui_End();
-	*/
-
-	vertex_buffer_bind(&ecs_get_sprite(block)->vertex_buffer, BUFFER_VAO);
-	vertex_buffer_update(&ecs_get_sprite(block)->vertex_buffer, vertex_render_data, sizeof(Vertex)*arrlen(vertex_render_data), 0);
-	vertex_buffer_draw(&ecs_get_sprite(block)->vertex_buffer, GL_TRIANGLES, arrlen(vertex_render_data), 0);	
+	vertex_buffer_update(&ecs_entity_get_sprite(&chunk)->vertex_buffer, vertex_render_data, sizeof(Vertex3D)*arrlen(vertex_render_data), 0);
+	vertex_buffer_draw(&ecs_entity_get_sprite(&chunk)->vertex_buffer, PRIMITIVE_TRIANGLES, arrlen(vertex_render_data), 0);	
 }
 
 static void activate()
@@ -438,22 +338,23 @@ static void deactivate()
 	vertex_buffer_unbind_all();
 	shader_unbind();
 	
-	texture_active_slot(GL_TEXTURE1);
+	texture_active_slot(TEXTURE_SLOT_1);
 	texture2d_unbind();
 
-	texture_active_slot(GL_TEXTURE0);
+	texture_active_slot(TEXTURE_SLOT_0);
 	texture2d_unbind();
 }
 
 static void destroy()
 {
+	texture_atlas_destroy(&blocks_texture_atlas);
 	arrfree(vertex_render_data);
 
-	texture2d_map_destroy(&ecs_get_sprite(block)->textures);
-	shader_destroy(&ecs_get_sprite(block)->shader);
-	vertex_buffer_destroy(&ecs_get_sprite(block)->vertex_buffer);
+	texture2d_map_destroy(&ecs_entity_get_sprite(&chunk)->textures);
+	shader_destroy(&ecs_entity_get_sprite(&chunk)->shader);
+	vertex_buffer_destroy(&ecs_entity_get_sprite(&chunk)->vertex_buffer);
 
-	ecs_destroy_entity(block);
+	ecs_entity_destroy(&chunk);
 }
 
 

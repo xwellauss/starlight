@@ -58,14 +58,6 @@ void vertex_buffer_2d_init(VertexBuffer* vb, void* vertex_data, size_t vertex_da
 	vertex_buffer_init_with_layout(vb, vertex_data, vertex_data_size, index_data, index_data_size, indexed, layout);
 }
 
-// TODO: Compatibility
-void vertex_buffer_init(VertexBuffer* vb, void* vertex_data, size_t vertex_data_size, void* index_data, size_t index_data_size, bool indexed)
-{
-	vertex_buffer_3d_init(vb, vertex_data, vertex_data_size, index_data, index_data_size, indexed);
-}
-
-
-
 void vertex_buffer_bind(VertexBuffer* vb, enum Buffers buffer)
 {
 	switch(buffer)
@@ -107,19 +99,41 @@ void vertex_buffer_unbind_all()
 
 void vertex_buffer_update(VertexBuffer* vb, void* data, long size, int offset)
 {
+	vertex_buffer_bind(vb, BUFFER_VBO);
 	glBufferSubData(GL_ARRAY_BUFFER, offset, size, data);
 }
 
-void vertex_buffer_draw(VertexBuffer* vb, GLenum mode, int count, int offset)
+void vertex_buffer_draw(VertexBuffer* vb, DrawPrimitive primitive, int count, int offset)
 {
-	glDrawArrays(mode, offset, count);
+	vertex_buffer_bind(vb, BUFFER_VAO);
+
+	switch(primitive)
+	{
+		case PRIMITIVE_TRIANGLES: glDrawArrays(GL_TRIANGLES, offset, count); break;
+		case PRIMITIVE_TRIANGLE_STRIP: glDrawArrays(GL_TRIANGLE_STRIP, offset, count); break;
+		case PRIMITIVE_TRIANGLE_FAN: glDrawArrays(GL_TRIANGLE_FAN, offset, count); break;
+		case PRIMITIVE_LINES: glDrawArrays(GL_LINES, offset, count); break;
+		case PRIMITIVE_LINE_STRIP: glDrawArrays(GL_LINE_STRIP, offset, count); break;
+		case PRIMITIVE_LINE_LOOP: glDrawArrays(GL_LINE_LOOP, offset, count); break;
+		case PRIMITIVE_POINTS: glDrawArrays(GL_POINTS, offset, count); break;
+	}
 }
 
-void vertex_buffer_draw_indexed(VertexBuffer* vb, GLenum mode, GLenum type, int count, void* offset)
+void vertex_buffer_draw_indexed(VertexBuffer* vb, DrawPrimitive primitive, int count, void* offset)
 {
-	glDrawElements(mode, count, type, offset);
-}
+	vertex_buffer_bind(vb, BUFFER_VAO);
 
+	switch(primitive)
+	{
+		case PRIMITIVE_TRIANGLES: glDrawElements(GL_TRIANGLES, count, GL_UNSIGNED_INT, offset); break;
+		case PRIMITIVE_TRIANGLE_STRIP: glDrawElements(GL_TRIANGLE_STRIP, count, GL_UNSIGNED_INT, offset); break;
+		case PRIMITIVE_TRIANGLE_FAN: glDrawElements(GL_TRIANGLE_FAN, count, GL_UNSIGNED_INT, offset); break;
+		case PRIMITIVE_LINES: glDrawElements(GL_LINES, count, GL_UNSIGNED_INT, offset); break;
+		case PRIMITIVE_LINE_STRIP: glDrawElements(GL_LINE_STRIP, count, GL_UNSIGNED_INT, offset); break;
+		case PRIMITIVE_LINE_LOOP: glDrawElements(GL_LINE_LOOP, count, GL_UNSIGNED_INT, offset); break;
+		case PRIMITIVE_POINTS: glDrawElements(GL_POINTS, count, GL_UNSIGNED_INT, offset); break;
+	}
+}
 
 void vertex_buffer_destroy(VertexBuffer* vb)
 {

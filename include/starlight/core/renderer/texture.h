@@ -2,6 +2,20 @@
 
 #include <stdbool.h>
 #include <stdint.h>
+#include <stddef.h>
+
+typedef enum
+{
+	TEXTURE_SLOT_0 = 0,
+	TEXTURE_SLOT_1,
+	TEXTURE_SLOT_2,
+	TEXTURE_SLOT_3,
+	TEXTURE_SLOT_4,
+	TEXTURE_SLOT_5,
+	TEXTURE_SLOT_6,
+	TEXTURE_SLOT_7,
+	TEXTURE_SLOT_8,
+} TextureSlot;
 
 typedef struct
 {
@@ -24,7 +38,7 @@ typedef struct
 
 typedef struct { char* key; Texture2D value; }* Texture2DHashMap;
 
-void texture_active_slot(uint32_t slot);
+void texture_active_slot(TextureSlot slot);
 void texture_set_parameteri(uint32_t target, uint32_t pname, int param);
 
 void texture2d_init_from_file(Texture2D* texture, const char* texture_path);

@@ -8,7 +8,8 @@ typedef struct
 	uint32_t id;
 } Shader;
 
-void shader_init(Shader* shader, const char* vertex_shader_source, const char* fragment_shader_source);
+void shader_init_from_source(Shader* shader, const char* vertex_shader_source, const char* fragment_shader_source);
+void shader_init_from_file(Shader* shader, const char* vertex_shader_path, const char* fragment_shader_path);
 void shader_destroy(Shader* shader);
 
 void shader_bind(Shader* shader);

@@ -4,11 +4,11 @@
 
 #include <cglm/struct.h>
 
-enum AtlasLayout
+typedef enum
 {
 	ATLAS_LAYOUT_HORIZONTAL = 0,
 	ATLAS_LAYOUT_VERTICAL = 1,
-};
+} AtlasLayout;
 
 typedef struct
 {
@@ -26,7 +26,7 @@ typedef struct
 	char* name;
 	char* path;
 	char* default_region_name;
-	enum AtlasLayout type;
+	AtlasLayout layout;
 	int width;
 	int height;
 	struct { char* key; AtlasRegion* value; }* atlas_region_map;
@@ -40,14 +40,10 @@ typedef struct
 	float y2;
 } AtlasUV;
 
-typedef struct { char* key; TextureAtlas* value; }* TextureAtlasHashMap;
+void texture_atlas_init(TextureAtlas* texture_atlas, const char* atlas_json_path);
+void texture_atlas_destroy(TextureAtlas* texture_atlas);
 
-void texture_atlas_init(TextureAtlasHashMap* texture_atlas_hashmap);
-void texture_atlas_destroy(TextureAtlasHashMap* texture_atlas_hashmap);
-
-TextureAtlas* texture_atlas_get(TextureAtlasHashMap* texture_atlas_hashmap, const char* name);
-
-
-void atlas_get_uv(AtlasUV* atlas_uv, TextureAtlas* texture_atlas, AtlasRegion* atlas_region);
-void atlas_get_frame_verts(Vertex vertex_render_data[], int start, TextureAtlas* texture_atlas, AtlasRegion* atlas_region, int frame);
-void atlas_get_frame(Vertex2DQuad* quad, TextureAtlas* texture_atlas, AtlasRegion* atlas_region, int frame);
+int texture_atlas_get_current_frame(TextureAtlas* texture_atlas, AtlasRegion* atlas_region, int tick);
+void texture_atlas_get_uv(AtlasUV* atlas_uv, TextureAtlas* texture_atlas, AtlasRegion* atlas_region);
+void texture_atlas_get_frame_verts(Vertex2D vertex_render_data[], int start, TextureAtlas* texture_atlas, AtlasRegion* atlas_region, int frame);
+void texture_atlas_get_frame_quad(Vertex2DQuad* quad, TextureAtlas* texture_atlas, AtlasRegion* atlas_region, int frame);

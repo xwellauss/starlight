@@ -7,15 +7,14 @@
 
 typedef struct
 {
-	bool keys_held_down[INPUT_KEY_COUNT];
-	bool previous_keys_held[INPUT_KEY_COUNT];
+	bool keys[INPUT_KEY_COUNT];
+	bool keys_prev[INPUT_KEY_COUNT];
+	
+	bool mouse_btns[INPUT_MOUSE_BUTTON_COUNT];
+	bool mouse_btns_prev[INPUT_MOUSE_BUTTON_COUNT];
 
 	bool mouse_moved;
 	vec2s mouse_position;
-
-	bool mouse_btns_held_down[INPUT_MOUSE_BUTTON_COUNT];
-	bool previous_mouse_btns_held[INPUT_MOUSE_BUTTON_COUNT];
-
 	vec2s mouse_scroll_delta;
 } InputSystem;
 

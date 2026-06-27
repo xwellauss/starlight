@@ -18,7 +18,7 @@ FontAtlas font_atlas = {0};
 
 void ui_font_init(const char* filepath, int atlas_w, int atlas_h, float backed_font_size)
 {
-	unsigned char* font_file_buffer = (unsigned char*)platform_read_file(filepath, "rb");
+	unsigned char* font_file_buffer = (unsigned char*)platform_read_file(filepath, FILE_READ_BINARY, NULL);
 
 	font_atlas.width = atlas_w;
 	font_atlas.height = atlas_h;

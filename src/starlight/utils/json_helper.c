@@ -12,7 +12,7 @@ cJSON* json_parse(const char* json_data_string)
 
 cJSON* json_read_file(const char* path)
 {
-    char* json_string = platform_read_file(path, "r");
+    char* json_string = platform_read_file(path, FILE_READ_TEXT, NULL);
     cJSON* json = cJSON_Parse(json_string);
     free(json_string);
     return json;

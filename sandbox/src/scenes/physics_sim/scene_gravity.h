@@ -1,5 +1,5 @@
 #pragma once
 
-#include "../../core/scene.h"
+#include <starlight/core/scene/scene.h>
 
 extern Scene scene_gravity;

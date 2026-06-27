@@ -5,10 +5,11 @@
 #include <stb_image.h>
 
 #include "../gl_platform.h"
+#include "starlight/platform/platform.h"
 
-void texture_active_slot(GLenum slot)
+void texture_active_slot(TextureSlot slot)
 {
-	glActiveTexture(slot);
+	glActiveTexture(GL_TEXTURE0+slot);
 }
 
 void texture_set_parameteri(GLenum target, GLenum pname, GLint param)
@@ -20,9 +21,14 @@ void texture2d_init_from_file(Texture2D* texture, const char* texture_path)
 {
 	stbi_set_flip_vertically_on_load(true);
 
-	int channels;
+	size_t buffer_size;
+	unsigned char* buffer = (unsigned char*)platform_read_file(texture_path, FILE_READ_BINARY, &buffer_size);
 
-	unsigned char* texture_data = stbi_load(texture_path, &texture->width, &texture->height, &channels, 4);
+	//unsigned char* texture_data = stbi_load(texture_path, &texture->width, &texture->height, &channels, 4);
+	int channels;
+	unsigned char* texture_data = stbi_load_from_memory(buffer, buffer_size, &texture->width, &texture->height, &channels, 4);
+	free(buffer);
+
 	if(!texture_data)
 	{
 		log_error("Invalid Texture Data: %s\n", texture_path);
@@ -31,12 +37,28 @@ void texture2d_init_from_file(Texture2D* texture, const char* texture_path)
 	texture2d_init_from_data(texture, 0, GL_RGBA, GL_RGBA, GL_UNSIGNED_BYTE, texture_data);
 	
 	stbi_image_free(texture_data);
-
 }
 
-void texture2d_init_from_data(Texture2D* texture, GLint level, GLint internalformat, GLenum format, GLenum type, void* texture_data)
+/*
+void texture2d_init_from_buffer(Texture2D* texture, int level, int internalformat, uint32_t format, uint32_t type, void* buffer, size_t buffer_size)
 {
-	texture_active_slot(GL_TEXTURE0);
+	int channels;
+	unsigned char* texture_data = stbi_load_from_memory(buffer, buffer_size, &texture->width, &texture->height, &channels, 4);
+
+	if(!texture_data)
+	{
+		log_error("Invalid Texture Buffer\n");
+	}
+
+	texture2d_init(texture, 0, GL_RGBA, GL_RGBA, GL_UNSIGNED_BYTE, texture_data);
+
+	stbi_image_free(texture_data);
+}
+*/
+
+void texture2d_init_from_data(Texture2D* texture, int level, int internalformat, uint32_t format, uint32_t type, void* texture_data)
+{
+	texture_active_slot(TEXTURE_SLOT_0);
 
 	glGenTextures(1, &texture->texture_id);
 	texture2d_bind(texture);

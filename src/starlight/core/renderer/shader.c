@@ -43,7 +43,7 @@ static void shader_compile_source(unsigned int* shader, const int shader_type, c
 }
 
 
-void shader_init(Shader* shader, const char* vertex_shader_source, const char* fragment_shader_source)
+void shader_init_from_source(Shader* shader, const char* vertex_shader_source, const char* fragment_shader_source)
 {
 	unsigned int vertex_shader;
 	shader_compile_source(&vertex_shader, GL_VERTEX_SHADER, (const char**)&vertex_shader_source);
@@ -59,6 +59,33 @@ void shader_init(Shader* shader, const char* vertex_shader_source, const char* f
 	shader_check_for_errors(shader->id, GL_LINK_STATUS);
 	
 	shader_unbind();
+
+	glDeleteShader(vertex_shader);
+	glDeleteShader(fragment_shader);
+}
+
+void shader_init_from_file(Shader* shader, const char* vertex_shader_path, const char* fragment_shader_path)
+{
+	char* vertex_shader_source = platform_read_file(vertex_shader_path, FILE_READ_TEXT, NULL);
+	char* fragment_shader_source = platform_read_file(fragment_shader_path, FILE_READ_TEXT, NULL);
+
+	unsigned int vertex_shader;
+	shader_compile_source(&vertex_shader, GL_VERTEX_SHADER, (const char**)&vertex_shader_source);
+
+	unsigned int fragment_shader;
+	shader_compile_source(&fragment_shader, GL_FRAGMENT_SHADER, (const char**)&fragment_shader_source);
+
+	shader->id = glCreateProgram();
+	glAttachShader(shader->id, vertex_shader);
+	glAttachShader(shader->id, fragment_shader);
+	glLinkProgram(shader->id);
+
+	shader_check_for_errors(shader->id, GL_LINK_STATUS);
+	
+	shader_unbind();
+
+	free(vertex_shader_source);
+	free(fragment_shader_source);
 
 	glDeleteShader(vertex_shader);
 	glDeleteShader(fragment_shader);

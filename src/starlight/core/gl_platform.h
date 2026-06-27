@@ -7,8 +7,8 @@
 	#include <emscripten/html5.h> 
 	#include <GLES3/gl3.h>
 #elif defined(_PLATFORM_ANDROID)
-	#include <GLES3/gl3.h>
 	#include <android/native_window.h>
+	#include <GLES3/gl3.h>
 #endif
 
 #define GLSL_VERSION "#version 300 es"

@@ -9,9 +9,7 @@
 #include <starlight/utils/logger.h>
 #include <starlight/utils/math_utils.h>
 
-
-#define GLFW_INCLUDE_NONE
-#include <GLFW/glfw3.h>
+#include "gl_platform.h"
 
 #include <stb_ds.h>
 

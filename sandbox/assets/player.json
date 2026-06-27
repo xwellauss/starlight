@@ -1,0 +1,55 @@
+{
+	"name": "villan",
+	"path": "textures/villan.png",
+	"layout": 0,
+	"width": 384,
+	"height": 32,
+	"atlas_regions": [
+		{
+			"name": "idle",
+			"x": 0,
+			"y": 1,
+			"frame_speed": 10,
+			"frame_count": 3,
+			"width": 32,
+			"height": 32
+		},
+		{
+			"name": "move-left",
+			"x": 4,
+			"y": 1,
+			"frame_speed": 10,
+			"frame_count": 2,
+			"width": 32,
+			"height": 32
+		},
+		{
+			"name": "move-right",
+			"x": 6,
+			"y": 1,
+			"frame_speed": 10,
+			"frame_count": 2,
+			"width": 32,
+			"height": 32
+		},
+		{
+			"name": "move-up",
+			"x": 8,
+			"y": 1,
+			"frame_speed": 10,
+			"frame_count": 2,
+			"width": 32,
+			"height": 32
+		},
+		{
+			"name": "move-down",
+			"x": 10,
+			"y": 1,
+			"frame_speed": 10,
+			"frame_count": 2,
+			"width": 32,
+			"height": 32
+		}
+	],
+	"default_region": "idle"
+}

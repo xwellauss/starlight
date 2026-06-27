@@ -2,39 +2,31 @@
 #include <starlight/utils/logger.h>
 
 #include <unistd.h>
+#include <string.h>
 #include <stdlib.h>
 
-char* platform_read_file(const char* filepath, const char* mode)
+char* platform_read_file(const char* filepath, FileReadMode mode, size_t* out_size)
 {
-#if !defined(_PLATFORM_ANDROID)
-	if(access(filepath, F_OK) != 0)
+	FILE* file = platform_fopen(filepath, mode == FILE_READ_TEXT ? "r" : "rb");
+
+	if(!file)
 	{
-		log_error("File %s does not exist!\n", filepath);
-		exit(EXIT_FAILURE);
+		log_debug("File not found: %s\n", filepath);
+		return NULL;
 	}
-#endif
 
-	char* buffer = NULL;
-	long length;
+	fseek(file, 0, SEEK_END);
+	size_t size = ftell(file);
+	fseek(file, 0, SEEK_SET);
 
-	FILE* file = platform_fopen(filepath, mode);
+	char* buffer = malloc(mode == FILE_READ_TEXT ? size + 1 : size);
 
-	if(file)
-	{
-		fseek(file, 0, SEEK_END);
-		length = ftell(file);
-		fseek(file, 0, SEEK_SET);
+	fread(buffer, 1, size, file);
+	if(mode == FILE_READ_TEXT) buffer[size] = '\0';
 
-		buffer = malloc(length + 1);
+	fclose(file);
 
-		if(buffer)
-		{
-			fread(buffer, 1, length, file);
-			buffer[length] = '\0';
-		}
-
-		fclose(file);
-	}
+	if(out_size) *out_size = size;
 
 	return buffer;
 }
@@ -44,7 +36,7 @@ bool platform_write_file(const char* filepath, char* data)
 	FILE* file = platform_fopen(filepath, "w+");
 	if(file)
 	{
-		fprintf(file, "%s", data);
+		fwrite(data, 1, strlen(data), file);
 		fclose(file);
 
 		return true;

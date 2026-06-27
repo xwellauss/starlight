@@ -3,6 +3,10 @@ sandbox_inc = [include_directories('.'), public_inc]
 sandbox_src = files(
   'main.c',
   'scenes/scene_default.c',
+  'scenes/scene_block.c',
+  'scenes/scene_model.c',
+  'scenes/scene_play.c',
+  'scenes/physics_sim/scene_gravity.c'
 )
 
 sandbox_c_args = []

@@ -1,66 +1,50 @@
 #include "scene_play.h"
 
-#include "../core/game_engine.h"
-#include "../core/ecs.h"
-#include "../core/font_renderer.h"
-#include "../utils/utils.h"
-#include "../core/renderer.h"
-#include "../core/camera.h"
-#include "../utils/ui_imgui.h"
-#include "../utils/spritesheet.h"
-#include "../utils/json_helper.h"
-
-#if defined(_PLATFORM_DESKTOP)
-	#include <glad/gles2.h>
-#elif defined(_PLATFORM_WEB)
-	#include <emscripten.h>
-	#include <GLES3/gl3.h>
-#elif defined(_PLATFORM_ANDROID)
-	#include <GLES3/gl3.h>
-#endif
+#include <starlight/core/engine.h>
+#include <starlight/core/ecs.h>
+#include <starlight/core/window/window.h>
+#include <starlight/core/window/input.h>
+#include <starlight/core/camera.h>
+#include <starlight/core/resources/texture_atlas.h>
+#include <starlight/utils/logger.h>
 
 #include <math.h>
+#include <stdint.h>
 #include <time.h>
 
-#include <hashmap.h>
 #include <stb_perlin.h>
-
+#include <stb_ds.h>
 #include <cglm/struct.h>
-#include "cimgui.h"
-
-static Window* current_window;
-
-static InputState input_state;
 
 static Camera camera;
+static InputState input_state;
 
 static float joystick_angle = 0.0f;
 static bool is_joystick_active = false;
-static ImVec2 joystick_box_size = {400.0f, 400.0f};
+static vec2s joystick_box_size = {400.0f, 400.0f};
 static float joystick_radius = 70.0f;
-static ImVec4 joystick_color = {225.0f, 225.0f, 225.0f, 100.0f};
-
-static ImGuiIO* imgui_io;
+static vec4s joystick_color = {225.0f, 225.0f, 225.0f, 100.0f};
 
 // Player
-static SpriteSheet* player_spritesheet;
 static char* player_current_sprite_name = "";
-static Entity* player;
+static TextureAtlas player_texture_atlas;
+static Entity player;
+static float player_speed = 4.0f;
 
-static Quad player_quad[1] =
+static Vertex2DQuad player_quad[1] =
 {
-	(Quad)
+	(Vertex2DQuad)
 	{
 		{
-		{{{1.0f, 1.0f, 0.0f}}, {{0.0f, 0.0f, 0.0f, 0.0f}}, {{1.0f, 1.0f}}},
-		{{{1.0f, -1.0f, 0.0f}}, {{0.0f, 0.0f, 0.0f, 0.0f}}, {{1.0f, 0.0f}}},
-		{{{-1.0f, -1.0f, 0.0f}}, {{0.0f, 0.0f, 0.0f, 0.0f}}, {{0.0f, 0.0f}}},
-		{{{-1.0f, 1.0f, 0.0f}}, {{0.0f, 0.0f, 0.0f, 0.0f}}, {{0.0f, 1.0f}}},
+		{{{1.0f, 1.0f}}, {{0.0f, 0.0f, 0.0f, 0.0f}}, {{1.0f, 1.0f}}},
+		{{{1.0f, -1.0f}}, {{0.0f, 0.0f, 0.0f, 0.0f}}, {{1.0f, 0.0f}}},
+		{{{-1.0f, -1.0f}}, {{0.0f, 0.0f, 0.0f, 0.0f}}, {{0.0f, 0.0f}}},
+		{{{-1.0f, 1.0f}}, {{0.0f, 0.0f, 0.0f, 0.0f}}, {{0.0f, 1.0f}}},
 		}
 	}
 };
 
-static GLushort player_indices[6] =
+static uint32_t player_indices[6] =
 {
 	0, 1, 2,
 	2, 3, 0
@@ -71,70 +55,59 @@ static GLushort player_indices[6] =
 #define MAP_SIZE_Y 50
 #define MAP_TILE_COUNT MAP_SIZE_X * MAP_SIZE_Y
 
-static Entity* map;
-static SpriteSheet* map_sprite_sheet;
-static Quad map_tiles[MAP_TILE_COUNT];
-static GLushort map_indices[MAP_TILE_COUNT * 6];
+static Entity map;
+static TextureAtlas map_texture_atlas;
+static Vertex2DQuad map_tiles[MAP_TILE_COUNT];
+static uint32_t map_indices[MAP_TILE_COUNT * 6];
 
 // Player
 static void init_player()
 {
-	player = ecs_create_entity("player");
+	ecs_entity_init(&player, "player");
+	ecs_entity_add_component(&player, COMPONENT_TRANSFORM);
+	ecs_entity_add_component(&player, COMPONENT_SPRITE);
 
-	player->component_list.transform_component = (Component_Transform)
-	{
-		.position = {0.0f, 0.0f, 0.1f},
-		.scale = {1.0f, 1.0f, 1.0f},
-		.speed = 4.0f,
-	};
+	ecs_entity_get_transform(&player)->position = (vec3s){0.0f, 0.0f, 0.1f};
+	ecs_entity_get_transform(&player)->scale = (vec3s){1.0f, 1.0f, 1.0f};
 
-	player_spritesheet = (SpriteSheet*)hashmap_get(sprite_sheet_hashmap, &(SpriteSheet){ .name="villan" });
+	texture_atlas_init(&player_texture_atlas, "player.json");
 
-	player_current_sprite_name = player_spritesheet->default_sprite;
+	player_current_sprite_name = player_texture_atlas.default_region_name;
 
-	add_texture_from_file(&ecs_get_sprite(player)->textures, "player", player_spritesheet->path);
-	init_vertex_attributes(&ecs_get_sprite(player)->vertex_attribs, player_quad, sizeof(player_quad), player_indices, sizeof(player_indices), true, false);
-	init_shader_program(&ecs_get_sprite(player)->shader_program, "shaders/player-vertex-shader.glsl", "shaders/player-fragment-shader.glsl");
+	texture2d_map_add_from_file(&ecs_entity_get_sprite(&player)->textures, "player", player_texture_atlas.path);
+	vertex_buffer_2d_init(&ecs_entity_get_sprite(&player)->vertex_buffer, player_quad, sizeof(player_quad), player_indices, sizeof(player_indices), true);
+	shader_init_from_file(&ecs_entity_get_sprite(&player)->shader, "shaders/player-vertex-shader.glsl", "shaders/player-fragment-shader.glsl");
 }
 
 static void player_update_texcoords()
 {
-	Sprite* current_sprite = (Sprite*)hashmap_get(player_spritesheet->sprite_hashmap, &(Sprite){ .name=player_current_sprite_name });
+	AtlasRegion* current_sprite = shget(player_texture_atlas.atlas_region_map, player_current_sprite_name);
 
-	static int current_frame = 0;
+	static int anim_tick = 0;
+	anim_tick++;
 
-	current_frame++;
-
-	int anim_frame;
-	if(player_spritesheet->type == SHEET_HORIZONTAL)
-		anim_frame = current_sprite->x + ((current_frame/current_sprite->frame_speed) % current_sprite->sprite_count);
-	if(player_spritesheet->type == SHEET_VERTICAL)
-		anim_frame = current_sprite->y + ((current_frame/current_sprite->frame_speed) % current_sprite->sprite_count);
-
-	get_sprite_animation(player_quad, player_spritesheet, current_sprite, anim_frame);
+	int anim_frame = texture_atlas_get_current_frame(&player_texture_atlas, current_sprite, anim_tick);
+	texture_atlas_get_frame_quad(player_quad, &player_texture_atlas, current_sprite, anim_frame);
 }
 
 static void draw_player()
 {
-	bind_shader_program(&ecs_get_sprite(player)->shader_program);
+	shader_bind(&ecs_entity_get_sprite(&player)->shader);
 
-	bind_texture(&shget(ecs_get_sprite(player)->textures, "player"));
+	texture2d_bind(&shget(ecs_entity_get_sprite(&player)->textures, "player"));
 
 	mat4s transform = GLMS_MAT4_IDENTITY_INIT;
-	transform = glms_scale(transform, player->component_list.transform_component.scale);
-	transform = glms_translate(transform, player->component_list.transform_component.position);
+	transform = glms_scale(transform, ecs_entity_get_transform(&player)->scale);
+	transform = glms_translate(transform, ecs_entity_get_transform(&player)->position);
 
-	uniform_mat4(&ecs_get_sprite(player)->shader_program, "projection", camera.projection_matrix);
-	uniform_mat4(&ecs_get_sprite(player)->shader_program, "view", camera.view_matrix);
-	uniform_mat4(&ecs_get_sprite(player)->shader_program, "transform", transform);
-
-	bind_vertex_buffer(&ecs_get_sprite(player)->vertex_attribs, VAO);
-	bind_vertex_buffer(&ecs_get_sprite(player)->vertex_attribs, VBO);
+	shader_uniform_mat4(&ecs_entity_get_sprite(&player)->shader, "projection", camera.projection_matrix);
+	shader_uniform_mat4(&ecs_entity_get_sprite(&player)->shader, "view", camera.view_matrix);
+	shader_uniform_mat4(&ecs_entity_get_sprite(&player)->shader, "transform", transform);
 
 	player_update_texcoords();
 
-	glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(player_quad), player_quad);
-	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_SHORT, 0);
+	vertex_buffer_update(&ecs_entity_get_sprite(&player)->vertex_buffer, player_quad, sizeof(player_quad), 0);
+	vertex_buffer_draw_indexed(&ecs_entity_get_sprite(&player)->vertex_buffer, PRIMITIVE_TRIANGLES, 6, 0);
 }
 
 // Map
@@ -160,24 +133,23 @@ static void fill_map()
 			if(perlin_noise > -0.1) tile_sprite = "grass";
 			if(perlin_noise > 0.3) tile_sprite = "stone";
 
-			Sprite* current_tile_sprite = (Sprite*)hashmap_get(map_sprite_sheet->sprite_hashmap, &(Sprite){ .name=tile_sprite });
+			AtlasRegion* current_tile_sprite = shget(map_texture_atlas.atlas_region_map, tile_sprite);
 
-			float x1 = (float)(x * current_tile_sprite->sprite_width * scale);
-			float y1 = (float)(y * current_tile_sprite->sprite_height * scale);
-			float x2 = (float)((x+1) * current_tile_sprite->sprite_width * scale);
-			float y2 = (float)((y+1) * current_tile_sprite->sprite_height * scale);
+			float x1 = (float)(x * current_tile_sprite->width * scale);
+			float y1 = (float)(y * current_tile_sprite->height * scale);
+			float x2 = (float)((x+1) * current_tile_sprite->width * scale);
+			float y2 = (float)((y+1) * current_tile_sprite->height * scale);
 
-			UV_Coords uv_coords;
-			Sprite* sprite = (Sprite*)hashmap_get(map_sprite_sheet->sprite_hashmap, &(Sprite){ .name=tile_sprite });
-			get_spriteUV(&uv_coords, map_sprite_sheet, sprite);
+			AtlasUV uv_coords;
+			texture_atlas_get_uv(&uv_coords, &map_texture_atlas, current_tile_sprite);
 
-			map_tiles[y * MAP_SIZE_X + x] = (Quad)
+			map_tiles[y * MAP_SIZE_X + x] = (Vertex2DQuad)
 			{
 				{
-					{{{x2, y2, 0.0f}}, {{1.0f, 0.0f, 0.0f, 1.0f}}, {{uv_coords.x2, uv_coords.y2}}},
-					{{{x2, y1, 0.0f}}, {{1.0f, 0.0f, 0.0f, 1.0f}}, {{uv_coords.x2, uv_coords.y1}}},
-					{{{x1, y1, 0.0f}}, {{1.0f, 0.0f, 0.0f, 1.0f}}, {{uv_coords.x1, uv_coords.y1}}},
-					{{{x1, y2, 0.0f}}, {{1.0f, 0.0f, 0.0f, 1.0f}}, {{uv_coords.x1, uv_coords.y2}}},
+					{{{x2, y2}}, {{1.0f, 0.0f, 0.0f, 1.0f}}, {{uv_coords.x2, uv_coords.y2}}},
+					{{{x2, y1}}, {{1.0f, 0.0f, 0.0f, 1.0f}}, {{uv_coords.x2, uv_coords.y1}}},
+					{{{x1, y1}}, {{1.0f, 0.0f, 0.0f, 1.0f}}, {{uv_coords.x1, uv_coords.y1}}},
+					{{{x1, y2}}, {{1.0f, 0.0f, 0.0f, 1.0f}}, {{uv_coords.x1, uv_coords.y2}}},
 				}
 			};
 		}
@@ -202,49 +174,42 @@ static void fill_map()
 
 static void init_map()
 {
-	map = ecs_create_entity("map");
-	map->component_list.transform_component = (Component_Transform)
-	{
-		.position = {0.0f, 0.0f, 0.0f},
-		.scale = {1.0f, 1.0f, 0.0f},
-		.speed = 0.0f,
-	};
+	ecs_entity_init(&map, "map");
+	ecs_entity_add_component(&map, COMPONENT_TRANSFORM);
+	ecs_entity_add_component(&map, COMPONENT_SPRITE);
 
-	map_sprite_sheet = (SpriteSheet*)hashmap_get(sprite_sheet_hashmap, &(SpriteSheet){ .name="tiles" });
+	ecs_entity_get_transform(&map)->position = (vec3s){0.0f, 0.0f, 0.0f};
+	ecs_entity_get_transform(&map)->scale = (vec3s){1.0f, 1.0f, 1.0f};
+	
+	texture_atlas_init(&map_texture_atlas, "blocks.json");
 
-	add_texture_from_file(&ecs_get_sprite(map)->textures, "map", map_sprite_sheet->path);
+	texture2d_map_add_from_file(&ecs_entity_get_sprite(&map)->textures, "map", map_texture_atlas.path);
 
 	fill_map();
-	init_shader_program(&ecs_get_sprite(map)->shader_program, "shaders/map-vertex-shader.glsl", "shaders/map-fragment-shader.glsl");
-	init_vertex_attributes(&ecs_get_sprite(map)->vertex_attribs, map_tiles, sizeof(map_tiles), map_indices, sizeof(map_indices), true, false);
+	vertex_buffer_2d_init(&ecs_entity_get_sprite(&map)->vertex_buffer, map_tiles, sizeof(map_tiles), map_indices, sizeof(map_indices), true);
+	shader_init_from_file(&ecs_entity_get_sprite(&map)->shader, "shaders/map-vertex-shader.glsl", "shaders/map-fragment-shader.glsl");
 }
 
 static void draw_map()
 {
-	bind_shader_program(&ecs_get_sprite(map)->shader_program);
+	shader_bind(&ecs_entity_get_sprite(&map)->shader);
 
-	bind_texture(&shget(ecs_get_sprite(map)->textures, "map"));
+	texture2d_bind(&shget(ecs_entity_get_sprite(&map)->textures, "map"));
 
 	mat4s transform = GLMS_MAT4_IDENTITY_INIT;
 	transform = glms_scale(transform, (vec3s){{1.0f, 1.0f, 0.0f}});
 	transform = glms_translate(transform, (vec3s){{0.0f, 0.0f, 0.0f}});
 
-	uniform_mat4(&ecs_get_sprite(map)->shader_program, "projection", camera.projection_matrix);
-	uniform_mat4(&ecs_get_sprite(map)->shader_program, "view", camera.view_matrix);
-	uniform_mat4(&ecs_get_sprite(map)->shader_program, "transform", transform);
+	shader_uniform_mat4(&ecs_entity_get_sprite(&map)->shader, "projection", camera.projection_matrix);
+	shader_uniform_mat4(&ecs_entity_get_sprite(&map)->shader, "view", camera.view_matrix);
+	shader_uniform_mat4(&ecs_entity_get_sprite(&map)->shader, "transform", transform);
 
-	bind_vertex_buffer(&ecs_get_sprite(map)->vertex_attribs, VAO);
-
-	glDrawElements(GL_TRIANGLES, MAP_TILE_COUNT*6, GL_UNSIGNED_SHORT, 0);
-	
-	render_text("Starlight", 0.0f, 0.0f, 1.0f, "#ffffff", 1.0f, camera.projection_matrix, camera.view_matrix);
+	vertex_buffer_draw_indexed(&ecs_entity_get_sprite(&map)->vertex_buffer, PRIMITIVE_TRIANGLES, MAP_TILE_COUNT*6, 0);
 }
 
 // Scene
 static void init()
 {
-	current_window = &game_engine.current_window;
-
 	init_player();
 	init_map();
 
@@ -259,53 +224,59 @@ static void init()
 	camera.mouse_sensitivity = 0.1f;
 	camera.pitch = 0.0f;
 	camera.yaw = -90.0f;
-//	camera.camera_type = WALK_AROUND;
-	init_camera(&camera);
-
-	
-	imgui_io = ImGui_GetIO();
+	camera.camera_type = CAMERA_NO_MOVE;
+	init_camera(&camera);	
 }
 
 static void update()
 {
 	update_camera(&camera);
 
-	if(!input_state.keyPress)
+	bool moving = input_state.left || input_state.right || input_state.forward || input_state.backward;
+	float deltatime = engine_get_deltatime();
+	float speed = player_speed * deltatime;
+	vec3s* pos = &ecs_entity_get_transform(&player)->position;
+
+	if(!moving)
 	{
-		player_current_sprite_name = player_spritesheet->default_sprite;
+		player_current_sprite_name = player_texture_atlas.default_region_name;
 	}
 
-	if(input_state.up)
+	if(input_state.forward)
 	{
-		player->component_list.transform_component.position.y += player->component_list.transform_component.speed * game_engine.deltatime;
+		pos->y += speed;
 		player_current_sprite_name = "move-up";
 	}
-	if(input_state.down)
+	if(input_state.backward)
 	{
-		player->component_list.transform_component.position.y -= player->component_list.transform_component.speed * game_engine.deltatime;
+		pos->y -= speed;
 		player_current_sprite_name = "move-down";
 	}
 	if(input_state.left)
 	{
-		player->component_list.transform_component.position.x -= player->component_list.transform_component.speed * game_engine.deltatime;
+		pos->x -= speed;
 		player_current_sprite_name = "move-left";
 	}
 	if(input_state.right)
 	{
-		player->component_list.transform_component.position.x += player->component_list.transform_component.speed * game_engine.deltatime;
+		pos->x += speed;
 		player_current_sprite_name = "move-right";
 	}
 
-	move_camera(&camera, input_state, game_engine.deltatime);
+	move_camera(&camera, input_state);
 
-	camera.position.x = player->component_list.transform_component.position.x;
-	camera.position.y = player->component_list.transform_component.position.y;
+	camera.position.x = pos->x;
+	camera.position.y = pos->y;
+}
+
+static void build_ui()
+{
 }
 
 static void render()
 {
 #if defined(_PLATFORM_ANDROID) || defined(_PLATFORM_WEB)
-	ui_component_joystick("Input", "Joystick", joystick_box_size, joystick_radius, joystick_color, &joystick_angle, &is_joystick_active);
+	//ui_component_joystick("Input", "Joystick", joystick_box_size, joystick_radius, joystick_color, &joystick_angle, &is_joystick_active);
 #endif
 
 	draw_map();
@@ -314,22 +285,20 @@ static void render()
 
 static void process_input()
 {
-	InputSystem input_system = game_engine.current_window.input_system;
-
-	input_state.up = input_system.key_pressed_data[GLFW_KEY_UP] || input_system.key_pressed_data[GLFW_KEY_W];
-	input_state.down = input_system.key_pressed_data[GLFW_KEY_DOWN] || input_system.key_pressed_data[GLFW_KEY_S];
-	input_state.left = input_system.key_pressed_data[GLFW_KEY_LEFT] || input_system.key_pressed_data[GLFW_KEY_A];
-	input_state.right = input_system.key_pressed_data[GLFW_KEY_RIGHT] || input_system.key_pressed_data[GLFW_KEY_D];
-	input_state.space = input_system.key_pressed_data[GLFW_KEY_SPACE];
-	input_state.l_ctrl = input_system.key_pressed_data[GLFW_KEY_LEFT_CONTROL];
+	input_state.forward = window_input_key_is_down(INPUT_KEY_UP) || window_input_key_is_down(INPUT_KEY_W);
+	input_state.backward = window_input_key_is_down(INPUT_KEY_DOWN) || window_input_key_is_down(INPUT_KEY_S);
+	input_state.left = window_input_key_is_down(INPUT_KEY_LEFT) || window_input_key_is_down(INPUT_KEY_A);
+	input_state.right = window_input_key_is_down(INPUT_KEY_RIGHT) || window_input_key_is_down(INPUT_KEY_D);
+	input_state.up = window_input_key_is_down(INPUT_KEY_SPACE);
+	input_state.down = window_input_key_is_down(INPUT_KEY_LEFT_CONTROL);
 
 	// Joystick
 	if(is_joystick_active)
 	{
 		if(joystick_angle >= 315.0f || joystick_angle <= 45.0f) input_state.right = true;
-		else if(joystick_angle >= 45.0f && joystick_angle <= 135.0f) input_state.up = true;
+		else if(joystick_angle >= 45.0f && joystick_angle <= 135.0f) input_state.forward = true;
 		else if(joystick_angle >= 135.0f && joystick_angle <= 225.0f) input_state.left = true;
-		else if(joystick_angle >= 225.0f && joystick_angle <= 315.0f) input_state.down = true;
+		else if(joystick_angle >= 225.0f && joystick_angle <= 315.0f) input_state.backward = true;
 	}
 }
 
@@ -339,25 +308,28 @@ static void activate()
 
 static void deactivate()
 {
-	unbind_vertex_buffer_all();
-	unbind_shader_program();
+	vertex_buffer_unbind_all();
+	shader_unbind();
 	
-	texture_active_slot(GL_TEXTURE1);
-	unbind_texture();
+	texture_active_slot(TEXTURE_SLOT_1);
+	texture2d_unbind();
 
-	texture_active_slot(GL_TEXTURE0);
-	unbind_texture();
+	texture_active_slot(TEXTURE_SLOT_0);
+	texture2d_unbind();
 }
 
 static void destroy()
 {
-	destroy_textures_hashmap(&ecs_get_sprite(map)->textures);
-	destroy_shader_program(&ecs_get_sprite(map)->shader_program);
-	destroy_vertex_attributes(&ecs_get_sprite(map)->vertex_attribs, true);
+	texture2d_map_destroy(&ecs_entity_get_sprite(&map)->textures);
+	shader_destroy(&ecs_entity_get_sprite(&map)->shader);
+	vertex_buffer_destroy(&ecs_entity_get_sprite(&map)->vertex_buffer);
 	
-	destroy_textures_hashmap(&ecs_get_sprite(player)->textures);
-	destroy_vertex_attributes(&ecs_get_sprite(player)->vertex_attribs, true);
-	destroy_shader_program(&ecs_get_sprite(player)->shader_program);
+	texture2d_map_destroy(&ecs_entity_get_sprite(&player)->textures);
+	shader_destroy(&ecs_entity_get_sprite(&player)->shader);
+	vertex_buffer_destroy(&ecs_entity_get_sprite(&player)->vertex_buffer);
+
+	ecs_entity_destroy(&player);
+	ecs_entity_destroy(&map);
 }
 
-Scene scene_play = {"ScenePlay", init, destroy, activate, deactivate, update, render, process_input};
+Scene scene_play = {"ScenePlay", init, destroy, activate, deactivate, update, render, build_ui, process_input};
