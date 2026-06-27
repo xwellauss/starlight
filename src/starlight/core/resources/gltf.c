@@ -1,13 +1,13 @@
 #include "gltf.h"
 
 #include <starlight/platform/platform.h>
+#include <starlight/core/renderer/texture.h>
 #include <starlight/utils/logger.h>
 
 #include <stb_ds.h>
 #include <stb_image.h>
 #include <stdint.h>
 
-#include "../gl_platform.h"
 #include "cgltf.h"
 
 typedef struct
@@ -18,6 +18,30 @@ typedef struct
 	float metallic_factor;
 	float roughness_factor;
 } GLTF_Material;
+
+static TextureWrap cgltf_wrap_to_texture_wrap(cgltf_wrap_mode wrap)
+{
+	switch(wrap)
+    {
+        case cgltf_wrap_mode_clamp_to_edge:   return TEXTURE_WRAP_CLAMP;
+        case cgltf_wrap_mode_mirrored_repeat: return TEXTURE_WRAP_MIRRORED;
+        case cgltf_wrap_mode_repeat:          return TEXTURE_WRAP_REPEAT;
+    }
+}
+
+static TextureFilter cgltf_filter_to_texture_filter(cgltf_filter_type filter)
+{
+    switch(filter)
+    {
+        case cgltf_filter_type_nearest:
+        case cgltf_filter_type_nearest_mipmap_nearest:
+        case cgltf_filter_type_nearest_mipmap_linear:  return TEXTURE_FILTER_NEAREST;
+        case cgltf_filter_type_linear:
+        case cgltf_filter_type_linear_mipmap_nearest:
+        case cgltf_filter_type_linear_mipmap_linear:   return TEXTURE_FILTER_LINEAR;
+        default:                                       return TEXTURE_FILTER_LINEAR;
+    }
+}
 
 
 
@@ -190,7 +214,7 @@ static void gltf_parse_image(cgltf_image* image, Texture2D* texture)
 		int channels;
 		unsigned char* data = stbi_load_from_memory(image_data, image_size, &texture->width, &texture->height, &channels, 4);
 
-		texture2d_init_from_data(texture, 0, GL_RGBA, GL_RGBA, GL_UNSIGNED_BYTE, data);
+		texture2d_init_from_bytes(texture, TEXTURE_FORMAT_RGBA, data);
 
 		stbi_image_free(data);
 	}
@@ -203,10 +227,10 @@ static void gltf_parse_texture(Model* model, cgltf_texture* gltf_texture, size_t
 	if(gltf_texture->sampler)
 	{
 		texture.texture_config.is_init = true;
-		texture.texture_config.wrap_s = gltf_texture->sampler->wrap_s;
-		texture.texture_config.wrap_t = gltf_texture->sampler->wrap_t;
-		texture.texture_config.min_filter = gltf_texture->sampler->min_filter;
-		texture.texture_config.mag_filter = gltf_texture->sampler->mag_filter;
+		texture.texture_config.wrap_s = cgltf_wrap_to_texture_wrap(gltf_texture->sampler->wrap_s);
+		texture.texture_config.wrap_t = cgltf_wrap_to_texture_wrap(gltf_texture->sampler->wrap_t);
+		texture.texture_config.min_filter = cgltf_filter_to_texture_filter(gltf_texture->sampler->min_filter);
+		texture.texture_config.mag_filter = cgltf_filter_to_texture_filter(gltf_texture->sampler->mag_filter);
 	}
 
 	gltf_parse_image(gltf_texture->image, &texture);

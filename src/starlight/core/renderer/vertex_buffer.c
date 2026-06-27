@@ -3,6 +3,21 @@
 
 #include "../gl_platform.h"
 
+static GLenum attrib_type_to_gl(AttribType type)
+{
+	switch(type)
+    {
+        case ATTRIB_TYPE_FLOAT:  return GL_FLOAT;
+        case ATTRIB_TYPE_INT:    return GL_INT;
+        case ATTRIB_TYPE_UINT:   return GL_UNSIGNED_INT;
+        case ATTRIB_TYPE_BYTE:   return GL_BYTE;
+        case ATTRIB_TYPE_UBYTE:  return GL_UNSIGNED_BYTE;
+        case ATTRIB_TYPE_SHORT:  return GL_SHORT;
+        case ATTRIB_TYPE_USHORT: return GL_UNSIGNED_SHORT;
+        default:                 return GL_FLOAT;
+    }
+}
+
 void vertex_buffer_init_with_layout(VertexBuffer* vb, void* vertex_data, size_t vertex_data_size, void* index_data, size_t index_data_size, bool indexed, VertexLayout layout)
 {
 	vb->indexed = indexed;
@@ -17,7 +32,7 @@ void vertex_buffer_init_with_layout(VertexBuffer* vb, void* vertex_data, size_t 
 	for(int i = 0; i < layout.attrib_count; i++)
 	{
 		VertexAttrib* vat = &layout.attribs[i];
-		glVertexAttribPointer(vat->location, vat->count, vat->type, GL_FALSE, layout.stride, (void*)vat->offset);
+		glVertexAttribPointer(vat->location, vat->count, attrib_type_to_gl(vat->type), GL_FALSE, layout.stride, (void*)vat->offset);
 		glEnableVertexAttribArray(vat->location);
 	}
 
@@ -35,10 +50,10 @@ void vertex_buffer_3d_init(VertexBuffer* vb, void* vertex_data, size_t vertex_da
 {
 	VertexAttrib attribs[] =
 	{
-		{0, 3, GL_FLOAT, offsetof(Vertex3D, position)},
-		{1, 4, GL_FLOAT, offsetof(Vertex3D, color)},
-		{2, 2, GL_FLOAT, offsetof(Vertex3D, tex_coord)},
-		{3, 3, GL_FLOAT, offsetof(Vertex3D, normal)},
+		{0, 3, ATTRIB_TYPE_FLOAT, offsetof(Vertex3D, position)},
+		{1, 4, ATTRIB_TYPE_FLOAT, offsetof(Vertex3D, color)},
+		{2, 2, ATTRIB_TYPE_FLOAT, offsetof(Vertex3D, tex_coord)},
+		{3, 3, ATTRIB_TYPE_FLOAT, offsetof(Vertex3D, normal)},
 	};
 
 	VertexLayout layout = {attribs, 4, sizeof(Vertex3D)};
@@ -49,9 +64,9 @@ void vertex_buffer_2d_init(VertexBuffer* vb, void* vertex_data, size_t vertex_da
 {
 	VertexAttrib attribs[] =
 	{
-		{0, 2, GL_FLOAT, offsetof(Vertex2D, position)},
-		{1, 4, GL_FLOAT, offsetof(Vertex2D, color)},
-		{2, 2, GL_FLOAT, offsetof(Vertex2D, tex_coord)},
+		{0, 2, ATTRIB_TYPE_FLOAT, offsetof(Vertex2D, position)},
+		{1, 4, ATTRIB_TYPE_FLOAT, offsetof(Vertex2D, color)},
+		{2, 2, ATTRIB_TYPE_FLOAT, offsetof(Vertex2D, tex_coord)},
 	};
 
 	VertexLayout layout = {attribs, 3, sizeof(Vertex2D)};

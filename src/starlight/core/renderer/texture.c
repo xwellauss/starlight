@@ -7,14 +7,53 @@
 #include "../gl_platform.h"
 #include "starlight/platform/platform.h"
 
+static void texture_set_parameteri(GLenum target, GLenum pname, GLint param)
+{
+	glTexParameteri(target, pname, param);
+}
+
+static GLenum texture_format_to_gl(TextureFormat format)
+{
+	switch(format)
+	{
+		case TEXTURE_FORMAT_RGBA: return GL_RGBA;
+		case TEXTURE_FORMAT_RGB: return GL_RGB;
+		case TEXTURE_FORMAT_RED: return GL_RED;
+	}
+}
+
+static GLint texture_format_to_gl_internal(TextureFormat format)
+{
+	switch(format)
+	{
+		case TEXTURE_FORMAT_RGBA: return GL_RGBA8;
+		case TEXTURE_FORMAT_RGB: return GL_RGB8;
+		case TEXTURE_FORMAT_RED: return GL_R8;
+	}
+}
+
+static GLint texture_wrap_to_gl(TextureWrap wrap)
+{
+	switch(wrap)
+	{
+		case TEXTURE_WRAP_REPEAT: return GL_REPEAT;
+		case TEXTURE_WRAP_CLAMP: return GL_CLAMP_TO_EDGE;
+		case TEXTURE_WRAP_MIRRORED: return GL_MIRRORED_REPEAT;
+	}
+}
+
+static GLint texture_filter_to_gl(TextureFilter filter)
+{
+	switch(filter)
+	{
+		case TEXTURE_FILTER_NEAREST: return GL_NEAREST;
+		case TEXTURE_FILTER_LINEAR: return GL_LINEAR;
+	}
+}
+
 void texture_active_slot(TextureSlot slot)
 {
 	glActiveTexture(GL_TEXTURE0+slot);
-}
-
-void texture_set_parameteri(GLenum target, GLenum pname, GLint param)
-{
-	glTexParameteri(target, pname, param);
 }
 
 void texture2d_init_from_file(Texture2D* texture, const char* texture_path)
@@ -24,7 +63,6 @@ void texture2d_init_from_file(Texture2D* texture, const char* texture_path)
 	size_t buffer_size;
 	unsigned char* buffer = (unsigned char*)platform_read_file(texture_path, FILE_READ_BINARY, &buffer_size);
 
-	//unsigned char* texture_data = stbi_load(texture_path, &texture->width, &texture->height, &channels, 4);
 	int channels;
 	unsigned char* texture_data = stbi_load_from_memory(buffer, buffer_size, &texture->width, &texture->height, &channels, 4);
 	free(buffer);
@@ -34,30 +72,14 @@ void texture2d_init_from_file(Texture2D* texture, const char* texture_path)
 		log_error("Invalid Texture Data: %s\n", texture_path);
 	}
 
-	texture2d_init_from_data(texture, 0, GL_RGBA, GL_RGBA, GL_UNSIGNED_BYTE, texture_data);
+	texture2d_init_from_bytes(texture, TEXTURE_FORMAT_RGBA, texture_data);
 	
 	stbi_image_free(texture_data);
 }
 
-/*
-void texture2d_init_from_buffer(Texture2D* texture, int level, int internalformat, uint32_t format, uint32_t type, void* buffer, size_t buffer_size)
+void texture2d_init_from_bytes(Texture2D* texture, TextureFormat format, const unsigned char* texture_data)
 {
-	int channels;
-	unsigned char* texture_data = stbi_load_from_memory(buffer, buffer_size, &texture->width, &texture->height, &channels, 4);
-
-	if(!texture_data)
-	{
-		log_error("Invalid Texture Buffer\n");
-	}
-
-	texture2d_init(texture, 0, GL_RGBA, GL_RGBA, GL_UNSIGNED_BYTE, texture_data);
-
-	stbi_image_free(texture_data);
-}
-*/
-
-void texture2d_init_from_data(Texture2D* texture, int level, int internalformat, uint32_t format, uint32_t type, void* texture_data)
-{
+	glPixelStorei(GL_UNPACK_ALIGNMENT, 1); // disable byte-alignment restriction
 	texture_active_slot(TEXTURE_SLOT_0);
 
 	glGenTextures(1, &texture->texture_id);
@@ -65,26 +87,27 @@ void texture2d_init_from_data(Texture2D* texture, int level, int internalformat,
 
 	if(!texture->texture_config.is_init)
 	{
-		texture->texture_config.wrap_s = GL_REPEAT;
-		texture->texture_config.wrap_t = GL_REPEAT;
-		texture->texture_config.min_filter = GL_NEAREST;
-		texture->texture_config.mag_filter = GL_NEAREST;
+		texture->texture_config.wrap_s = TEXTURE_WRAP_REPEAT;
+		texture->texture_config.wrap_t = TEXTURE_WRAP_REPEAT;
+		texture->texture_config.min_filter = TEXTURE_FILTER_NEAREST;
+		texture->texture_config.mag_filter = TEXTURE_FILTER_NEAREST;
 	}
 
-	texture_set_parameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, texture->texture_config.wrap_s);
-	texture_set_parameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, texture->texture_config.wrap_t);
-	texture_set_parameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, texture->texture_config.min_filter);
-	texture_set_parameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, texture->texture_config.mag_filter);
+	texture_set_parameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, texture_wrap_to_gl(texture->texture_config.wrap_s));
+	texture_set_parameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, texture_wrap_to_gl(texture->texture_config.wrap_t));
+	texture_set_parameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, texture_filter_to_gl(texture->texture_config.min_filter));
+	texture_set_parameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, texture_filter_to_gl(texture->texture_config.mag_filter));
 
-	glTexImage2D(GL_TEXTURE_2D, level, internalformat, texture->width, texture->height, 0, format, type, texture_data);
-	glGenerateMipmap(GL_TEXTURE_2D);
+	glTexImage2D(GL_TEXTURE_2D, 0, texture_format_to_gl_internal(format), texture->width, texture->height, 0, texture_format_to_gl(format), GL_UNSIGNED_BYTE, texture_data);
+	// TODO: Handle mipmaps
+	//glGenerateMipmap(GL_TEXTURE_2D);
 
 	texture2d_unbind();
 }
 
-void texture2d_bind_id(GLuint texture_id)
+void texture2d_bind_id(unsigned int id)
 {
-	glBindTexture(GL_TEXTURE_2D, texture_id);
+	glBindTexture(GL_TEXTURE_2D, id);
 }
 
 void texture2d_bind(Texture2D* texture)
@@ -111,11 +134,11 @@ void texture2d_map_add_from_file(Texture2DHashMap* textures, const char* texture
 	shput(*textures, texture_name, texture);
 }
 
-void texture2d_map_add_from_data(Texture2DHashMap* textures, const char* texture_name, GLint level, GLint internalformat, GLenum format, GLenum type, void* texture_data)
+void texture2d_map_add_from_bytes(Texture2DHashMap* textures, const char* texture_name, uint32_t format, const unsigned char* texture_data)
 {
 	Texture2D texture = {};
 
-	texture2d_init_from_data(&texture, level, internalformat, format, type, texture_data);
+	texture2d_init_from_bytes(&texture, format, texture_data);
 
 	shput(*textures, texture_name, texture);
 

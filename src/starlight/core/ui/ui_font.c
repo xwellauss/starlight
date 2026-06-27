@@ -6,7 +6,6 @@
 #include <starlight/platform/platform.h>
 
 #include "ui_font_internal.h"
-#include "../gl_platform.h"
 
 #include <stb_rect_pack.h>
 #include <stb_truetype.h>
@@ -50,17 +49,16 @@ void ui_font_init(const char* filepath, int atlas_w, int atlas_h, float backed_f
 
 	// Upload to Textures
 	
-	glPixelStorei(GL_UNPACK_ALIGNMENT, 1); // disable byte-alignment restriction
 
 	font_atlas.texture.width = font_atlas.width;
 	font_atlas.texture.height = font_atlas.height;
 	font_atlas.texture.texture_config.is_init = true;
-	font_atlas.texture.texture_config.wrap_s = GL_CLAMP_TO_EDGE;
-	font_atlas.texture.texture_config.wrap_t = GL_CLAMP_TO_EDGE;
-	font_atlas.texture.texture_config.min_filter = GL_NEAREST;
-	font_atlas.texture.texture_config.mag_filter = GL_NEAREST;
+	font_atlas.texture.texture_config.wrap_s = TEXTURE_WRAP_CLAMP;
+	font_atlas.texture.texture_config.wrap_t = TEXTURE_WRAP_CLAMP;
+	font_atlas.texture.texture_config.min_filter = TEXTURE_FILTER_NEAREST;
+	font_atlas.texture.texture_config.mag_filter = TEXTURE_FILTER_NEAREST;
 	
-	texture2d_init_from_data(&font_atlas.texture, 0, GL_R8, GL_RED, GL_UNSIGNED_BYTE, atlas_buffer);
+	texture2d_init_from_bytes(&font_atlas.texture, TEXTURE_FORMAT_RED, atlas_buffer);
 
 	free(atlas_buffer);
 	free(font_file_buffer);

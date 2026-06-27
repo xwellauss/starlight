@@ -17,11 +17,22 @@ typedef enum
 	PRIMITIVE_POINTS
 } DrawPrimitive;
 
+typedef enum
+{
+	ATTRIB_TYPE_FLOAT,
+    ATTRIB_TYPE_INT,
+    ATTRIB_TYPE_UINT,
+    ATTRIB_TYPE_BYTE,
+    ATTRIB_TYPE_UBYTE,
+    ATTRIB_TYPE_SHORT,
+    ATTRIB_TYPE_USHORT
+} AttribType;
+
 typedef struct
 {
 	int location;
 	int count;
-	uint32_t type;
+	AttribType type;
 	size_t offset;
 } VertexAttrib;
 

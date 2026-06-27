@@ -7,8 +7,6 @@
 
 #include <stb_ds.h>
 
-#include "starlight/core/renderer/texture.h"
-#include "starlight/core/renderer/vertex_buffer.h"
 #include "ui_font.h"
 #include "ui_font_internal.h"
 #include "ui_shaders.h"
@@ -156,13 +154,13 @@ void ui_backend_init()
 	{
 		VertexAttrib attribs[] =
 		{
-			{0, 2, GL_FLOAT, offsetof(RectVertex, position)},
-			{1, 4, GL_FLOAT, offsetof(RectVertex, color)},
-			{2, 2, GL_FLOAT, offsetof(RectVertex, norm_pos)},
-			{3, 2, GL_FLOAT, offsetof(RectVertex, rect_pos)},
-			{4, 2, GL_FLOAT, offsetof(RectVertex, rect_size)},
-			{5, 4, GL_FLOAT, offsetof(RectVertex, corner_radius)},
-			{6, 4, GL_FLOAT, offsetof(RectVertex, border_width)},
+			{0, 2, ATTRIB_TYPE_FLOAT, offsetof(RectVertex, position)},
+			{1, 4, ATTRIB_TYPE_FLOAT, offsetof(RectVertex, color)},
+			{2, 2, ATTRIB_TYPE_FLOAT, offsetof(RectVertex, norm_pos)},
+			{3, 2, ATTRIB_TYPE_FLOAT, offsetof(RectVertex, rect_pos)},
+			{4, 2, ATTRIB_TYPE_FLOAT, offsetof(RectVertex, rect_size)},
+			{5, 4, ATTRIB_TYPE_FLOAT, offsetof(RectVertex, corner_radius)},
+			{6, 4, ATTRIB_TYPE_FLOAT, offsetof(RectVertex, border_width)},
 		};
 
 		VertexLayout layout = {attribs, 7, sizeof(RectVertex)};
