@@ -2,7 +2,7 @@
 #include <starlight/utils/logger.h>
 #include <starlight/platform/platform.h>
 
-#include "../gl_platform.h"
+#include "gl_platform.h"
 
 static void shader_check_for_errors(unsigned int id, int status)
 {

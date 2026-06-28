@@ -11,10 +11,6 @@
 #include "ui_font_internal.h"
 #include "ui_shaders.h"
 
-// TODO: Maybe remove thuis, i.e remove opengl specific code
-#include "../gl_platform.h"
-
-
 #define MAX_RECTS 1024
 #define MAX_GLYPHS 4096
 
@@ -75,6 +71,7 @@ static void flush_glyphs()
 	shader_bind(&glyph_shader);
 	
 	texture_active_slot(TEXTURE_SLOT_0);
+	shader_uniform_int(&glyph_shader, "sampler", 0);
 	texture2d_bind(&font_atlas.texture);
 
 	vertex_buffer_update(&glyph_vertex_buffer, glyph_vertex_data, glyph_count*sizeof(GlyphQuad), 0);
@@ -183,12 +180,9 @@ void ui_backend_render(Clay_RenderCommandArray cmds)
 	shader_uniform_mat4(&glyph_shader, "projection", projection);
 	shader_unbind();
 
-	GLboolean depth_test_was_enabled = glIsEnabled(GL_DEPTH_TEST);
-    GLboolean depth_mask;
-    glGetBooleanv(GL_DEPTH_WRITEMASK, &depth_mask);
-
-	glDisable(GL_DEPTH_TEST);
-    glDepthMask(GL_FALSE);
+	RendererState r_state = renderer_save_state();
+	renderer_set_depth_test(false);
+	renderer_set_depth_write(false);
 
 	for(int i = 0; i < cmds.length; i++)
 	{
@@ -285,6 +279,7 @@ void ui_backend_render(Clay_RenderCommandArray cmds)
 				shader_bind(&rect_shader);
 				shader_uniform_int(&rect_shader, "has_texture", true);
 				texture_active_slot(TEXTURE_SLOT_0);
+				shader_uniform_int(&rect_shader, "sampler", 0);
 				texture2d_bind(texture);
 				flush_rects();
 				shader_bind(&rect_shader);
@@ -326,22 +321,20 @@ void ui_backend_render(Clay_RenderCommandArray cmds)
 			{
 				if(cmd->commandType == CLAY_RENDER_COMMAND_TYPE_SCISSOR_START)
 				{
-					GLint x = (GLint)bounding_box.x;
-					GLint y = (GLint)(window_height - (bounding_box.y + bounding_box.height));
+					int x = (int)bounding_box.x;
+					int y = (int)(window_height - (bounding_box.y + bounding_box.height));
 
-					glEnable(GL_SCISSOR_TEST);
-					glScissor(x, y, (GLsizei)bounding_box.width, (GLsizei)bounding_box.height);
+					renderer_scissor_begin(x, y, (size_t)bounding_box.width, (size_t)bounding_box.height);
 				}
 				else
 				{
-					glDisable(GL_SCISSOR_TEST);
+					renderer_scissor_end();
 				}
 			}
 		}
 	}
 
-	if (depth_test_was_enabled) glEnable(GL_DEPTH_TEST);
-	glDepthMask(depth_mask);
+	renderer_restore_state(r_state);
 }
 
 void ui_backend_destroy()

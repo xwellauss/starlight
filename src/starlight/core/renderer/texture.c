@@ -1,11 +1,11 @@
 #include <starlight/core/renderer/texture.h>
+#include <starlight/platform/platform.h>
 #include <starlight/utils/logger.h>
 
 #include <stb_ds.h>
 #include <stb_image.h>
 
-#include "../gl_platform.h"
-#include "starlight/platform/platform.h"
+#include "gl_platform.h"
 
 static void texture_set_parameteri(GLenum target, GLenum pname, GLint param)
 {

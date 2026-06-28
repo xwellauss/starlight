@@ -9,10 +9,6 @@
 #include <starlight/utils/logger.h>
 #include <starlight/utils/math_utils.h>
 
-#include "gl_platform.h"
-
-#include <stb_ds.h>
-
 typedef struct
 {
 	float deltatime;
@@ -46,7 +42,7 @@ static void engine_render_frame()
 	scene_manager_scene_process_input();
 	scene_manager_scene_update();
 
-	window_clear();
+	renderer_clear_buffer();
 
 	scene_manager_scene_render();
 
@@ -68,7 +64,7 @@ bool engine_init(EngineConfig e_config)
 	window_config.height = engine_config.window_height;
 
 	window_init(window_config);
-	window_change_bgcolor(hex_to_rgb("#333333", 0.5f));	
+	renderer_set_bg_color(hex_to_rgb("#333333", 0.5f));	
 
 	ecs_init();
 

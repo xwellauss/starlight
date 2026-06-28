@@ -1,5 +1,6 @@
 #include <starlight/core/window/window.h>
 #include <starlight/core/window/input.h>
+#include <starlight/core/renderer/renderer.h>
 #include <starlight/utils/logger.h>
 
 #include <GLFW/glfw3.h>
@@ -8,13 +9,23 @@
 	#include <GLFW/glfw3native.h>
 #endif
 
-#include "../gl_platform.h"
 #include "internal.h"
 
 #include <string.h>
 
 
 Window window = {0};
+
+static int cursor_mode_to_glfw(WindowCursorMode mode)
+{
+	switch(mode)
+	{
+		case CURSOR_MODE_NORMAL:   return GLFW_CURSOR_NORMAL;
+        case CURSOR_MODE_HIDDEN:   return GLFW_CURSOR_HIDDEN;
+        case CURSOR_MODE_DISABLED: return GLFW_CURSOR_DISABLED;
+        default:                   return GLFW_CURSOR_NORMAL;
+	}
+}
 
 static void GLFW_error_callback(int errorcode, const char* error_description)
 {
@@ -48,7 +59,7 @@ static void mouse_button_callback(GLFWwindow* handle, int button, int action, in
 {
 	InputMouseButton input_mouse_btn = glfw_mouse_btn_to_input_mouse_btn(button);
 
-	if(button < 0 || button >= GLFW_KEY_LAST) return;
+	if(button < 0 || button >= GLFW_MOUSE_BUTTON_LAST) return;
 
 	if(action == GLFW_PRESS)
 	{
@@ -71,7 +82,7 @@ static void framebuffer_size_callback(GLFWwindow* handle, int width, int height)
 	window.config.width = width;
 	window.config.height = height;
 
-	glViewport(0, 0, width, height);
+	renderer_set_viewport(0, 0, window.config.width, window.config.height);
 }
 
 void window_init(WindowConfig window_config)
@@ -112,27 +123,20 @@ void window_init(WindowConfig window_config)
 	glfwMakeContextCurrent(window.handle);
 	glfwSwapInterval(1);
 
-#if defined(_PLATFORM_DESKTOP)
-	gladLoadGLES2(glfwGetProcAddress);
-#endif
-
 #if defined(_PLATFORM_ANDROID)
 	window.config.width = ANativeWindow_getWidth(glfwGetAndroidApp()->window);
 	window.config.height = ANativeWindow_getHeight(glfwGetAndroidApp()->window);
 	glfwSetWindowSize(window.handle, window.config.width, window.config.height);
-#endif
+#endif	
 	
-	glViewport(0, 0, window.config.width, window.config.height);
+	renderer_init();
+	renderer_set_viewport(0, 0, window.config.width, window.config.height);
 
 	glfwSetKeyCallback(window.handle, key_callback);
 	glfwSetCursorPosCallback(window.handle, mouse_callback);
 	glfwSetMouseButtonCallback(window.handle, mouse_button_callback);
 	glfwSetScrollCallback(window.handle, scroll_callback);
 	glfwSetFramebufferSizeCallback(window.handle, framebuffer_size_callback);
-
-	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-	glEnable(GL_BLEND);
-	glEnable(GL_DEPTH_TEST);
 }
 
 double window_get_time()
@@ -148,11 +152,6 @@ void window_poll_events()
 	window.input_system.mouse_moved = false;
 
 	glfwPollEvents();
-}
-
-void window_clear()
-{
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 }
 
 void window_swap_buffers()
@@ -174,31 +173,9 @@ int window_is_valid()
 #endif
 }
 
-void window_change_bgcolor(vec4s color)
-{
-	glClearColor(color.r, color.g, color.b, color.a);
-}
-
 void window_set_cursor_mode(WindowCursorMode mode)
 {
-	switch(mode)
-	{
-	case CURSOR_MODE_NORMAL:
-	{
-		glfwSetInputMode(window.handle, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
-		break;
-	}
-	case CURSOR_MODE_HIDDEN:
-	{
-		glfwSetInputMode(window.handle, GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
-		break;
-	}
-	case CURSOR_MODE_DISABLED:
-	{
-		glfwSetInputMode(window.handle, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
-		break;
-	}
-	}
+	glfwSetInputMode(window.handle, GLFW_CURSOR, cursor_mode_to_glfw(mode));
 }
 
 int window_get_width()

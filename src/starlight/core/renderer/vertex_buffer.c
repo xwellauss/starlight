@@ -1,7 +1,7 @@
 #include <starlight/core/renderer/vertex_buffer.h>
 #include <starlight/utils/logger.h>
 
-#include "../gl_platform.h"
+#include "gl_platform.h"
 
 static GLenum attrib_type_to_gl(AttribType type)
 {

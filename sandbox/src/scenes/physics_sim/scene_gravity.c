@@ -142,7 +142,7 @@ static void render()
 	//ui_component_joystick("Input", "Joystick", joystick_box_size, joystick_radius, joystick_color, &joystick_angle, &is_joystick_active);
 #endif
 	
-	window_change_bgcolor(hex_to_rgb("#111111", 1.0f));
+	renderer_set_bg_color(hex_to_rgb("#111111", 1.0f));
 	
 	render_planet_model(&planet1_entity);
 	render_planet_model(&planet2_entity);

@@ -5,6 +5,7 @@
 #include <starlight/core/window/window.h>
 #include <starlight/core/window/input.h>
 #include <starlight/core/camera.h>
+#include <starlight/core/renderer/renderer.h>
 #include <starlight/core/resources/texture_atlas.h>
 #include <starlight/utils/logger.h>
 
@@ -315,7 +316,7 @@ static void render()
 	background_color.r = 0.5f + 0.5f * sin(frequency * window_get_time());
 	background_color.b = 0.5f + 0.5f * sin(frequency * window_get_time() + 2.0f * M_PI / 3.0f);
 	background_color.g = 0.5f + 0.5f * sin(frequency * window_get_time() + 4.0f * M_PI / 3.0f);
-	window_change_bgcolor(background_color);
+	renderer_set_bg_color(background_color);
 	
 	texture_active_slot(TEXTURE_SLOT_0);
 	texture2d_bind(&shget(ecs_entity_get_sprite(&chunk)->textures, "block"));

@@ -1,5 +1,4 @@
 #include "scene_model.h"
-#include "starlight/core/renderer/vertex_buffer.h"
 
 #include <starlight/core/engine.h>
 #include <starlight/core/ecs.h>
@@ -128,7 +127,7 @@ static void render()
 	//ui_component_joystick("Input", "Joystick", joystick_box_size, joystick_radius, joystick_color, &joystick_angle, &is_joystick_active);
 #endif
 
-	window_change_bgcolor(hex_to_rgb("#222222", 1.0f));
+	renderer_set_bg_color(hex_to_rgb("#222222", 1.0f));
 	
 	// Light Cube
 	mat4s light_source_transform = glms_mat4_identity();

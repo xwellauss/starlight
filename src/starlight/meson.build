@@ -8,6 +8,7 @@ starlight_src = files(
   'core/scene/scene_manager.c',
   'core/window/window.c',
   'core/window/input.c',
+  'core/renderer/renderer.c',
   'core/renderer/shader.c',
   'core/renderer/texture.c',
   'core/renderer/vertex_buffer.c',

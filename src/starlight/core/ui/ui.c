@@ -7,8 +7,8 @@
 
 #include "ui_font.h"
 #include "ui_backend.h"
-#include "../gl_platform.h"
 
+#include <stdbool.h>
 #include <stdint.h>
 
 #include <clay.h>
@@ -28,9 +28,17 @@ static Clay_Color hex_to_clay_color(char colorcode[7], float alpha)
 	return clay_color;
 }
 
-void handle_clay_errors(Clay_ErrorData error_data)
+static void handle_clay_errors(Clay_ErrorData error_data)
 {
 	log_debug("Clay Error: %s", error_data.errorText.chars);
+}
+
+static void toggle_debug_mode()
+{
+	static bool enabled = false;
+	enabled = !enabled;
+
+	Clay_SetDebugModeEnabled(enabled);
 }
 
 
@@ -49,12 +57,12 @@ void ui_init(const char* font_path)
 	
 	ui_font_init(font_path, 1024, 1024, 45.0f);
 	ui_backend_init();
-
-	Clay_SetDebugModeEnabled(false);
 }
 
 void ui_process_input()
 {
+	if(window_input_key_just_pressed(INPUT_KEY_B)) toggle_debug_mode();
+
 	Clay_Vector2 mouse_pos = {window_input_mouse_get_position().x, window_input_mouse_get_position().y};
 	vec2s mouse_scroll_delta = window_input_mouse_get_scroll();
     bool mouse_pressed = window_input_mouse_btn_is_down(INPUT_MOUSE_BUTTON_LEFT);	
