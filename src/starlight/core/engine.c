@@ -12,6 +12,7 @@
 typedef struct
 {
 	float deltatime;
+	EngineConfig config;
 } Engine;
 
 // Delta Time
@@ -19,7 +20,6 @@ static float current_frame = 0.0f;
 static float last_frame = 0.0f;
 
 Engine engine = {0};
-static EngineConfig engine_config;
 
 float engine_get_deltatime()
 {
@@ -55,24 +55,24 @@ static void engine_render_frame()
 
 bool engine_init(EngineConfig e_config)
 {
-	engine_config = e_config;
+	engine.config = e_config;
 
 	WindowConfig window_config;
 
-	window_config.title = engine_config.window_title;
-	window_config.width = engine_config.window_width;
-	window_config.height = engine_config.window_height;
+	window_config.title = engine.config.window_title;
+	window_config.width = engine.config.window_width;
+	window_config.height = engine.config.window_height;
 
 	window_init(window_config);
-	renderer_set_bg_color(hex_to_rgb("#333333", 0.5f));	
+	renderer_set_bg_color(hex_to_rgb("#333333", 1.0f));	
 
 	ecs_init();
 
-	if(engine_config.enable_ui) ui_init(engine_config.font_path);
+	if(engine.config.enable_ui) ui_init(engine.config.font_path);
 
-	if(engine_config.enable_network) network_init();
+	if(engine.config.enable_network) network_init();
 
-	if(engine_config.enable_audio) audio_init();
+	if(engine.config.enable_audio) audio_init();
 
 	return true;
 }
@@ -91,13 +91,13 @@ void engine_run()
 
 void engine_destroy()
 {
-	if(engine_config.enable_network) network_destroy();
-	if(engine_config.enable_audio) audio_destroy();
+	if(engine.config.enable_network) network_destroy();
+	if(engine.config.enable_audio) audio_destroy();
 
 	ecs_destroy();
 
 	scene_manager_destroy_all_scenes();
 
-	if(engine_config.enable_ui) ui_destroy();
+	if(engine.config.enable_ui) ui_destroy();
 	window_destroy();
 }

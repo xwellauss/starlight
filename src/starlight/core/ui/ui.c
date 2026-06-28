@@ -8,8 +8,8 @@
 #include "ui_font.h"
 #include "ui_backend.h"
 
-#include <stdbool.h>
 #include <stdint.h>
+#include <string.h>
 
 #include <clay.h>
 
@@ -39,6 +39,15 @@ static void toggle_debug_mode()
 	enabled = !enabled;
 
 	Clay_SetDebugModeEnabled(enabled);
+}
+
+static void button_on_hover_callback(Clay_ElementId id, Clay_PointerData pointer, void* user_data)
+{
+	bool* clicked = (bool*)user_data;
+	if(pointer.state == CLAY_POINTER_DATA_PRESSED_THIS_FRAME)
+	{
+		*clicked = true;
+	}
 }
 
 
@@ -82,6 +91,26 @@ void ui_begin_frame()
 void ui_render_frame()
 {
 	ui_backend_render(Clay_EndLayout(engine_get_deltatime()*1000.0f));
+}
+
+void ui_button(const char* label, bool* clicked)
+{
+	Clay_String clay_label = { .length = strlen(label), .chars = label};
+
+	CLAY_AUTO_ID({
+		.layout = {.padding=CLAY_PADDING_ALL(8)},
+		.backgroundColor = Clay_Hovered() ? hex_to_clay_color("#746030", 1.0f) : hex_to_clay_color("#9a8040", 1.0f),
+		.cornerRadius = CLAY_CORNER_RADIUS(4)
+	})
+	{
+		Clay_OnHover(button_on_hover_callback, clicked);
+		bool pressing = Clay_Hovered() && window_input_mouse_btn_is_down(INPUT_MOUSE_BUTTON_LEFT);
+		CLAY_TEXT(clay_label, CLAY_TEXT_CONFIG({
+			.fontId = 0,
+			.fontSize = 16,
+			.textColor = pressing ? hex_to_clay_color("#aaaaaa", 1.0f) : hex_to_clay_color("#ffffff", 1.0f),
+		}));
+	}
 }
 
 void ui_destroy()
