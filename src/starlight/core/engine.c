@@ -9,6 +9,11 @@
 #include <starlight/utils/logger.h>
 #include <starlight/utils/math_utils.h>
 
+#if defined(_PLATFORM_WEB)
+	#include <emscripten.h>
+	#include <emscripten/html5.h>
+#endif
+
 typedef struct
 {
 	float deltatime;

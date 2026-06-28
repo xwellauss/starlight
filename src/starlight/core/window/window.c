@@ -1,10 +1,16 @@
 #include <starlight/core/window/window.h>
 #include <starlight/core/window/input.h>
 #include <starlight/core/renderer/renderer.h>
+#include <starlight/platform/platform.h>
 #include <starlight/utils/logger.h>
 
 #include <GLFW/glfw3.h>
-#if defined(_PLATFORM_ANDROID)
+
+#if defined(_PLATFORM_WEB)
+	#include <emscripten.h>
+	#include <emscripten/html5.h>
+#elif defined(_PLATFORM_ANDROID)
+	#include <android/native_window.h>
 	#define GLFW_EXPOSE_NATIVE_ANDROID
 	#include <GLFW/glfw3native.h>
 #endif
@@ -89,18 +95,6 @@ void window_init(WindowConfig window_config)
 {
 	window.config = window_config;
 
-#if defined(_PLATFORM_WEB)
-	window.config.width = 1920;
-	window.config.height = 1080;
-
-	emscripten_request_fullscreen_strategy("canvas", true, &(EmscriptenFullscreenStrategy)
-	{
-		.scaleMode=EMSCRIPTEN_FULLSCREEN_SCALE_DEFAULT,
-		.canvasResolutionScaleMode=EMSCRIPTEN_FULLSCREEN_CANVAS_SCALE_NONE,
-		.filteringMode=EMSCRIPTEN_FULLSCREEN_FILTERING_NEAREST
-	});
-#endif
-
 	glfwSetErrorCallback(GLFW_error_callback);
 
 	glfwInit();
@@ -123,11 +117,22 @@ void window_init(WindowConfig window_config)
 	glfwMakeContextCurrent(window.handle);
 	glfwSwapInterval(1);
 
-#if defined(_PLATFORM_ANDROID)
+#if defined(_PLATFORM_WEB)
+	window.config.width = 1920;
+	window.config.height = 1080;
+
+	emscripten_request_fullscreen_strategy("canvas", true, &(EmscriptenFullscreenStrategy)
+	{
+		.scaleMode=EMSCRIPTEN_FULLSCREEN_SCALE_DEFAULT,
+		.canvasResolutionScaleMode=EMSCRIPTEN_FULLSCREEN_CANVAS_SCALE_NONE,
+		.filteringMode=EMSCRIPTEN_FULLSCREEN_FILTERING_NEAREST
+	});
+#elif defined(_PLATFORM_ANDROID)
 	window.config.width = ANativeWindow_getWidth(glfwGetAndroidApp()->window);
 	window.config.height = ANativeWindow_getHeight(glfwGetAndroidApp()->window);
+#endif
+	
 	glfwSetWindowSize(window.handle, window.config.width, window.config.height);
-#endif	
 	
 	renderer_init();
 	renderer_set_viewport(0, 0, window.config.width, window.config.height);
