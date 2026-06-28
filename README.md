@@ -1,6 +1,6 @@
 # starlight
 
-A lightweight graphics framework written in C. Supports Desktop, Web and Android.
+A graphics framework written in C. Supports Desktop, Web and Android.
 
 
 ## Building the Project
