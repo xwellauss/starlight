@@ -1,4 +1,4 @@
-#include "ui_backend.h"
+#include "internal.h"
 
 #include <starlight/core/renderer/renderer.h>
 #include <starlight/core/window/window.h>
@@ -7,9 +7,7 @@
 
 #include <stb_ds.h>
 
-#include "ui_font.h"
-#include "ui_font_internal.h"
-#include "ui_shaders.h"
+#include "shaders.h"
 
 #define MAX_RECTS 1024
 #define MAX_GLYPHS 4096

@@ -1,36 +1,48 @@
 #include <starlight/core/ui/ui.h>
+#include <starlight/core/ui/style.h>
 #include <starlight/core/window/window.h>
 #include <starlight/core/window/input.h>
 #include <starlight/core/engine.h>
 #include <starlight/utils/logger.h>
 #include <starlight/utils/math_utils.h>
 
-#include "ui_font.h"
-#include "ui_backend.h"
+#include "internal.h"
 
 #include <stdint.h>
 #include <string.h>
 
 #include <clay.h>
 
-static float window_width, window_height;
+#define MAX_UI_NODES 512
+#define MAX_STACK_DEPTH 32
+#define MAX_CHILDREN 32
 
-static Clay_Color hex_to_clay_color(char colorcode[7], float alpha)
+typedef struct UINode
 {
-	vec4s color_vec = hex_to_rgb(colorcode, alpha);
+	UINodeType type;
+	const char* label;
 
-	Clay_Color clay_color;
-	clay_color.r = color_vec.r * 255.0f;
-	clay_color.g = color_vec.g * 255.0f;
-	clay_color.b = color_vec.b * 255.0f;
-	clay_color.a = color_vec.a * 255.0f;
+	struct UINode* children[MAX_CHILDREN];
+	int child_count;
 
-	return clay_color;
-}
+	UIStyleResolved* style;
+
+	void* user_data;
+} UINode;
+
+static UINode node_pool[MAX_UI_NODES];
+static int node_count;
+
+static UINode* parent_stack[MAX_STACK_DEPTH]; // stack for tracking parent containers
+static int stack_cursor;
+
+static UINode root_node;
+
+static float window_width, window_height;
 
 static void handle_clay_errors(Clay_ErrorData error_data)
 {
-	log_debug("Clay Error: %s", error_data.errorText.chars);
+	log_debug("UI: Clay Error: %s\n", error_data.errorText.chars);
 }
 
 static void toggle_debug_mode()
@@ -41,12 +53,115 @@ static void toggle_debug_mode()
 	Clay_SetDebugModeEnabled(enabled);
 }
 
-static void button_on_hover_callback(Clay_ElementId id, Clay_PointerData pointer, void* user_data)
+static UINode* get_current_parent()
 {
-	bool* clicked = (bool*)user_data;
+	if(stack_cursor < 0) return NULL;
+	return parent_stack[stack_cursor];
+}
+
+static UINode* append_node(UINodeType type, const char* label)
+{
+	if(node_count >= MAX_UI_NODES) return NULL;
+
+	UINode* parent = get_current_parent();
+	if(parent && parent->child_count >= MAX_CHILDREN)
+	{
+		return NULL;
+	}
+
+	UINode* node = &node_pool[node_count++];
+	node->type = type;
+	node->label = label;
+	node->child_count = 0;
+	node->style = ui_style_get_current(type);
+
+	if(parent)
+	{
+		parent->children[parent->child_count++] = node;
+	}
+
+	return node;
+}
+
+static void interactive_hover_callback(Clay_ElementId id, Clay_PointerData pointer, void* user_data)
+{
+	if(!user_data) return;
+
+	UINode* node = (UINode*)user_data;
+
 	if(pointer.state == CLAY_POINTER_DATA_PRESSED_THIS_FRAME)
 	{
+		bool* clicked = (bool*)node->user_data;
+		if(!clicked) return;
+
 		*clicked = true;
+	}
+}
+
+static void execute_clay_node(UINode* node)
+{
+	if(!node) return;
+
+	Clay_String clay_label = { .length = strlen(node->label), .chars = node->label};
+	UIStyleResolved* node_style = node->style;
+
+	switch(node->type)
+	{
+		case UI_NODE_CONTAINER:
+		{
+			CLAY(Clay_GetElementId(clay_label), {
+				.layout = {.padding = node_style->base.padding},
+				.backgroundColor = node_style->is_interactive ? ((Clay_Hovered()) ? (window_input_mouse_btn_is_down(INPUT_MOUSE_BUTTON_LEFT) ? node_style->interactive.bg_press_color : node_style->interactive.bg_hover_color) : node_style->base.bg_color) : node_style->base.bg_color,
+				.cornerRadius = node_style->base.corner_radius
+			})
+			{
+				if(node_style->is_interactive)
+				{
+					Clay_OnHover(interactive_hover_callback, node);
+				}
+
+				for(int i = 0; i < node->child_count; i++)
+				{
+					execute_clay_node(node->children[i]);
+				}
+			}
+			break;
+		}
+		case UI_NODE_TEXT:
+		{
+			CLAY_AUTO_ID({
+				.layout = {.padding=node_style->base.padding},
+			})
+			{
+				CLAY_TEXT(clay_label, CLAY_TEXT_CONFIG({
+					.fontId = 0,
+					.fontSize = node_style->base.font_size,
+					.textColor = node_style->is_interactive ? ((Clay_Hovered()) ? (window_input_mouse_btn_is_down(INPUT_MOUSE_BUTTON_LEFT) ? node_style->interactive.fg_press_color : node_style->interactive.fg_hover_color) : node_style->base.fg_color) : node_style->base.fg_color,
+				}));
+			}
+
+			break;
+		}
+		case UI_NODE_BUTTON:
+		{
+			CLAY_AUTO_ID({
+					.layout = {.padding=node_style->base.padding},
+					.backgroundColor = ((Clay_Hovered()) ? (window_input_mouse_btn_is_down(INPUT_MOUSE_BUTTON_LEFT) ? node_style->interactive.bg_press_color : node_style->interactive.bg_hover_color) : node_style->base.bg_color),
+					.cornerRadius = node_style->base.corner_radius
+				})
+				{
+					Clay_OnHover(interactive_hover_callback, node);
+
+					CLAY_TEXT(clay_label, CLAY_TEXT_CONFIG({
+						.fontId = 0,
+						.fontSize = node_style->base.font_size,
+						.textColor = ((Clay_Hovered()) ? (window_input_mouse_btn_is_down(INPUT_MOUSE_BUTTON_LEFT) ? node_style->interactive.fg_press_color : node_style->interactive.fg_hover_color) : node_style->base.fg_color),
+					}));
+				}
+
+			break;
+		}
+		default: break;
 	}
 }
 
@@ -55,6 +170,8 @@ void ui_init(const char* font_path)
 {
 	window_width = (float)window_get_width();
 	window_height = (float)window_get_height();
+
+	ui_style_init();
 
 	size_t clay_required_memory = Clay_MinMemorySize();
 	Clay_Arena clay_arena = Clay_CreateArenaWithCapacityAndMemory(clay_required_memory, malloc(clay_required_memory));
@@ -66,6 +183,12 @@ void ui_init(const char* font_path)
 	
 	ui_font_init(font_path, 1024, 1024, 45.0f);
 	ui_backend_init();
+}
+
+void ui_destroy()
+{
+	ui_font_destroy();
+	ui_backend_destroy();
 }
 
 void ui_process_input()
@@ -85,36 +208,61 @@ void ui_process_input()
 
 void ui_begin_frame()
 {
-	Clay_BeginLayout();
+	node_count = 0;
+	stack_cursor = 0;
+
+	root_node.child_count = 0;
+
+	parent_stack[stack_cursor] = &root_node;
+
+	ui_style_stack_reset();
 }
 
 void ui_render_frame()
 {
+	Clay_BeginLayout();
+
+	for(int i = 0; i < root_node.child_count; i++)
+	{
+		execute_clay_node(root_node.children[i]);
+	}
+
 	ui_backend_render(Clay_EndLayout(engine_get_deltatime()*1000.0f));
+}
+
+void ui_begin_container(const char* label, bool* clicked)
+{
+	UINode* node = append_node(UI_NODE_CONTAINER, label);
+	node->user_data = clicked;
+	
+	if(stack_cursor < MAX_STACK_DEPTH - 1)
+	{
+		stack_cursor++;
+		parent_stack[stack_cursor] = node;
+	}
+}
+
+void ui_end_container()
+{
+	if(stack_cursor > 0)
+	{
+		stack_cursor--;
+	}
+	else
+	{
+		log_error("UI: Mismatched ui_end_contained!\n");
+	}
 }
 
 void ui_button(const char* label, bool* clicked)
 {
-	Clay_String clay_label = { .length = strlen(label), .chars = label};
-
-	CLAY_AUTO_ID({
-		.layout = {.padding=CLAY_PADDING_ALL(8)},
-		.backgroundColor = Clay_Hovered() ? hex_to_clay_color("#746030", 1.0f) : hex_to_clay_color("#9a8040", 1.0f),
-		.cornerRadius = CLAY_CORNER_RADIUS(4)
-	})
-	{
-		Clay_OnHover(button_on_hover_callback, clicked);
-		bool pressing = Clay_Hovered() && window_input_mouse_btn_is_down(INPUT_MOUSE_BUTTON_LEFT);
-		CLAY_TEXT(clay_label, CLAY_TEXT_CONFIG({
-			.fontId = 0,
-			.fontSize = 16,
-			.textColor = pressing ? hex_to_clay_color("#aaaaaa", 1.0f) : hex_to_clay_color("#ffffff", 1.0f),
-		}));
-	}
+	UINode* node = append_node(UI_NODE_BUTTON, label);
+	node->user_data = clicked;
 }
 
-void ui_destroy()
+void ui_text(const char* label)
 {
-	ui_font_destroy();
-	ui_backend_destroy();
+	UINode* node = append_node(UI_NODE_TEXT, label);
 }
+
+

@@ -10,9 +10,9 @@ static int free_ids[MAX_ENTITIES];
 static int free_id_count = 0;
 static int total_entities = 0; // Active Entities
 
-static Transform_Component transforms[MAX_ENTITIES];
-static Physics_Component physics[MAX_ENTITIES];
-static Sprite_Component sprites[MAX_ENTITIES];
+static TransformComponent transforms[MAX_ENTITIES];
+static PhysicsComponent physics[MAX_ENTITIES];
+static SpriteComponent sprites[MAX_ENTITIES];
 
 void ecs_init()
 {
@@ -36,14 +36,14 @@ void ecs_entity_add_component(Entity* e, Component_Type type)
 	switch(type)
 	{
 	case COMPONENT_TRANSFORM:
-		transforms[e->id] = (Transform_Component){0};
+		transforms[e->id] = (TransformComponent){0};
 		break;
 	case COMPONENT_PHYSICS:
-		physics[e->id] = (Physics_Component){0};
+		physics[e->id] = (PhysicsComponent){0};
 		physics[e->id].mass = 1.0f;
 		break;
 	case COMPONENT_SPRITE:
-		sprites[e->id] = (Sprite_Component){0};
+		sprites[e->id] = (SpriteComponent){0};
 		break;
 	}
 }
@@ -58,17 +58,17 @@ void ecs_entity_remove_component(Entity* e, Component_Type type)
 	e->component_mask &= ~type;
 }
 
-Transform_Component* ecs_entity_get_transform(Entity* e)
+TransformComponent* ecs_entity_get_transform(Entity* e)
 {
 	return ecs_entity_has_component(e, COMPONENT_TRANSFORM) ? &transforms[e->id] : NULL;
 }
 
-Physics_Component* ecs_entity_get_physics(Entity* e)
+PhysicsComponent* ecs_entity_get_physics(Entity* e)
 {
 	return ecs_entity_has_component(e, COMPONENT_PHYSICS) ? &physics[e->id] : NULL;
 }
 
-Sprite_Component* ecs_entity_get_sprite(Entity* e)
+SpriteComponent* ecs_entity_get_sprite(Entity* e)
 {
 	return ecs_entity_has_component(e, COMPONENT_SPRITE) ? &sprites[e->id] : NULL;
 }

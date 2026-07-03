@@ -1,11 +1,10 @@
-#include "ui_font.h"
+#include "internal.h"
 
 #include <starlight/core/renderer/renderer.h>
 #include <starlight/core/window/window.h>
 #include <starlight/utils/logger.h>
 #include <starlight/platform/platform.h>
 
-#include "ui_font_internal.h"
 
 #include <stb_rect_pack.h>
 #include <stb_truetype.h>

@@ -18,7 +18,7 @@ typedef struct
 	vec3s rotation;
 
 	mat4s transform;
-} Transform_Component;
+} TransformComponent;
 
 typedef struct
 {
@@ -26,7 +26,7 @@ typedef struct
 	vec3s acceleration;
 
 	float mass;
-} Physics_Component;
+} PhysicsComponent;
 
 
 // TODO: Split this
@@ -39,7 +39,7 @@ typedef struct
 	vec4s color; // For testing and debugging
 
 	Texture2DHashMap textures;
-} Sprite_Component;
+} SpriteComponent;
 
 
 typedef enum
@@ -59,6 +59,6 @@ void ecs_entity_add_component(Entity* e, Component_Type type);
 void ecs_entity_remove_component(Entity* e, Component_Type type);
 bool ecs_entity_has_component(Entity* e, Component_Type type);
 
-Transform_Component* ecs_entity_get_transform(Entity* e);
-Physics_Component* ecs_entity_get_physics(Entity* e);
-Sprite_Component* ecs_entity_get_sprite(Entity* e);
+TransformComponent* ecs_entity_get_transform(Entity* e);
+PhysicsComponent* ecs_entity_get_physics(Entity* e);
+SpriteComponent* ecs_entity_get_sprite(Entity* e);
