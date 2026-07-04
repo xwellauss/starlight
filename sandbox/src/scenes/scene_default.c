@@ -18,26 +18,35 @@ static void init()
 	//audio_play("sounds/song1.wav");
 	style1.base.bg_color = hex_to_rgb("#333333", 1.0f);
 	style1.base.fg_color = hex_to_rgb("#ffffff", 1.0f);
-	style1.is_interactive = true;
 	style1.base.font_size = 16;
-	style1.base.padding = (vec4s){8.0f, 8.0f, 8.0f, 8.0f};
 	style1.base.corner_radius = (vec4s){2.0f, 2.0f, 2.0f, 2.0f};
+
+	style1.base.layout.padding = (vec4s){8.0f, 8.0f, 8.0f, 8.0f};
+	style1.base.layout.direction = UI_LAYOUT_TOP_TO_BOTTOM;
+	style1.base.layout.child_gap = 0;
+	style1.base.layout.child_alignment_x = UI_LAYOUT_ALIGN_X_CENTER;
+	style1.base.layout.child_alignment_y = UI_LAYOUT_ALIGN_Y_TOP;
+	style1.base.layout.sizing.x = ui_style_size_fit(0, 400);
+	style1.base.layout.sizing.y = ui_style_size_grow(0, 200);
+	
+	style1.is_interactive = true;
 	style1.interactive.bg_hover_color = hex_to_rgb("#666666", 1.0f);
 	style1.interactive.bg_press_color = hex_to_rgb("#666666", 1.0f);
 	style1.interactive.fg_hover_color = hex_to_rgb("#ffffff", 1.0f);
 	style1.interactive.fg_press_color = hex_to_rgb("#ffffff", 1.0f);
 
+
+
 	style2.base.bg_color = hex_to_rgb("#a7a8f8", 1.0f);
 	style2.base.fg_color = hex_to_rgb("#000000", 1.0f);
 	style2.is_interactive = true;
 	style2.base.font_size = 16;
-	style2.base.padding = (vec4s){8.0f, 8.0f, 8.0f, 8.0f};
 	style2.base.corner_radius = (vec4s){8.0f, 8.0f, 8.0f, 8.0f};
+	style2.base.layout.padding = (vec4s){8.0f, 8.0f, 8.0f, 8.0f};
 	style2.interactive.bg_hover_color = hex_to_rgb("#d7a8f8", 1.0f);
 	style2.interactive.bg_press_color = hex_to_rgb("#f7a8f8", 1.0f);
 	style2.interactive.fg_hover_color = hex_to_rgb("#444444", 1.0f);
 	style2.interactive.fg_press_color = hex_to_rgb("#222222", 1.0f);
-
 }
 
 static void activate()

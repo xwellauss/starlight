@@ -110,7 +110,7 @@ static void execute_clay_node(UINode* node)
 		case UI_NODE_CONTAINER:
 		{
 			CLAY(Clay_GetElementId(clay_label), {
-				.layout = {.padding = node_style->base.padding},
+				.layout = node_style->base.layout,
 				.backgroundColor = node_style->is_interactive ? ((Clay_Hovered()) ? (window_input_mouse_btn_is_down(INPUT_MOUSE_BUTTON_LEFT) ? node_style->interactive.bg_press_color : node_style->interactive.bg_hover_color) : node_style->base.bg_color) : node_style->base.bg_color,
 				.cornerRadius = node_style->base.corner_radius
 			})
@@ -130,7 +130,7 @@ static void execute_clay_node(UINode* node)
 		case UI_NODE_TEXT:
 		{
 			CLAY_AUTO_ID({
-				.layout = {.padding=node_style->base.padding},
+				.layout = node_style->base.layout,
 			})
 			{
 				CLAY_TEXT(clay_label, CLAY_TEXT_CONFIG({
@@ -145,7 +145,7 @@ static void execute_clay_node(UINode* node)
 		case UI_NODE_BUTTON:
 		{
 			CLAY_AUTO_ID({
-					.layout = {.padding=node_style->base.padding},
+					.layout = node_style->base.layout,
 					.backgroundColor = ((Clay_Hovered()) ? (window_input_mouse_btn_is_down(INPUT_MOUSE_BUTTON_LEFT) ? node_style->interactive.bg_press_color : node_style->interactive.bg_hover_color) : node_style->base.bg_color),
 					.cornerRadius = node_style->base.corner_radius
 				})

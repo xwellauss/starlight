@@ -38,9 +38,14 @@ void ui_style_init()
 	{
 		.base.bg_color = hex_to_clay_color("#000000", 0.0f),
 		.base.fg_color = hex_to_clay_color("#ffffff", 1.0f),
-		.base.padding = CLAY_PADDING_ALL(0),
 		.base.corner_radius = CLAY_CORNER_RADIUS(0),
 		.base.font_size = 16,
+		.base.layout.padding = CLAY_PADDING_ALL(0),
+		.base.layout.sizing = { .width=CLAY_SIZING_FIT(0, 0), .height=CLAY_SIZING_FIT(0, 0)},
+		.base.layout.layoutDirection = CLAY_LEFT_TO_RIGHT,
+		.base.layout.childGap = 0,
+		.base.layout.childAlignment.x = CLAY_ALIGN_X_LEFT,
+		.base.layout.childAlignment.y = CLAY_ALIGN_Y_TOP,
 		.is_interactive = false,
 	};
 
@@ -50,9 +55,14 @@ void ui_style_init()
 	{
 		.base.bg_color = hex_to_clay_color("#9a8040", 1.0f),
 		.base.fg_color = hex_to_clay_color("#ffffff", 1.0f),
-		.base.padding = CLAY_PADDING_ALL(8),
 		.base.corner_radius = CLAY_CORNER_RADIUS(4),
 		.base.font_size = 16,
+		.base.layout.padding = CLAY_PADDING_ALL(0),
+		.base.layout.sizing = { .width=CLAY_SIZING_FIT(0, 0), .height=CLAY_SIZING_FIT(0, 0)},
+		.base.layout.layoutDirection = CLAY_LEFT_TO_RIGHT,
+		.base.layout.childGap = 0,
+		.base.layout.childAlignment.x = CLAY_ALIGN_X_LEFT,
+		.base.layout.childAlignment.y = CLAY_ALIGN_Y_TOP,
 		.is_interactive = true,
 		.interactive.bg_hover_color = hex_to_clay_color("#746030", 1.0f),
 		.interactive.bg_press_color = hex_to_clay_color("#746055", 1.0f),
@@ -89,22 +99,31 @@ void ui_style_push(UIStyle* style)
 	if(style_stack_cursor < MAX_STACK_DEPTH - 1)
 	{
 		style_stack_cursor++;
-		style_stack[style_stack_cursor] = (UIStyleResolved)
+
+		UIStyleResolved* resolved = &style_stack[style_stack_cursor];
+
+		*resolved = (UIStyleResolved)
 		{
 			.base.bg_color = vec4_to_clay_color(style->base.bg_color),
 			.base.fg_color = vec4_to_clay_color(style->base.fg_color),
 
-			.base.font_size = style->base.font_size,
-
-			.base.padding.left = (uint16_t)style->base.padding.x,
-			.base.padding.right = (uint16_t)style->base.padding.y,
-			.base.padding.top = (uint16_t)style->base.padding.z,
-			.base.padding.bottom = (uint16_t)style->base.padding.w,
+			.base.font_size = style->base.font_size,	
 
 			.base.corner_radius.topLeft = (uint16_t)style->base.corner_radius.x,
 			.base.corner_radius.topRight = (uint16_t)style->base.corner_radius.y,
 			.base.corner_radius.bottomLeft = (uint16_t)style->base.corner_radius.z,
 			.base.corner_radius.bottomRight = (uint16_t)style->base.corner_radius.w,
+
+			.base.layout.padding.left = (uint16_t)style->base.layout.padding.x,
+			.base.layout.padding.right = (uint16_t)style->base.layout.padding.y,
+			.base.layout.padding.top = (uint16_t)style->base.layout.padding.z,
+			.base.layout.padding.bottom = (uint16_t)style->base.layout.padding.w,
+			.base.layout.childGap = style->base.layout.child_gap,
+			.base.layout.layoutDirection = style->base.layout.direction,
+			.base.layout.childAlignment.x = style->base.layout.child_alignment_x,
+			.base.layout.childAlignment.y = style->base.layout.child_alignment_y,
+			.base.layout.sizing.width.type = style->base.layout.sizing.x.type,
+			.base.layout.sizing.height.type = style->base.layout.sizing.y.type,
 
 			.is_interactive = style->is_interactive,
 			.interactive.bg_hover_color = vec4_to_clay_color(style->interactive.bg_hover_color),
@@ -112,6 +131,32 @@ void ui_style_push(UIStyle* style)
 			.interactive.fg_hover_color = vec4_to_clay_color(style->interactive.fg_hover_color),
 			.interactive.fg_press_color = vec4_to_clay_color(style->interactive.fg_press_color),
 		};
+
+		UISizingAxis size_x = style->base.layout.sizing.x;
+		resolved->base.layout.sizing.width.type = size_x.type;
+
+		if(size_x.type == UI_LAYOUT_SIZING_TYPE_PERCENT)
+		{
+			resolved->base.layout.sizing.width.size.percent = size_x.size.percent;
+		}
+		else
+		{
+			resolved->base.layout.sizing.width.size.minMax.min = size_x.size.min_max.min;
+			resolved->base.layout.sizing.width.size.minMax.max = size_x.size.min_max.max;
+		}
+
+		UISizingAxis size_y = style->base.layout.sizing.y;
+		resolved->base.layout.sizing.height.type = size_y.type;
+
+		if(size_y.type == UI_LAYOUT_SIZING_TYPE_PERCENT)
+		{
+			resolved->base.layout.sizing.height.size.percent = size_y.size.percent;
+		}
+		else
+		{
+			resolved->base.layout.sizing.height.size.minMax.min = size_y.size.min_max.min;
+			resolved->base.layout.sizing.height.size.minMax.max = size_y.size.min_max.max;
+		}
 	}
 }
 

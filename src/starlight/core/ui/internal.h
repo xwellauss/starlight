@@ -16,8 +16,8 @@ typedef struct
 	Clay_Color bg_color;
 	Clay_Color fg_color;
 
-	Clay_Padding padding;
 	Clay_CornerRadius corner_radius;
+	Clay_LayoutConfig layout;
 	// TODO: add size mode
 
 	int font_size;
