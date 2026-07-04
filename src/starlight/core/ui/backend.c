@@ -1,6 +1,7 @@
 #include "internal.h"
 
 #include <starlight/core/renderer/renderer.h>
+#include <starlight/core/resources/font_atlas.h>
 #include <starlight/core/window/window.h>
 #include <starlight/utils/logger.h>
 #include <starlight/utils/math_utils.h>
@@ -39,6 +40,7 @@ static mat4s projection = GLMS_MAT4_IDENTITY_INIT;
 
 static VertexBuffer rect_vertex_buffer;
 static Shader rect_shader;
+static FontAtlas font_atlas;
 
 static RectQuad rect_vertex_data[MAX_RECTS];
 static size_t rect_count = 0;
@@ -48,6 +50,45 @@ static Shader glyph_shader;
 
 static GlyphQuad glyph_vertex_data[MAX_GLYPHS];
 static size_t glyph_count = 0;
+
+
+static Clay_Dimensions clay_measure_text(Clay_StringSlice glyph_vtx_array, Clay_TextElementConfig* config, void* user_data)
+{
+	if(font_atlas.texture.texture_id == 0)
+	{
+		log_error("MeasureText cannot do anything when texture is not loaded\n");
+		return (Clay_Dimensions){.width=0, .height=0};
+	}
+
+	float x = 0.0f;
+	float y = 0.0f;
+
+	const char* str = glyph_vtx_array.chars;
+	int len = glyph_vtx_array.length;
+
+	float scale = config->fontSize / font_atlas.baked_font_size;
+	float letter_spacing = (float)config->letterSpacing;
+	float line_height = (config->lineHeight > 0) ? (float)config->lineHeight : font_atlas.baked_font_size;
+
+	for(int i = 0; i < len; i++)
+	{
+		unsigned char c = str[i];
+
+		if(c < 32 || c > 127)
+		{
+			log_error("Illegal char %d\n", (int)c);
+			x += font_atlas.baked_font_size * 0.25f;
+			continue;
+		}
+        
+		stbtt_packedchar* pc = &font_atlas.glyph_ascii[c - 32];
+        
+		x += pc->xadvance * scale + letter_spacing;
+	}
+
+	float line_h = (font_atlas.ascent - font_atlas.descent) * scale;
+	return (Clay_Dimensions){.width=x, .height=y+line_h};
+}
 
 
 static void flush_rects()
@@ -141,11 +182,14 @@ static void build_glyphs(const char* text, float x, float y, float requested_sca
 	}
 }
 
-void ui_backend_init()
+void ui_backend_init(const char* font_path)
 {
+	font_atlas_init(&font_atlas, font_path, 1024, 1024, 45.0f);
+	Clay_SetMeasureTextFunction(clay_measure_text, NULL);
+
 	window_width = (float)window_get_width();
 	window_height = (float)window_get_height();
-
+		
 	{
 		VertexAttrib attribs[] =
 		{
@@ -337,9 +381,67 @@ void ui_backend_render(Clay_RenderCommandArray cmds)
 
 void ui_backend_destroy()
 {
+	font_atlas_destroy(&font_atlas);
+
 	vertex_buffer_destroy(&rect_vertex_buffer);
 	shader_destroy(&rect_shader);
 
 	vertex_buffer_destroy(&glyph_vertex_buffer);
 	shader_destroy(&glyph_shader);
 }
+
+
+/*
+void ui_font_render_text(const char* text, float x, float y, float requested_scale, vec4s color)
+{
+	shader_bind(&glyph_shader);
+	
+	shader_uniform_mat4(&glyph_shader, "projection", projection);
+	shader_uniform_vec4(&glyph_shader, "text_color", color);
+
+	Vertex2DQuad vertex_data[MAX_GLYPHS];
+	size_t glyph_count = 0;
+	vertex_buffer_bind(&glyph_vertex_buffer, BUFFER_VAO);
+	
+	float render_scale = requested_scale / font_atlas.baked_font_size;
+	y += font_atlas.ascent * render_scale;
+	for(const char* c = text; *c != '\0'; c++)
+	{
+		unsigned char ch = *c;
+		if(ch < 32 || ch > 127) continue;
+
+		stbtt_packedchar* pc = &font_atlas.glyph_ascii[ch - 32];
+
+		float x0 = x + pc->xoff * render_scale;
+		float y0 = y + pc->yoff * render_scale;
+		float x1 = x + pc->xoff2 * render_scale;
+		float y1 = y + pc->yoff2 * render_scale;
+
+		float u0 = pc->x0 / (float)font_atlas.width;
+		float v0 = pc->y0 / (float)font_atlas.height;
+		float u1 = pc->x1 / (float)font_atlas.width;
+		float v1 = pc->y1 / (float)font_atlas.height;
+		
+		if(glyph_count >= MAX_GLYPHS) break;
+
+		vertex_data[glyph_count] = (Vertex2DQuad)
+		{{
+			{{x0, y0}, {0.0f, 0.0f, 0.0f, 0.0f}, {u0, v0}},
+			{{x1, y0}, {0.0f, 0.0f, 0.0f, 0.0f}, {u1, v0}},
+			{{x1, y1}, {0.0f, 0.0f, 0.0f, 0.0f}, {u1, v1}},
+			{{x0, y1}, {0.0f, 0.0f, 0.0f, 0.0f}, {u0, v1}}
+		}};
+		
+		x += pc->xadvance * render_scale;
+
+		glyph_count++;
+	}
+
+	texture_active_slot(GL_TEXTURE0);
+	texture2d_bind(&font_atlas.texture);
+	
+	vertex_buffer_bind(&glyph_vertex_buffer, BUFFER_VBO);
+	vertex_buffer_update(&glyph_vertex_buffer, vertex_data, glyph_count*sizeof(Vertex2DQuad), 0);
+	vertex_buffer_draw_indexed(&glyph_vertex_buffer, GL_TRIANGLES, GL_UNSIGNED_SHORT, glyph_count*6, 0);
+}
+*/

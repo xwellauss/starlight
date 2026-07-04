@@ -179,15 +179,12 @@ void ui_init(const char* font_path)
 	Clay_Context* clay_ctx = Clay_Initialize(clay_arena, (Clay_Dimensions){ .width=window_width, .height=window_height}, (Clay_ErrorHandler){ .errorHandlerFunction=handle_clay_errors });
 
 	Clay_SetCurrentContext(clay_ctx);
-	Clay_SetMeasureTextFunction(ui_font_clay_measure_text, NULL);
 	
-	ui_font_init(font_path, 1024, 1024, 45.0f);
-	ui_backend_init();
+	ui_backend_init(font_path);
 }
 
 void ui_destroy()
 {
-	ui_font_destroy();
 	ui_backend_destroy();
 }
 

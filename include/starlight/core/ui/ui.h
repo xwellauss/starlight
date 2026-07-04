@@ -1,5 +1,7 @@
 #pragma once
 
+#include <starlight/core/ui/style.h>
+
 #include <stdbool.h>
 
 void ui_init(const char* font_path);
