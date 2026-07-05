@@ -239,7 +239,7 @@ static void update()
 
 	if(!moving)
 	{
-		player_current_sprite_name = player_texture_atlas.default_region_name;
+		player_current_sprite_name = "idle";
 	}
 
 	if(input_state.forward)

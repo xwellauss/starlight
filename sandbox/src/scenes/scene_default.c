@@ -15,7 +15,6 @@ static UIStyle style2;
 
 static void init()
 {
-	//audio_play("sounds/song1.wav");
 	style1.base.bg_color = hex_to_rgb("#333333", 1.0f);
 	style1.base.fg_color = hex_to_rgb("#ffffff", 1.0f);
 	style1.base.font_size = 16;
@@ -64,14 +63,14 @@ static void update()
 
 static void build_ui()
 {
-	ui_style_push(&style1);
+	//ui_style_push(&style1);
 	ui_begin_container("Container 1", NULL);
 		ui_text("This is a button!");
-		ui_style_push(&style2);
+		//ui_style_push(&style2);
 		ui_button("Click me!", &button_clicked);
-		ui_style_pop();
+		//ui_style_pop();
 	ui_end_container();
-	ui_style_pop();
+	//ui_style_pop();
 	ui_begin_container("Container 2", NULL);
 		ui_text("This is a button!");
 		//ui_button("Click me!", &button_clicked);

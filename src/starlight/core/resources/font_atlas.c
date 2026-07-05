@@ -43,8 +43,6 @@ void font_atlas_init(FontAtlas* font_atlas, const char* filepath, int atlas_w, i
 	stbtt_PackEnd(&font_pack_ctx);
 
 	// Upload to Textures
-	
-
 	font_atlas->texture.width = font_atlas->width;
 	font_atlas->texture.height = font_atlas->height;
 	font_atlas->texture.texture_config.is_init = true;
@@ -57,7 +55,6 @@ void font_atlas_init(FontAtlas* font_atlas, const char* filepath, int atlas_w, i
 
 	free(atlas_buffer);
 	free(font_file_buffer);
-
 }
 
 void font_atlas_destroy(FontAtlas* font_atlas)

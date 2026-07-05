@@ -6,10 +6,11 @@
 
 #include <cglm/struct.h>
 
-#define MAX_STACK_DEPTH 32
+#define MAX_STACK_DEPTH 64
 
 static UIStyleResolved style_stack[MAX_STACK_DEPTH];
 static int style_stack_cursor;
+
 static UIStyleResolved default_container_style;
 static UIStyleResolved default_button_style;
 static UIStyleResolved default_text_style;
@@ -90,7 +91,6 @@ UIStyleResolved* ui_style_get_current(UINodeType type)
 		case UI_NODE_BUTTON:    return &default_button_style;
 		case UI_NODE_TEXT:      return &default_text_style;
 		case UI_NODE_CONTAINER: return &default_container_style;
-		default:                return &default_container_style;
 	}
 }
 
