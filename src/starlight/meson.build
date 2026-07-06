@@ -20,6 +20,8 @@ starlight_src = files(
   'core/ui/backend.c',
   'core/ui/style.c',
   'network/network.c',
+  'network/server.c',
+  'network/client.c',
   'network/net_packer.c',
   'platform/platform.c',
   'utils/json_helper.c',
