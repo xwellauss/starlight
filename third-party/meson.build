@@ -91,6 +91,25 @@ if host_machine.system() != 'emscripten'
     endif
   endif
 
+  if host_machine.system() == 'windows'
+    glfw_src += files(
+      'glfw/src/win32_module.c',
+      'glfw/src/win32_time.c',
+      'glfw/src/win32_thread.c',
+      'glfw/src/win32_init.c',
+      'glfw/src/win32_joystick.c',
+      'glfw/src/win32_monitor.c',
+      'glfw/src/win32_window.c',
+      'glfw/src/wgl_context.c',
+    )
+    glfw_c_args += '-D_GLFW_WIN32'
+    glfw_deps += [
+      cc.find_library('gdi32'),
+      cc.find_library('user32'),
+      cc.find_library('shell32'),
+    ]
+  endif
+
   if host_machine.system() == 'android'
     glfw_src += files(
       'glfw/src/android_init.c',
@@ -183,9 +202,16 @@ enet_src = files(
   'enet_impl.c'
 )
 enet_c_args = ['-DHAS_SOCKLEN_T', '-pthread']
+enet_deps = []
+if host_machine.system() == 'windows'
+  enet_deps += [
+    cc.find_library('ws2_32'),
+    cc.find_library('winmm'),
+  ]
+endif
 
-enet_lib = static_library('enet', enet_src, include_directories: enet_inc, c_args: enet_c_args, override_options: vendor_opts + ['c_std=none'])
-enet_dep = declare_dependency(link_with: enet_lib, include_directories: enet_inc)
+enet_lib = static_library('enet', enet_src, include_directories: enet_inc, dependencies: enet_deps, c_args: enet_c_args, override_options: vendor_opts + ['c_std=none'])
+enet_dep = declare_dependency(link_with: enet_lib, include_directories: enet_inc, dependencies: enet_deps)
 
 # miniaudio
 # TODO: Add android and web support

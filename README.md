@@ -4,7 +4,7 @@ A graphics framework written in C. Supports Desktop, Web and Android.
 
 
 ## Building the Project
-> **Windows:** Not tested, but MSYS2 should work.
+> **Windows:** MSYS2 should work, just make sure all dependencies are installed.
 
 Clone this repository recursively to pull in the submodules
 
