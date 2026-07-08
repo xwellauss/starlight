@@ -6,7 +6,7 @@
 	url = https://github.com/DaveGamble/cJSON.git
 [submodule "third-party/glfw"]
 	path = third-party/glfw
-	url = git@github.com:techie-guy/GLFW.git
+	url = git@github.com:xwellauss/GLFW.git
 	branch = android-support
 [submodule "third-party/enet"]
 	path = third-party/enet
