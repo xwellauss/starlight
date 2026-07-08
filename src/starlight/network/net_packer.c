@@ -1,11 +1,11 @@
-#include "net_packer.h"
-
 #include <stdint.h>
 #include <stdarg.h>
 #include <string.h>
 #include <ctype.h>
 
 #include <stb_ds.h>
+
+// https://beej.us/guide/bgnet/html/#serialization
 
 #define pack754_16(f) (pack754((f), 16, 5))
 #define pack754_32(f) (pack754((f), 32, 8))

@@ -22,7 +22,7 @@ starlight_src = files(
   'network/network.c',
   'network/server.c',
   'network/client.c',
-  'network/net_packer.c',
+  'network/serialize.c',
   'platform/platform.c',
   'utils/json_helper.c',
   'utils/logger.c',
