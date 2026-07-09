@@ -27,7 +27,7 @@ static void init()
 	style1.base.layout.child_alignment_y = UI_LAYOUT_ALIGN_Y_TOP;
 	style1.base.layout.sizing.x = ui_style_size_fit(0, 400);
 	style1.base.layout.sizing.y = ui_style_size_grow(0, 200);
-	
+
 	style1.is_interactive = true;
 	style1.interactive.bg_hover_color = hex_to_rgb("#666666", 1.0f);
 	style1.interactive.bg_press_color = hex_to_rgb("#666666", 1.0f);
@@ -75,7 +75,6 @@ static void build_ui()
 		ui_text("This is a button!");
 		//ui_button("Click me!", &button_clicked);
 	ui_end_container();
-
 }
 
 static void render()
@@ -94,4 +93,4 @@ static void destroy()
 {
 }
 
-Scene scene_default = {"SceneDefault", init, destroy, activate, deactivate, update, render, build_ui, process_input};
+Scene scene_default = {"SceneDefault", .init=init, .destroy=destroy, .activate=activate, .deactivate=deactivate, .update=update, .render=render, .build_ui=build_ui, .process_input=process_input};

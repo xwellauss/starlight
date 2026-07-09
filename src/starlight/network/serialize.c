@@ -21,7 +21,7 @@ static uint64_t float_encode(long double f, unsigned bits, unsigned expbits)
 	unsigned significandbits = bits - expbits - 1;
 
 	if(f == 0.0) return 0;
-	
+
 	if(f < 0)
 	{
 		sign = 1;
@@ -38,7 +38,7 @@ static uint64_t float_encode(long double f, unsigned bits, unsigned expbits)
 	while(fnorm < 1.0) { fnorm *= 2.0; shift--; }
 
 	fnorm = fnorm - 1.0;
-	
+
 	significand = fnorm * ((1LL << significandbits) + 0.5f);
 	exp = shift + ((1 << (expbits - 1)) - 1);
 
@@ -232,11 +232,29 @@ bool network_write_i16(NetworkWriter* writer, uint16_t value)
 	return true;
 }
 
+bool network_write_u16(NetworkWriter* writer, uint16_t value)
+{
+	if(writer->cursor + 2 > writer->capacity) return false;
+
+	packi16(writer->buffer + writer->cursor, value);
+	writer->cursor += 2;
+	return true;
+}
+
 bool network_read_i16(NetworkReader* reader, uint16_t* out)
 {
 	if(reader->cursor + 2 > reader->capacity) return false;
 
 	*out = unpacki16(reader->buffer + reader->cursor);
+	reader->cursor += 2;
+	return true;
+}
+
+bool network_read_u16(NetworkReader* reader, uint16_t* out)
+{
+	if(reader->cursor + 2 > reader->capacity) return false;
+
+	*out = unpacku16(reader->buffer + reader->cursor);
 	reader->cursor += 2;
 	return true;
 }

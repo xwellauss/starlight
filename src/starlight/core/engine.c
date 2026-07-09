@@ -101,7 +101,7 @@ void engine_destroy()
 
 	ecs_destroy();
 
-	scene_manager_destroy_all_scenes();
+	scene_manager_destroy();
 
 	if(engine.config.enable_ui) ui_destroy();
 	window_destroy();

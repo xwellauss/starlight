@@ -28,7 +28,7 @@ int main()
 	engine_init(config);
 
 	sandbox_scenes();
-	scene_manager_switch_scene("SceneDefault");
+	scene_manager_switch_scene("SceneMenu");
 
 	engine_run();
 

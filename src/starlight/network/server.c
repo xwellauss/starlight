@@ -19,13 +19,18 @@ struct NetworkServer
 	void* user_data;
 };
 
-bool network_server_init(NetworkServer* server, uint16_t port, size_t max_clients, size_t channels, NetworkEventCallback on_event, void* user_data)
+NetworkServer* network_server_create()
+{
+	return malloc(sizeof(NetworkServer));
+}
+
+bool network_server_init(NetworkServer* server, uint16_t port, size_t max_clients, NetworkEventCallback on_event, void* user_data)
 {
 	ENetAddress address = {0};
 	address.host = ENET_HOST_ANY;
 	address.port = port;
 
-	server->host = enet_host_create(&address, max_clients, channels, 0, 0);
+	server->host = enet_host_create(&address, max_clients, 0, 0, 0);
 
 	if(!server->host)
 	{
@@ -44,6 +49,7 @@ void network_server_destroy(NetworkServer* server)
 	if(!server) return;
 
 	enet_host_destroy(server->host);
+	free(server);
 }
 
 void network_server_service(NetworkServer* server, uint32_t timeout_ms)
@@ -54,7 +60,7 @@ void network_server_service(NetworkServer* server, uint32_t timeout_ms)
 	{
 		NetworkEvent event = {0};
 		event.peer = network_peer_from_enet_peer(enet_event.peer);
-		
+
 		switch(enet_event.type)
 		{
 			case ENET_EVENT_TYPE_CONNECT:

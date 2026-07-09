@@ -1,7 +1,7 @@
 starlight_inc = [include_directories('.'), public_inc]
 
 starlight_src = files(
-  'audio/audio.c',  
+  'audio/audio.c',
   'core/camera.c',
   'core/ecs.c',
   'core/engine.c',
@@ -32,7 +32,7 @@ starlight_src = files(
 #is_debug = get_option('buildtype') == 'debug'
 #wants_asan = is_debug and host_machine.system() != 'android' and host_machine.system() != 'emscripten'
 
-starlight_c_args = ['-Wno-missing-braces', '-Wno-unused-parameter', '-Wno-unused-variable']
+starlight_c_args = ['-Wno-missing-braces', '-Wno-unused-parameter', '-Wno-unused-variable', '-fcolor-diagnostics', '-fansi-escape-codes']
 starlight_link_args = []
 
 #if wants_asan
@@ -50,7 +50,7 @@ if host_machine.system() == 'android'
 
   android_c_args = []
   #android_link_args = ['-llog', '-landroid', '-u ANativeActivity_onCreate']
-  android_link_args = [] 
+  android_link_args = []
   android_deps = [android_glue_dep]
 
   starlight_lib = static_library('starlight', starlight_src, include_directories: starlight_inc, c_args: starlight_c_args + android_c_args, link_args: starlight_link_args + android_link_args, dependencies: starlight_deps + android_deps)
@@ -79,4 +79,3 @@ else
   starlight_lib = static_library('starlight', starlight_src, include_directories: starlight_inc, c_args: starlight_c_args, link_args: starlight_link_args, dependencies: starlight_deps)
   starlight_dep = declare_dependency(link_with: starlight_lib, include_directories: public_inc, compile_args: starlight_c_args, link_args: starlight_link_args, dependencies: starlight_deps)
 endif
-

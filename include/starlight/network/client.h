@@ -4,7 +4,8 @@
 
 typedef struct NetworkClient NetworkClient;
 
-bool network_client_init(NetworkClient* client, size_t channels, NetworkEventCallback on_event, void* user_data);
+NetworkClient* network_client_create();
+bool network_client_init(NetworkClient* client, NetworkEventCallback on_event, void* user_data);
 void network_client_destroy(NetworkClient* client);
 bool network_client_connect(NetworkClient* client, const char* host, uint16_t port, uint32_t timeout_ms);
 void network_client_disconnect(NetworkClient* client);

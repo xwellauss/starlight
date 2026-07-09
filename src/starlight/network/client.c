@@ -20,9 +20,14 @@ struct NetworkClient
 	void* user_data;
 };
 
-bool network_client_init(NetworkClient* client, size_t channels, NetworkEventCallback on_event, void* user_data)
+NetworkClient* network_client_create()
 {
-	client->host = enet_host_create(NULL, 1, channels, 0, 0);
+	return malloc(sizeof(NetworkClient));
+}
+
+bool network_client_init(NetworkClient* client, NetworkEventCallback on_event, void* user_data)
+{
+	client->host = enet_host_create(NULL, 1, 0, 0, 0);
 
 	if(!client->host)
 	{
@@ -41,6 +46,7 @@ void network_client_destroy(NetworkClient* client)
 {
 	if(!client) return;
 	enet_host_destroy(client->host);
+	free(client);
 }
 
 bool network_client_connect(NetworkClient* client, const char* host, uint16_t port, uint32_t timeout_ms)
@@ -61,7 +67,7 @@ bool network_client_connect(NetworkClient* client, const char* host, uint16_t po
 	{
 		enet_peer_reset(client->peer);
 		client->peer = NULL;
-		
+
 		log_error("Network: Client could not connect to host, no connect event received!\n");
 		return false;
 	}
@@ -83,7 +89,7 @@ void network_client_service(NetworkClient* client, uint32_t timeout_ms)
 	{
 		NetworkEvent event = {0};
 		event.peer = network_peer_from_enet_peer(enet_event.peer);
-		
+
 		switch(enet_event.type)
 		{
 			case ENET_EVENT_TYPE_CONNECT:

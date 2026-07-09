@@ -41,10 +41,10 @@ void ui_style_init()
 		.base.fg_color = hex_to_clay_color("#ffffff", 1.0f),
 		.base.corner_radius = CLAY_CORNER_RADIUS(0),
 		.base.font_size = 16,
-		.base.layout.padding = CLAY_PADDING_ALL(0),
+		.base.layout.padding = CLAY_PADDING_ALL(8),
 		.base.layout.sizing = { .width=CLAY_SIZING_FIT(0, 0), .height=CLAY_SIZING_FIT(0, 0)},
-		.base.layout.layoutDirection = CLAY_LEFT_TO_RIGHT,
-		.base.layout.childGap = 0,
+		.base.layout.layoutDirection = CLAY_TOP_TO_BOTTOM,
+		.base.layout.childGap = 4,
 		.base.layout.childAlignment.x = CLAY_ALIGN_X_LEFT,
 		.base.layout.childAlignment.y = CLAY_ALIGN_Y_TOP,
 		.is_interactive = false,
@@ -58,7 +58,7 @@ void ui_style_init()
 		.base.fg_color = hex_to_clay_color("#ffffff", 1.0f),
 		.base.corner_radius = CLAY_CORNER_RADIUS(4),
 		.base.font_size = 16,
-		.base.layout.padding = CLAY_PADDING_ALL(0),
+		.base.layout.padding = CLAY_PADDING_ALL(8),
 		.base.layout.sizing = { .width=CLAY_SIZING_FIT(0, 0), .height=CLAY_SIZING_FIT(0, 0)},
 		.base.layout.layoutDirection = CLAY_LEFT_TO_RIGHT,
 		.base.layout.childGap = 0,
@@ -107,7 +107,7 @@ void ui_style_push(UIStyle* style)
 			.base.bg_color = vec4_to_clay_color(style->base.bg_color),
 			.base.fg_color = vec4_to_clay_color(style->base.fg_color),
 
-			.base.font_size = style->base.font_size,	
+			.base.font_size = style->base.font_size,
 
 			.base.corner_radius.topLeft = (uint16_t)style->base.corner_radius.x,
 			.base.corner_radius.topRight = (uint16_t)style->base.corner_radius.y,
@@ -171,4 +171,3 @@ void ui_style_pop()
 		log_error("UI: Mismatched ui_style_pop!\n");
 	}
 }
-

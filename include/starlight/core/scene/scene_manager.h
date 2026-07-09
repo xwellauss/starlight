@@ -2,10 +2,14 @@
 
 #include <starlight/core/scene/scene.h>
 
+#include <stddef.h>
+
 void scene_manager_register_scene(Scene* scene);
-void scene_manager_switch_scene(char* scene_name);
+void scene_manager_switch_scene(const char* scene_name);
 const Scene* scene_manager_get_current();
-void scene_manager_destroy_all_scenes();
+const Scene* scene_manager_get_scene(const char* name);
+const char** scene_manager_get_scenes_list();
+void scene_manager_destroy();
 
 void scene_manager_scene_init();
 void scene_manager_scene_update();

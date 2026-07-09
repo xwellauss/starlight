@@ -2,4 +2,4 @@
 
 #include <starlight/core/scene/scene.h>
 
-extern Scene scene_menu;
+extern Scene scene_client_test;

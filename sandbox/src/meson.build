@@ -6,7 +6,10 @@ sandbox_src = files(
   'scenes/scene_block.c',
   'scenes/scene_model.c',
   'scenes/scene_play.c',
-  'scenes/physics_sim/scene_gravity.c'
+  'scenes/scene_server_test.c',
+  'scenes/scene_client_test.c',
+  'scenes/physics_sim/scene_gravity.c',
+  'scenes/scene_menu.c',
 )
 
 sandbox_c_args = []
@@ -17,7 +20,7 @@ sandbox_deps = [starlight_dep]
 if host_machine.system() == 'android'
   android_c_args = ['-DASSETS_DIR=""']
   #android_link_args = ['-llog', '-landroid', '-u ANativeActivity_onCreate']
-  android_link_args = [] 
+  android_link_args = []
   android_deps = [android_glue_dep]
 
   sandbox_lib = shared_library('starlight_sandbox', sandbox_src, include_directories: sandbox_inc, c_args: sandbox_c_args + android_c_args, link_args: sandbox_link_args + android_link_args, dependencies: sandbox_deps + android_deps)

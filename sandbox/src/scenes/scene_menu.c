@@ -1,64 +1,93 @@
 #include "scene_menu.h"
-#include "../core/game_engine.h"
-#include "../core/window.h"
-#include "../core/renderer/renderer.h"
 
-#include <math.h>
+#include <starlight/core/window/input.h>
+#include <starlight/core/ui/ui.h>
+#include <starlight/core/ui/style.h>
+#include <starlight/audio/audio.h>
+#include <starlight/utils/logger.h>
+#include <starlight/utils/math_utils.h>
+#include <starlight/core/scene/scene_manager.h>
+
 #include <stb_ds.h>
 
-static vec4s background_color = (vec4s){0.0f, 0.0f, 0.0f, 1.0f};
+
+static const char** scenes_list = NULL;
+
+static bool* scene_button_list = NULL;
+
+static UIStyle style1;
+static UIStyle style2;
 
 static void init()
 {
+    style1.base.bg_color = hex_to_rgb("#000000", 0.0f);
+	style1.base.fg_color = hex_to_rgb("#ffffff", 1.0f);
+	style1.base.font_size = 48;
+	style1.base.corner_radius = (vec4s){2.0f, 2.0f, 2.0f, 2.0f};
+	style1.base.layout.padding = (vec4s){8.0f, 8.0f, 8.0f, 8.0f};
+	style1.base.layout.direction = UI_LAYOUT_TOP_TO_BOTTOM;
+	style1.base.layout.child_gap = 4;
+	style1.base.layout.child_alignment_x = UI_LAYOUT_ALIGN_X_CENTER;
+	style1.base.layout.child_alignment_y = UI_LAYOUT_ALIGN_Y_CENTER;
+	style1.base.layout.sizing.x = ui_style_size_fit(0, 400);
+	style1.base.layout.sizing.y = ui_style_size_grow(0, 200);
+	style1.is_interactive = false;
+
+	style2.base.bg_color = hex_to_rgb("#9a8040", 0.0f);
+	style2.base.fg_color = hex_to_rgb("#4287f5", 1.0f);
+	style2.base.font_size = 32;
+	style2.base.corner_radius = (vec4s){2.0f, 2.0f, 2.0f, 2.0f};
+	style2.base.layout.padding = (vec4s){8.0f, 8.0f, 8.0f, 8.0f};
+	style2.base.layout.direction = UI_LAYOUT_TOP_TO_BOTTOM;
+	style2.base.layout.child_gap = 4;
+	style2.base.layout.child_alignment_x = UI_LAYOUT_ALIGN_X_CENTER;
+	style2.base.layout.child_alignment_y = UI_LAYOUT_ALIGN_Y_CENTER;
+	style2.base.layout.sizing.x = ui_style_size_fit(0, 400);
+	style2.base.layout.sizing.y = ui_style_size_grow(0, 200);
+	style2.is_interactive = true;
+	style2.interactive.bg_hover_color = hex_to_rgb("#d7a8f8", 0.0f);
+	style2.interactive.bg_press_color = hex_to_rgb("#f7a8f8", 0.0f);
+	style2.interactive.fg_hover_color = hex_to_rgb("#4e42f5", 1.0f);
+	style2.interactive.fg_press_color = hex_to_rgb("#2c258f", 1.0f);
+}
+
+static void activate()
+{
+    scenes_list = scene_manager_get_scenes_list();
+
+	for(size_t i = 0; i < arrlen(scenes_list); i++)
+	{
+		arrput(scene_button_list, false);
+	}
 }
 
 static void render()
 {
-	const float frequency = 0.5f;
-	background_color.b = 0.5f + 0.5f * sin(frequency * window_get_time());
-	background_color.r = 0.5f + 0.5f * sin(frequency * window_get_time() + 2.0f * M_PI / 3.0f);
-	background_color.g = 0.5f + 0.5f * sin(frequency * window_get_time() + 4.0f * M_PI / 3.0f);
-	window_change_bgcolor(background_color);
-/*
-	ImGui_Begin("Menu", NULL, ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoBackground);
+}
+
+static void build_ui()
+{
+    ui_style_push(&style1);
+	ui_begin_container("Scenes", NULL);
+	ui_text("Scenes");
+	ui_style_push(&style2);
+	for(size_t i = 0; i < arrlen(scenes_list); i++)
 	{
-		ImGui_SetWindowPos((ImVec2){imgui_io->DisplaySize.x * 0.4, 0.0f}, ImGuiCond_Always);
-		ImGui_SetWindowSize(imgui_io->DisplaySize, ImGuiCond_Always);
-
-		ImGui_BeginChild("Title", (ImVec2){300.0f, 100.0f}, 0, ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoBackground);
+		if(strcmp(scenes_list[i], "SceneMenu") == 0)
 		{
-			ImGui_PushFont(ui_get_font("Triple"));
-			ImGui_Text(WINDOW_TITLE);
-			ImGui_PopFont();
+			continue;
 		}
-		ImGui_EndChild();
 
+		ui_button(scenes_list[i], &scene_button_list[i]);
 
-		ImGui_SetCursorPosX(ImGui_GetCursorPosX() + 50.0f);
-		ImGui_BeginChild("Scenes", (ImVec2){300.0f, 500.0f}, 0, ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoBackground);
+		if(scene_button_list[i])
 		{
-			ImGui_SetCursorPosX(ImGui_GetCursorPosX() + 30.0f);
-			ImGui_PushFont(ui_get_font("Double"));
-			ImGui_Text("Scenes");
-
-			for(int i = 0; i < shlen(game_engine.scenes); i++)
-			{
-				if(strcmp(game_engine.scenes[i].key, "SceneMenu") == 0)
-				{
-					continue;
-				}
-
-				if(ImGui_Button(game_engine.scenes[i].key))
-				{
-					scene_switch(game_engine.scenes[i].key);
-				}
-			}
-			ImGui_PopFont();
+			scene_manager_switch_scene(scenes_list[i]);
 		}
-		ImGui_EndChild();
 	}
-	ImGui_End();
-	*/
+	ui_style_pop();
+	ui_end_container();
+	ui_style_pop();
 }
 
 static void update()
@@ -69,17 +98,14 @@ static void process_input()
 {
 }
 
-static void activate()
-{
-}
-
 static void deactivate()
 {
 }
 
 static void destroy()
 {
+	arrfree(scene_button_list);
 }
 
 
-Scene scene_menu = {"SceneMenu", init, destroy, activate, deactivate, update, render, process_input};
+Scene scene_menu = {"SceneMenu", .init=init, .destroy=destroy, .activate=activate, .deactivate=deactivate, .update=update, .render=render, .build_ui=build_ui, .process_input=process_input};
