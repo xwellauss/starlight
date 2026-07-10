@@ -1,5 +1,4 @@
 #include "scene_client_test.h"
-#include "starlight/network/network.h"
 
 #include <starlight/core/window/input.h>
 #include <starlight/core/ui/ui.h>
@@ -9,13 +8,11 @@
 #include <starlight/utils/math_utils.h>
 #include <starlight/network/client.h>
 #include <starlight/network/serialize.h>
-#include <stdint.h>
+
+#include <memory.h>
 
 static bool button_clicked = false;
 static bool client_connected = false;
-
-static const char* client_data1 = "This is from the client";
-static int client_data = 7;
 
 static NetworkClient* client = NULL;
 
@@ -34,6 +31,12 @@ static void on_network_event(const NetworkEvent* event, void* user_data)
         case NETWORK_EVENT_RECEIVE:
 		{
 			log_debug("Event Received on Client\n");
+			if(event->size == sizeof(int32_t))
+			{
+				int32_t value;
+				memcpy(&value, event->data, sizeof(value));
+				log_debug("Value from server: %d\n", value);
+			}
             break;
         }
     }
@@ -41,8 +44,6 @@ static void on_network_event(const NetworkEvent* event, void* user_data)
 
 static void init()
 {
-	client = network_client_create();
-	network_client_init(client, on_network_event, (void*)(intptr_t)client_data);
 }
 
 static void activate()
@@ -53,6 +54,8 @@ static void update()
 {
 	if(button_clicked && !client_connected)
 	{
+		client = network_client_create();
+		network_client_init(client, on_network_event, NULL);
 		client_connected = network_client_connect(client, "localhost", 8000, 50);
 
 		button_clicked = false;

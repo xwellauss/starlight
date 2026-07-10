@@ -1,3 +1,4 @@
+#include "starlight/network/network.h"
 #include <starlight/network/client.h>
 #include <starlight/utils/logger.h>
 
@@ -44,7 +45,8 @@ bool network_client_init(NetworkClient* client, NetworkEventCallback on_event, v
 
 void network_client_destroy(NetworkClient* client)
 {
-	if(!client) return;
+	if(!client && !client->host) return;
+	network_client_disconnect(client);
 	enet_host_destroy(client->host);
 	free(client);
 }
@@ -62,22 +64,12 @@ bool network_client_connect(NetworkClient* client, const char* host, uint16_t po
 		return false;
 	}
 
-	ENetEvent event;
-	if(!(enet_host_service(client->host, &event, timeout_ms) > 0 && event.type == ENET_EVENT_TYPE_CONNECT))
-	{
-		enet_peer_reset(client->peer);
-		client->peer = NULL;
-
-		log_error("Network: Client could not connect to host, no connect event received!\n");
-		return false;
-	}
-
 	return true;
 }
 
 void network_client_disconnect(NetworkClient* client)
 {
-	if(!client) return;
+	if(!client || !client->peer) return;
 	enet_peer_disconnect(client->peer, 0);
 }
 

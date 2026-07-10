@@ -12,6 +12,9 @@
 static bool button_clicked = false;
 static bool server_started = false;
 
+static const char* data1 = "This is from the server";
+static int32_t data = 7;
+
 static NetworkServer* server = NULL;
 
 static void on_network_event(const NetworkEvent* event, void* user_data)
@@ -22,6 +25,7 @@ static void on_network_event(const NetworkEvent* event, void* user_data)
 	{
         case NETWORK_EVENT_CONNECT:
             log_debug("Connected to client\n");
+            network_server_send(server, event->peer, 0, NETWORK_MODE_RELIABLE, &data, sizeof(data));
             break;
         case NETWORK_EVENT_DISCONNECT:
             log_debug("Client Disconnected\n");
@@ -36,7 +40,6 @@ static void on_network_event(const NetworkEvent* event, void* user_data)
 
 static void init()
 {
-	server = network_server_create();
 }
 
 static void activate()
@@ -47,6 +50,7 @@ static void update()
 {
 	if(button_clicked && !server_started)
 	{
+		server = network_server_create();
 		server_started = network_server_init(server, 8000, 16, on_network_event, NULL);
 
 		button_clicked = false;

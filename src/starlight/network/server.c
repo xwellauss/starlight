@@ -14,6 +14,8 @@ static EMSCRIPTEN_WEBSOCKET_T bridgeSocket = 0;
 
 struct NetworkServer
 {
+	bool is_init;
+
 	ENetHost* host;
 	NetworkEventCallback on_event;
 	void* user_data;
@@ -35,18 +37,20 @@ bool network_server_init(NetworkServer* server, uint16_t port, size_t max_client
 	if(!server->host)
 	{
 		log_error("Network: Error in creating server!\n");
+		server->is_init = false;
 		return false;
 	}
 
 	server->on_event = on_event;
 	server->user_data = user_data;
+	server->is_init = true;
 
 	return true;
 }
 
 void network_server_destroy(NetworkServer* server)
 {
-	if(!server) return;
+	if(!server || !server->host || !server->is_init) return;
 
 	enet_host_destroy(server->host);
 	free(server);
