@@ -33,8 +33,18 @@ static void on_network_event(const NetworkEvent* event, void* user_data)
 
 			NetworkReader reader = {.buffer=event->data, .capacity=event->size, .cursor=0};
 			char name[64];
+			vec2s v1;
+			vec3s v2;
+			vec4s v3;
+
 			network_read_string(&reader, name, sizeof(name));
+			network_read_vec2(&reader, &v1);
+			network_read_vec3(&reader, &v2);
+			network_read_vec4(&reader, &v3);
 			log_debug("name: %s\n", name);
+			glms_vec2_print(v1, stdout);
+			glms_vec3_print(v2, stdout);
+			glms_vec4_print(v3, stdout);
 
             break;
         }

@@ -3,6 +3,7 @@
 #include <stddef.h>
 #include <stdint.h>
 #include <stdbool.h>
+#include <cglm/struct.h>
 
 typedef uint8_t NetworkByte;
 
@@ -29,6 +30,12 @@ bool network_write_i64(NetworkWriter* writer, int64_t value);
 bool network_write_f32(NetworkWriter* writer, float value);
 bool network_write_f64(NetworkWriter* writer, double value);
 bool network_write_string(NetworkWriter* writer, const char* value);
+bool network_write_vec2(NetworkWriter* writer, vec2s value);
+bool network_write_vec3(NetworkWriter* writer, vec3s value);
+bool network_write_vec4(NetworkWriter* writer, vec4s value);
+bool network_write_mat2(NetworkWriter* writer, mat2s value);
+bool network_write_mat3(NetworkWriter* writer, mat3s value);
+bool network_write_mat4(NetworkWriter* writer, mat4s value);
 
 bool network_read_i16(NetworkReader* reader, int16_t* out);
 bool network_read_u16(NetworkReader* reader, uint16_t* out);
@@ -39,3 +46,9 @@ bool network_read_u64(NetworkReader* reader, uint64_t* out);
 bool network_read_f32(NetworkReader* reader, float* out);
 bool network_read_f64(NetworkReader* reader, double* out);
 bool network_read_string(NetworkReader* reader, char* out, size_t out_capacity);
+bool network_read_vec2(NetworkReader* reader, vec2s* out);
+bool network_read_vec3(NetworkReader* reader, vec3s* out);
+bool network_read_vec4(NetworkReader* reader, vec4s* out);
+bool network_read_mat2(NetworkReader* reader, mat2s* out);
+bool network_read_mat3(NetworkReader* reader, mat3s* out);
+bool network_read_mat4(NetworkReader* reader, mat4s* out);

@@ -254,6 +254,59 @@ bool network_write_string(NetworkWriter* writer, const char* value)
 	return true;
 }
 
+bool network_write_vec2(NetworkWriter* writer, vec2s value)
+{
+	bool result = network_write_f32(writer, value.x);
+	result &= network_write_f32(writer, value.y);
+
+	return result;
+}
+
+bool network_write_vec3(NetworkWriter* writer, vec3s value)
+{
+	bool result = network_write_f32(writer, value.x);
+	result &= network_write_f32(writer, value.y);
+	result &= network_write_f32(writer, value.z);
+
+	return result;
+}
+
+bool network_write_vec4(NetworkWriter* writer, vec4s value)
+{
+	bool result = network_write_f32(writer, value.x);
+	result &= network_write_f32(writer, value.y);
+	result &= network_write_f32(writer, value.z);
+	result &= network_write_f32(writer, value.w);
+
+	return result;
+}
+
+bool network_write_mat2(NetworkWriter* writer, mat2s value)
+{
+	bool result = network_write_vec2(writer, value.col[0]);
+	result &= network_write_vec2(writer, value.col[1]);
+
+	return result;
+}
+
+bool network_write_mat3(NetworkWriter* writer, mat3s value)
+{
+	bool result = network_write_vec3(writer, value.col[0]);
+	result &= network_write_vec3(writer, value.col[1]);
+	result &= network_write_vec3(writer, value.col[2]);
+
+	return result;
+}
+
+bool network_write_mat4(NetworkWriter* writer, mat4s value)
+{
+	bool result = network_write_vec4(writer, value.col[0]);
+	result &= network_write_vec4(writer, value.col[1]);
+	result &= network_write_vec4(writer, value.col[2]);
+	result &= network_write_vec4(writer, value.col[3]);
+
+	return result;
+}
 
 // Reader
 
@@ -361,4 +414,58 @@ bool network_read_string(NetworkReader* reader, char* out, size_t out_capacity)
 	reader->cursor += len;
 
 	return true;
+}
+
+bool network_read_vec2(NetworkReader* reader, vec2s* out)
+{
+	bool result = network_read_f32(reader, &out->x);
+	result &= network_read_f32(reader, &out->y);
+
+	return result;
+}
+
+bool network_read_vec3(NetworkReader* reader, vec3s* out)
+{
+	bool result = network_read_f32(reader, &out->x);
+	result &= network_read_f32(reader, &out->y);
+	result &= network_read_f32(reader, &out->z);
+
+	return result;
+}
+
+bool network_read_vec4(NetworkReader* reader, vec4s* out)
+{
+	bool result = network_read_f32(reader, &out->x);
+	result &= network_read_f32(reader, &out->y);
+	result &= network_read_f32(reader, &out->z);
+	result &= network_read_f32(reader, &out->w);
+
+	return result;
+}
+
+bool network_read_mat2(NetworkReader* reader, mat2s* out)
+{
+	bool result = network_read_vec2(reader, &out->col[0]);
+	result &= network_read_vec2(reader, &out->col[1]);
+
+	return result;
+}
+
+bool network_read_mat3(NetworkReader* reader, mat3s* out)
+{
+	bool result = network_read_vec3(reader, &out->col[0]);
+	result &= network_read_vec3(reader, &out->col[1]);
+	result &= network_read_vec3(reader, &out->col[2]);
+
+	return result;
+}
+
+bool network_read_mat4(NetworkReader* reader, mat4s* out)
+{
+	bool result = network_read_vec4(reader, &out->col[0]);
+	result &= network_read_vec4(reader, &out->col[1]);
+	result &= network_read_vec4(reader, &out->col[2]);
+	result &= network_read_vec4(reader, &out->col[3]);
+
+	return result;
 }

@@ -27,6 +27,9 @@ static void on_network_event(const NetworkEvent* event, void* user_data)
             NetworkByte buffer[256];
             NetworkWriter writer = { .buffer=buffer, .capacity=sizeof(buffer), .cursor=0};
             network_write_string(&writer, "xwellauss");
+            network_write_vec2(&writer, (vec2s){1.0f, 4.6f});
+            network_write_vec3(&writer, (vec3s){1.0f, 4.6f, 9.4f});
+            network_write_vec4(&writer, (vec4s){1.0f, 4.6f, 8.55f, 9.67767f});
 
             network_server_send(server, event->peer, 0, NETWORK_MODE_RELIABLE, writer.buffer, writer.capacity);
             break;
