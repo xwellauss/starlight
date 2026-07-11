@@ -23,7 +23,7 @@ struct NetworkServer
 
 NetworkServer* network_server_create()
 {
-	return malloc(sizeof(NetworkServer));
+	return calloc(1, sizeof(NetworkServer));
 }
 
 bool network_server_init(NetworkServer* server, uint16_t port, size_t max_clients, NetworkEventCallback on_event, void* user_data)
@@ -50,9 +50,13 @@ bool network_server_init(NetworkServer* server, uint16_t port, size_t max_client
 
 void network_server_destroy(NetworkServer* server)
 {
-	if(!server || !server->host || !server->is_init) return;
+	if(!server) return;
 
-	enet_host_destroy(server->host);
+	if(server->is_init)
+	{
+		enet_host_destroy(server->host);
+	}
+
 	free(server);
 }
 
@@ -98,17 +102,23 @@ void network_server_service(NetworkServer* server, uint32_t timeout_ms)
 
 void network_server_send(NetworkServer* server, NetworkPeer* peer, uint8_t channel, NetworkSendMode mode, const void* data, size_t size)
 {
+	if(!server || !server->is_init || !peer) return;
+
 	ENetPacket* packet = enet_packet_create(data, size, network_send_mode_to_enet_flags(mode));
 	enet_peer_send(network_peer_to_enet_peer(peer), channel, packet);
 }
 
 void network_server_broadcast(NetworkServer* server, uint8_t channel, NetworkSendMode mode, const void* data, size_t size)
 {
+	if(!server || !server->is_init) return;
+
 	ENetPacket* packet = enet_packet_create(data, size, network_send_mode_to_enet_flags(mode));
 	enet_host_broadcast(server->host, channel, packet);
 }
 
 void network_server_disconnect(NetworkServer* server, NetworkPeer* peer)
 {
+	if(!server || !server->is_init || !peer) return;
+
 	enet_peer_disconnect(network_peer_to_enet_peer(peer), 0);
 }

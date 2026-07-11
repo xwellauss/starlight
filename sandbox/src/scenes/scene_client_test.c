@@ -10,6 +10,7 @@
 #include <starlight/network/serialize.h>
 
 #include <memory.h>
+#include <stdint.h>
 
 static bool button_clicked = false;
 static bool client_connected = false;
@@ -18,8 +19,6 @@ static NetworkClient* client = NULL;
 
 static void on_network_event(const NetworkEvent* event, void* user_data)
 {
-	int p = (int)(intptr_t)user_data;
-
 	switch (event->type)
 	{
         case NETWORK_EVENT_CONNECT:
@@ -31,12 +30,12 @@ static void on_network_event(const NetworkEvent* event, void* user_data)
         case NETWORK_EVENT_RECEIVE:
 		{
 			log_debug("Event Received on Client\n");
-			if(event->size == sizeof(int32_t))
-			{
-				int32_t value;
-				memcpy(&value, event->data, sizeof(value));
-				log_debug("Value from server: %d\n", value);
-			}
+
+			NetworkReader reader = {.buffer=event->data, .capacity=event->size, .cursor=0};
+			char name[64];
+			network_read_string(&reader, name, sizeof(name));
+			log_debug("name: %s\n", name);
+
             break;
         }
     }
@@ -44,6 +43,7 @@ static void on_network_event(const NetworkEvent* event, void* user_data)
 
 static void init()
 {
+	client = network_client_create();
 }
 
 static void activate()
@@ -54,7 +54,6 @@ static void update()
 {
 	if(button_clicked && !client_connected)
 	{
-		client = network_client_create();
 		network_client_init(client, on_network_event, NULL);
 		client_connected = network_client_connect(client, "localhost", 8000, 50);
 

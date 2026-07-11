@@ -15,6 +15,8 @@ static EMSCRIPTEN_WEBSOCKET_T bridgeSocket = 0;
 
 struct NetworkClient
 {
+	bool is_init;
+
 	ENetHost* host;
 	ENetPeer* peer;
 	NetworkEventCallback on_event;
@@ -23,7 +25,7 @@ struct NetworkClient
 
 NetworkClient* network_client_create()
 {
-	return malloc(sizeof(NetworkClient));
+	return calloc(1, sizeof(NetworkClient));
 }
 
 bool network_client_init(NetworkClient* client, NetworkEventCallback on_event, void* user_data)
@@ -33,21 +35,29 @@ bool network_client_init(NetworkClient* client, NetworkEventCallback on_event, v
 	if(!client->host)
 	{
 		log_error("Network: Error in creating client!\n");
+		client->is_init = false;
 		return false;
 	}
 
 	client->peer = NULL;
 	client->on_event = on_event;
 	client->user_data = user_data;
+	client->is_init = true;
 
 	return true;
 }
 
 void network_client_destroy(NetworkClient* client)
 {
-	if(!client && !client->host) return;
-	network_client_disconnect(client);
-	enet_host_destroy(client->host);
+	if(!client) return;
+
+	if(client->is_init)
+	{
+
+		network_client_disconnect(client);
+		enet_host_destroy(client->host);
+	}
+
 	free(client);
 }
 
@@ -69,7 +79,7 @@ bool network_client_connect(NetworkClient* client, const char* host, uint16_t po
 
 void network_client_disconnect(NetworkClient* client)
 {
-	if(!client || !client->peer) return;
+	if(!client || !client->is_init || !client->peer) return;
 	enet_peer_disconnect(client->peer, 0);
 }
 
@@ -113,9 +123,10 @@ void network_client_service(NetworkClient* client, uint32_t timeout_ms)
 		}
 	}
 }
+
 void network_client_send(NetworkClient* client, uint8_t channel, NetworkSendMode mode, const void* data, size_t size)
 {
-	if(!client->peer) return;
+	if(!client || !client->is_init || !client->peer) return;
 
 	ENetPacket* packet = enet_packet_create(data, size, network_send_mode_to_enet_flags(mode));
 	enet_peer_send(client->peer, channel, packet);
