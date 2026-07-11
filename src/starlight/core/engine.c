@@ -54,7 +54,7 @@ static void engine_render_frame()
 	ui_begin_frame();
 	scene_manager_scene_build_ui();
 	ui_render_frame();
-	
+
 	window_swap_buffers();
 }
 
@@ -69,7 +69,7 @@ bool engine_init(EngineConfig e_config)
 	window_config.height = engine.config.window_height;
 
 	window_init(window_config);
-	renderer_set_bg_color(hex_to_rgb("#333333", 1.0f));	
+	renderer_set_bg_color(hex_to_rgb("#333333", 1.0f));
 
 	ecs_init();
 
@@ -96,12 +96,11 @@ void engine_run()
 
 void engine_destroy()
 {
+	ecs_destroy();
+	scene_manager_destroy();
+
 	if(engine.config.enable_network) network_destroy();
 	if(engine.config.enable_audio) audio_destroy();
-
-	ecs_destroy();
-
-	scene_manager_destroy();
 
 	if(engine.config.enable_ui) ui_destroy();
 	window_destroy();

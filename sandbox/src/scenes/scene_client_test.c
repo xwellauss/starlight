@@ -14,6 +14,7 @@
 
 static bool button_clicked = false;
 static bool client_connected = false;
+static bool button2_clicked = false;
 
 static NetworkClient* client = NULL;
 
@@ -67,7 +68,7 @@ static void update()
 	if(button_clicked && !client_connected)
 	{
 		network_client_init(client, on_network_event, NULL);
-		client_connected = network_client_connect(client, "localhost", 8000, 50);
+		client_connected = network_client_connect(client, "localhost", 8000);
 
 		button_clicked = false;
 	}
@@ -76,12 +77,20 @@ static void update()
 	{
 		network_client_service(client, 50);
 	}
+
+	if(button2_clicked && client_connected)
+	{
+		network_client_disconnect(client);
+		client_connected = false;
+		button2_clicked = false;
+	}
 }
 
 static void build_ui()
 {
 	ui_begin_container("Container 1", NULL);
 	ui_button("Join Server", &button_clicked);
+	ui_button("Leave Server", &button2_clicked);
 	ui_end_container();
 }
 

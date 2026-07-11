@@ -77,6 +77,7 @@ void network_server_service(NetworkServer* server, uint32_t timeout_ms)
 				server->on_event(&event, server->user_data);
 				break;
 			}
+			case ENET_EVENT_TYPE_DISCONNECT_TIMEOUT:
 			case ENET_EVENT_TYPE_DISCONNECT:
 			{
 				event.type = NETWORK_EVENT_DISCONNECT;
@@ -94,7 +95,6 @@ void network_server_service(NetworkServer* server, uint32_t timeout_ms)
 				break;
 			}
 
-			case ENET_EVENT_TYPE_DISCONNECT_TIMEOUT:
 			case ENET_EVENT_TYPE_NONE: break;
 		}
 	}

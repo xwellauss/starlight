@@ -52,7 +52,6 @@ void network_client_destroy(NetworkClient* client)
 
 	if(client->is_init)
 	{
-
 		network_client_disconnect(client);
 		enet_host_destroy(client->host);
 	}
@@ -60,7 +59,7 @@ void network_client_destroy(NetworkClient* client)
 	free(client);
 }
 
-bool network_client_connect(NetworkClient* client, const char* host, uint16_t port, uint32_t timeout_ms)
+bool network_client_connect(NetworkClient* client, const char* host, uint16_t port)
 {
 	ENetAddress address = {0};
 	enet_address_set_host(&address, host);
@@ -79,7 +78,9 @@ bool network_client_connect(NetworkClient* client, const char* host, uint16_t po
 void network_client_disconnect(NetworkClient* client)
 {
 	if(!client || !client->is_init || !client->peer) return;
+
 	enet_peer_disconnect(client->peer, 0);
+	network_client_service(client, 100);
 }
 
 void network_client_service(NetworkClient* client, uint32_t timeout_ms)
@@ -99,6 +100,7 @@ void network_client_service(NetworkClient* client, uint32_t timeout_ms)
 				client->on_event(&event, client->user_data);
 				break;
 			}
+			case ENET_EVENT_TYPE_DISCONNECT_TIMEOUT:
 			case ENET_EVENT_TYPE_DISCONNECT:
 			{
 				event.type = NETWORK_EVENT_DISCONNECT;
@@ -117,7 +119,6 @@ void network_client_service(NetworkClient* client, uint32_t timeout_ms)
 				break;
 			}
 
-			case ENET_EVENT_TYPE_DISCONNECT_TIMEOUT:
 			case ENET_EVENT_TYPE_NONE: break;
 		}
 	}
