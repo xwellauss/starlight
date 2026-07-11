@@ -25,7 +25,9 @@ static void on_network_event(const NetworkEvent* event, void* user_data)
             log_debug("Connected to client\n");
 
             NetworkByte buffer[256];
-            NetworkWriter writer = { .buffer=buffer, .capacity=sizeof(buffer), .cursor=0};
+            NetworkWriter writer;
+            network_writer_init(&writer, buffer, sizeof(buffer));
+
             network_write_string(&writer, "xwellauss");
             network_write_vec2(&writer, (vec2s){1.0f, 4.6f});
             network_write_vec3(&writer, (vec3s){1.0f, 4.6f, 9.4f});

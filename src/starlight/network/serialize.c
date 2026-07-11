@@ -69,6 +69,10 @@
 // 	return result;
 // }
 
+static void packu8(NetworkByte* buf, uint8_t i)
+{
+	*buf++ = i;
+}
 
 static void packu16(NetworkByte* buf, uint16_t i)
 {
@@ -96,6 +100,16 @@ static void packu64(NetworkByte* buf, uint64_t i)
 	*buf++ = i;
 }
 
+static uint8_t unpacku8(const NetworkByte* buf)
+{
+	return (uint8_t)buf[0];
+}
+
+static int8_t unpacki8(const NetworkByte* buf)
+{
+	return (int8_t)unpacku8(buf);
+}
+
 static uint16_t unpacku16(const NetworkByte* buf)
 {
 	return ((uint16_t)buf[0] << 8) | buf[1];
@@ -103,19 +117,7 @@ static uint16_t unpacku16(const NetworkByte* buf)
 
 static int16_t unpacki16(const NetworkByte* buf)
 {
-	uint16_t i2 = unpacku16(buf);
-	int16_t i;
-
-	if(i2 <= 0x7fffu)
-	{
-		i = i2;
-	}
-	else
-	{
-		i = -1 - (uint16_t)(0xffffu - i2);
-	}
-
-	return i;
+	return (int16_t)unpacku16(buf);
 }
 
 static uint32_t unpacku32(const NetworkByte* buf)
@@ -125,19 +127,7 @@ static uint32_t unpacku32(const NetworkByte* buf)
 
 static int32_t unpacki32(const NetworkByte* buf)
 {
-	uint32_t i2 = unpacku32(buf);
-	int32_t i;
-
-	if(i2 <= 0x7fffffffu)
-	{
-		i = i2;
-	}
-	else
-	{
-		i = -1 - (int32_t)(0xffffffffu - i2);
-	}
-
-	return i;
+	return (int32_t)unpacku32(buf);
 }
 
 static uint64_t unpacku64(const NetworkByte* buf)
@@ -147,22 +137,35 @@ static uint64_t unpacku64(const NetworkByte* buf)
 
 static int64_t unpacki64(const NetworkByte* buf)
 {
-	uint64_t i2 = unpacku64(buf);
-	int64_t i;
-
-	if(i2 <= 0x7fffffffffffffffu)
-	{
-		i = i2;
-	}
-	else
-	{
-		i = -1 - (int64_t)(0xffffffffffffffffu - i2);
-	}
-
-	return i;
+	return (int64_t)unpacku64(buf);
 }
 
 // Writer
+void network_writer_init(NetworkWriter* writer, NetworkByte* buffer, size_t capacity)
+{
+	writer->buffer = buffer;
+	writer->capacity = capacity;
+	writer->cursor = 0;
+}
+
+size_t network_writer_remaining(NetworkWriter* writer)
+{
+	return writer->capacity - writer->cursor;
+}
+
+void network_writer_reset(NetworkWriter* writer)
+{
+	writer->cursor = 0;
+}
+
+bool network_write_u8(NetworkWriter* writer, uint8_t value)
+{
+	if(writer->cursor + 1 > writer->capacity) return false;
+
+	packu8(writer->buffer + writer->cursor, value);
+	writer->cursor += 1;
+	return true;
+}
 
 bool network_write_u16(NetworkWriter* writer, uint16_t value)
 {
@@ -191,6 +194,11 @@ bool network_write_u64(NetworkWriter* writer, uint64_t value)
 	return true;
 }
 
+bool network_write_i8(NetworkWriter* writer, int8_t value)
+{
+	return network_write_u8(writer, (uint8_t)value);
+}
+
 bool network_write_i16(NetworkWriter* writer, int16_t value)
 {
 	return network_write_u16(writer, (uint16_t)value);
@@ -204,6 +212,11 @@ bool network_write_i32(NetworkWriter* writer, int32_t value)
 bool network_write_i64(NetworkWriter* writer, int64_t value)
 {
 	return network_write_u64(writer, (uint64_t)value);
+}
+
+bool network_write_bool(NetworkWriter* writer, bool value)
+{
+	return network_write_u8(writer, value ? 1 : 0);
 }
 
 // bool network_write_f16(NetworkWriter* writer, float value)
@@ -235,21 +248,6 @@ bool network_write_f64(NetworkWriter* writer, double value)
 	memcpy(&bits, &value, sizeof(bits));
 	packu64(writer->buffer + writer->cursor, bits);
 	writer->cursor += 8;
-
-	return true;
-}
-
-// Strings are assumed to be "small", i.e uint16_t
-bool network_write_string(NetworkWriter* writer, const char* value)
-{
-	size_t len = strlen(value);
-	if(len > 0xFFFu) return false;
-
-	if(!network_write_u16(writer, (uint16_t)len)) return false;
-
-	if(writer->cursor + len > writer->capacity) return false;
-	memcpy(writer->buffer + writer->cursor, value, len);
-	writer->cursor += len;
 
 	return true;
 }
@@ -308,7 +306,68 @@ bool network_write_mat4(NetworkWriter* writer, mat4s value)
 	return result;
 }
 
+// Strings are assumed to be "small", i.e uint16_t
+bool network_write_string(NetworkWriter* writer, const char* value)
+{
+	size_t len = strlen(value);
+	if(len > 0xFFFFu) return false;
+
+	if(!network_write_u16(writer, (uint16_t)len)) return false;
+
+	if(writer->cursor + len > writer->capacity) return false;
+	memcpy(writer->buffer + writer->cursor, value, len);
+	writer->cursor += len;
+
+	return true;
+}
+
+bool network_write_bytes(NetworkWriter* writer, const void* value, size_t size)
+{
+	if(writer->cursor + size > writer->capacity) return false;
+
+	memcpy(writer->buffer + writer->cursor, value, size);
+	writer->cursor += size;
+
+	return true;
+}
+
 // Reader
+void network_reader_init(NetworkReader* reader, const NetworkByte* buffer, size_t capacity)
+{
+	reader->buffer = buffer;
+	reader->capacity = capacity;
+	reader->cursor = 0;
+}
+
+size_t network_reader_remaining(NetworkReader* reader)
+{
+	return reader->capacity - reader->cursor;
+}
+
+void network_reader_reset(NetworkReader* reader)
+{
+	reader->cursor = 0;
+}
+
+bool network_read_u8(NetworkReader* reader, uint8_t* out)
+{
+	if(reader->cursor + 1 > reader->capacity) return false;
+
+	*out = unpacku8(reader->buffer + reader->cursor);
+	reader->cursor += 1;
+
+	return true;
+}
+
+bool network_read_i8(NetworkReader* reader, int8_t* out)
+{
+	if(reader->cursor + 1 > reader->capacity) return false;
+
+	*out = unpacki8(reader->buffer + reader->cursor);
+	reader->cursor += 1;
+
+	return true;
+}
 
 bool network_read_i16(NetworkReader* reader, int16_t* out)
 {
@@ -370,6 +429,16 @@ bool network_read_u64(NetworkReader* reader, uint64_t* out)
 	return true;
 }
 
+bool network_read_bool(NetworkReader* reader, bool* out)
+{
+	uint8_t raw;
+	if(!network_read_u8(reader, &raw)) return false;
+	*out = raw != 0;
+
+	return true;
+}
+
+
 // bool network_read_f16(NetworkReader* reader, float* out)
 // {
 // 	if(reader->cursor + 2 > reader->capacity) return false;
@@ -412,6 +481,16 @@ bool network_read_string(NetworkReader* reader, char* out, size_t out_capacity)
 	memcpy(out, reader->buffer + reader->cursor, len);
 	out[len] = '\0';
 	reader->cursor += len;
+
+	return true;
+}
+
+bool network_read_bytes(NetworkReader* reader, void* out, size_t size)
+{
+	if(reader->cursor + size > reader->capacity) return false;
+
+	memcpy(out, reader->buffer + reader->cursor, size);
+	reader->cursor += size;
 
 	return true;
 }

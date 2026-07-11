@@ -31,7 +31,9 @@ static void on_network_event(const NetworkEvent* event, void* user_data)
 		{
 			log_debug("Event Received on Client\n");
 
-			NetworkReader reader = {.buffer=event->data, .capacity=event->size, .cursor=0};
+			NetworkReader reader;
+			network_reader_init(&reader, event->data, event->size);
+
 			char name[64];
 			vec2s v1;
 			vec3s v2;
