@@ -59,6 +59,12 @@ typedef struct
 
 typedef struct
 {
+	bool enable_x;
+	bool enable_y;
+} UIScroll;
+
+typedef struct
+{
 	vec4s color;
 	vec4s width; // x=left y=right z=top w=bottom
 	uint16_t between_children;
@@ -73,6 +79,7 @@ typedef struct
 
 	UILayout layout;
 	UIBorderStyle border;
+	UIScroll scroll;
 
 	int font_size;
 } UIBaseStyle;

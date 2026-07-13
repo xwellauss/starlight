@@ -68,6 +68,9 @@ static UIStyleResolved resolve_style(UIStyle* style)
 		.base.border.width.bottom = (uint16_t)style->base.border.width.w,
 		.base.border.width.betweenChildren = style->base.border.between_children,
 
+		.base.clip.horizontal = style->base.scroll.enable_x,
+		.base.clip.vertical = style->base.scroll.enable_y,
+
 		.is_interactive = style->is_interactive,
 		.interactive.bg_hover_color = vec4_to_clay_color(style->interactive.bg_hover_color),
 		.interactive.bg_press_color = vec4_to_clay_color(style->interactive.bg_press_color),
@@ -121,6 +124,8 @@ UIStyle ui_style_root_get_default()
 	style.base.border.color = hex_to_rgba("#000000", 0.0f);
 	style.base.border.width = (vec4s){0.0f, 0.0f, 0.0f, 0.0f};
 	style.base.border.between_children = 0;
+	style.base.scroll.enable_x = false;
+	style.base.scroll.enable_y = false;
 	style.is_interactive = false;
 
 	return style;
@@ -143,6 +148,8 @@ UIStyle ui_style_container_get_default()
 	style.base.border.color = hex_to_rgba("#000000", 0.0f);
 	style.base.border.width = (vec4s){0.0f, 0.0f, 0.0f, 0.0f};
 	style.base.border.between_children = 0;
+	style.base.scroll.enable_x = false;
+	style.base.scroll.enable_y = false;
 	style.is_interactive = false;
 
 	return style;
@@ -170,6 +177,8 @@ UIStyle ui_style_button_get_default()
 	style.base.border.color = hex_to_rgba("#000000", 0.0f);
 	style.base.border.width = (vec4s){0.0f, 0.0f, 0.0f, 0.0f};
 	style.base.border.between_children = 0;
+	style.base.scroll.enable_x = false;
+	style.base.scroll.enable_y = false;
 	style.is_interactive = true;
 	style.interactive.bg_hover_color = hex_to_rgba("#746030", 1.0f);
 	style.interactive.bg_press_color = hex_to_rgba("#746055", 1.0f);

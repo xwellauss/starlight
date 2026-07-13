@@ -21,6 +21,7 @@ typedef struct
 	Clay_CornerRadius corner_radius;
 	Clay_LayoutConfig layout;
 	Clay_BorderElementConfig border;
+	Clay_ClipElementConfig clip;
 
 	int font_size;
 } UIBaseStyleResolved;

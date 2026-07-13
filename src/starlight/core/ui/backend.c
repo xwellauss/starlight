@@ -11,7 +11,7 @@
 #include "shaders.h"
 
 #define MAX_RECTS 1024
-#define MAX_GLYPHS 4096
+#define MAX_GLYPHS 65536
 
 typedef struct
 {
@@ -80,9 +80,9 @@ static Clay_Dimensions clay_measure_text(Clay_StringSlice glyph_vtx_array, Clay_
 			x += font_atlas.baked_font_size * 0.25f;
 			continue;
 		}
-        
+
 		stbtt_packedchar* pc = &font_atlas.glyph_ascii[c - 32];
-        
+
 		x += pc->xadvance * scale + letter_spacing;
 	}
 
@@ -95,11 +95,11 @@ static void flush_rects()
 {
 	if(rect_count == 0) return;
 
-	shader_bind(&rect_shader);	
+	shader_bind(&rect_shader);
 	vertex_buffer_update(&rect_vertex_buffer, rect_vertex_data, rect_count * sizeof(RectQuad), 0);
 	vertex_buffer_draw(&rect_vertex_buffer, PRIMITIVE_TRIANGLES, rect_count * 6, 0);
 	shader_unbind();
-	
+
 	rect_count = 0;
 }
 
@@ -108,7 +108,7 @@ static void flush_glyphs()
 	if(glyph_count == 0) return;
 
 	shader_bind(&glyph_shader);
-	
+
 	texture_active_slot(TEXTURE_SLOT_0);
 	shader_uniform_int(&glyph_shader, "sampler", 0);
 	texture2d_bind(&font_atlas.texture);
@@ -177,7 +177,7 @@ static void build_glyphs(const char* text, float x, float y, float requested_sca
 		float v1 = pc->y1 / (float)font_atlas.height;
 
 		push_glyph(x0, x1, y0, y1, u0, u1, v0, v1, color);
-		
+
 		x += pc->xadvance * render_scale;
 	}
 }
@@ -189,7 +189,7 @@ void ui_backend_init(const char* font_path)
 
 	window_width = (float)window_get_width();
 	window_height = (float)window_get_height();
-		
+
 	{
 		VertexAttrib attribs[] =
 		{
@@ -209,16 +209,16 @@ void ui_backend_init(const char* font_path)
 	}
 
 	vertex_buffer_2d_init(&glyph_vertex_buffer, NULL, MAX_GLYPHS * sizeof(GlyphQuad), NULL, 0, false);
-	shader_init_from_source(&glyph_shader, UI_FONT_VERTEX_SHADER, UI_FONT_FRAGMENT_SHADER);	
+	shader_init_from_source(&glyph_shader, UI_FONT_VERTEX_SHADER, UI_FONT_FRAGMENT_SHADER);
 }
 
 void ui_backend_render(Clay_RenderCommandArray cmds)
 {
 	projection = glms_ortho(0.0f, window_width, window_height, 0.0f, -1.0f, 1.0f); // Top left origin
 
-	shader_bind(&rect_shader);	
+	shader_bind(&rect_shader);
 	shader_uniform_mat4(&rect_shader, "projection", projection);
-	shader_bind(&glyph_shader);	
+	shader_bind(&glyph_shader);
 	shader_uniform_mat4(&glyph_shader, "projection", projection);
 	shader_unbind();
 
@@ -281,7 +281,7 @@ void ui_backend_render(Clay_RenderCommandArray cmds)
 			bool is_border = cmd->commandType == CLAY_RENDER_COMMAND_TYPE_BORDER;
 			bool is_rect = cmd->commandType == CLAY_RENDER_COMMAND_TYPE_RECTANGLE;
 			bool is_image = cmd->commandType == CLAY_RENDER_COMMAND_TYPE_IMAGE;
-			
+
 			vec4s color, corner_radius, border_width;
 
 			if(is_border)
@@ -300,7 +300,7 @@ void ui_backend_render(Clay_RenderCommandArray cmds)
 			else if(is_rect || is_image)
 			{
 				Clay_RectangleRenderData* rd = &cmd->renderData.rectangle;
-				
+
 				color.r = rd->backgroundColor.r/255.0f;
 				color.g = rd->backgroundColor.g/255.0f;
 				color.b = rd->backgroundColor.b/255.0f;
@@ -309,7 +309,7 @@ void ui_backend_render(Clay_RenderCommandArray cmds)
 				corner_radius = (vec4s){rd->cornerRadius.topLeft, rd->cornerRadius.topRight, rd->cornerRadius.bottomLeft, rd->cornerRadius.bottomRight};
 				border_width = (vec4s){0.0f, 0.0f, 0.0f, 0.0f};
 			}
-				
+
 			if(is_image)
 			{
 				flush_rects();
@@ -317,7 +317,7 @@ void ui_backend_render(Clay_RenderCommandArray cmds)
 
 				Texture2D* texture = (Texture2D*)cmd->renderData.image.imageData;
 
-				push_rect(x0, x1, y0, y1, color, rect_pos, rect_size, corner_radius, border_width);	
+				push_rect(x0, x1, y0, y1, color, rect_pos, rect_size, corner_radius, border_width);
 				shader_bind(&rect_shader);
 				shader_uniform_int(&rect_shader, "has_texture", true);
 				texture_active_slot(TEXTURE_SLOT_0);
@@ -353,7 +353,7 @@ void ui_backend_render(Clay_RenderCommandArray cmds)
 			break;
 		}
 		}
-        
+
 		if (i == cmds.length - 1 || scissor_changed)
 		{
 			flush_rects();
@@ -395,14 +395,14 @@ void ui_backend_destroy()
 void ui_font_render_text(const char* text, float x, float y, float requested_scale, vec4s color)
 {
 	shader_bind(&glyph_shader);
-	
+
 	shader_uniform_mat4(&glyph_shader, "projection", projection);
 	shader_uniform_vec4(&glyph_shader, "text_color", color);
 
 	Vertex2DQuad vertex_data[MAX_GLYPHS];
 	size_t glyph_count = 0;
 	vertex_buffer_bind(&glyph_vertex_buffer, BUFFER_VAO);
-	
+
 	float render_scale = requested_scale / font_atlas.baked_font_size;
 	y += font_atlas.ascent * render_scale;
 	for(const char* c = text; *c != '\0'; c++)
@@ -421,7 +421,7 @@ void ui_font_render_text(const char* text, float x, float y, float requested_sca
 		float v0 = pc->y0 / (float)font_atlas.height;
 		float u1 = pc->x1 / (float)font_atlas.width;
 		float v1 = pc->y1 / (float)font_atlas.height;
-		
+
 		if(glyph_count >= MAX_GLYPHS) break;
 
 		vertex_data[glyph_count] = (Vertex2DQuad)
@@ -431,7 +431,7 @@ void ui_font_render_text(const char* text, float x, float y, float requested_sca
 			{{x1, y1}, {0.0f, 0.0f, 0.0f, 0.0f}, {u1, v1}},
 			{{x0, y1}, {0.0f, 0.0f, 0.0f, 0.0f}, {u0, v1}}
 		}};
-		
+
 		x += pc->xadvance * render_scale;
 
 		glyph_count++;
@@ -439,7 +439,7 @@ void ui_font_render_text(const char* text, float x, float y, float requested_sca
 
 	texture_active_slot(GL_TEXTURE0);
 	texture2d_bind(&font_atlas.texture);
-	
+
 	vertex_buffer_bind(&glyph_vertex_buffer, BUFFER_VBO);
 	vertex_buffer_update(&glyph_vertex_buffer, vertex_data, glyph_count*sizeof(Vertex2DQuad), 0);
 	vertex_buffer_draw_indexed(&glyph_vertex_buffer, GL_TRIANGLES, GL_UNSIGNED_SHORT, glyph_count*6, 0);

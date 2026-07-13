@@ -103,6 +103,9 @@ static void execute_node(UINode* node)
 				.backgroundColor = node_style->base.bg_color,
 				.cornerRadius = node_style->base.corner_radius,
 				.border = node_style->base.border,
+				.clip.horizontal = node_style->base.clip.horizontal,
+				.clip.vertical = node_style->base.clip.vertical,
+				.clip.childOffset = Clay_GetScrollOffset(),
 			})
 			{
 				for(int i = 0; i < node->child_count; i++)
@@ -119,6 +122,9 @@ static void execute_node(UINode* node)
 				.backgroundColor = node_style->is_interactive ? ((Clay_Hovered()) ? (window_input_mouse_btn_is_down(INPUT_MOUSE_BUTTON_LEFT) ? node_style->interactive.bg_press_color : node_style->interactive.bg_hover_color) : node_style->base.bg_color) : node_style->base.bg_color,
 				.cornerRadius = node_style->base.corner_radius,
 				.border = node_style->base.border,
+				.clip.horizontal = node_style->base.clip.horizontal,
+				.clip.vertical = node_style->base.clip.vertical,
+				.clip.childOffset = Clay_GetScrollOffset(),
 			})
 			{
 				if(node_style->is_interactive)
@@ -139,6 +145,9 @@ static void execute_node(UINode* node)
 			CLAY_AUTO_ID({
 				.layout = node_style->base.layout,
 				.border = node_style->base.border,
+				.clip.horizontal = node_style->base.clip.horizontal,
+				.clip.vertical = node_style->base.clip.vertical,
+				.clip.childOffset = Clay_GetScrollOffset(),
 			})
 			{
 				CLAY_TEXT(clay_label, CLAY_TEXT_CONFIG({
@@ -159,6 +168,9 @@ static void execute_node(UINode* node)
 					.backgroundColor = ((Clay_Hovered()) ? (window_input_mouse_btn_is_down(INPUT_MOUSE_BUTTON_LEFT) ? node_style->interactive.bg_press_color : node_style->interactive.bg_hover_color) : node_style->base.bg_color),
 					.cornerRadius = node_style->base.corner_radius,
 					.border = node_style->base.border,
+					.clip.horizontal = node_style->base.clip.horizontal,
+					.clip.vertical = node_style->base.clip.vertical,
+					.clip.childOffset = Clay_GetScrollOffset(),
 				})
 				{
 					Clay_OnHover(interactive_hover_callback, node);
