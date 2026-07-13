@@ -69,7 +69,7 @@ bool engine_init(EngineConfig e_config)
 	window_config.height = engine.config.window_height;
 
 	window_init(window_config);
-	renderer_set_bg_color(hex_to_rgb("#333333", 1.0f));
+	renderer_set_bg_color(hex_to_rgba("#333333", 1.0f));
 
 	ecs_init();
 

@@ -9,4 +9,4 @@
 #include <cglm/struct.h>
 
 
-vec4s hex_to_rgb(char colorcode[7], float alpha);
+vec4s hex_to_rgba(char colorcode[7], float alpha);

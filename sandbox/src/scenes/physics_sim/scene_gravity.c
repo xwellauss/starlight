@@ -51,7 +51,7 @@ static void render_planet_model(Entity* e)
 	shader_uniform_mat4(&ecs_entity_get_sprite(e)->shader, "projection", camera.projection_matrix);
 	shader_uniform_mat4(&ecs_entity_get_sprite(e)->shader, "view", camera.view_matrix);
 	shader_uniform_mat4(&ecs_entity_get_sprite(e)->shader, "transform", ecs_entity_get_transform(e)->transform);
-	
+
 	vertex_buffer_draw_indexed(&ecs_entity_get_sprite(e)->vertex_buffer, PRIMITIVE_TRIANGLES, sphere_model.index_count, 0);
 }
 
@@ -83,7 +83,7 @@ void update_transform()
 
 
 static void init()
-{	
+{
 	model_load_from_file(&sphere_model, "3d-models/sphere.glb", FILE_GLTF);
 
 	ecs_entity_init(&planet1_entity, "Planet1");
@@ -94,7 +94,7 @@ static void init()
 	ecs_entity_get_transform(&planet1_entity)->position = (vec3s){0.0f, 0.0f, 0.0f};
 	ecs_entity_get_transform(&planet1_entity)->rotation = (vec3s){0.0f, 0.0f, 0.0f};
 	ecs_entity_get_transform(&planet1_entity)->scale = (vec3s){1.0f, 1.0f, 1.0f};
-	ecs_entity_get_sprite(&planet1_entity)->color = hex_to_rgb("#32a852", 1.0f);
+	ecs_entity_get_sprite(&planet1_entity)->color = hex_to_rgba("#32a852", 1.0f);
 	ecs_entity_get_physics(&planet1_entity)->mass = 10.0f;
 
 	vertex_buffer_3d_init(&ecs_entity_get_sprite(&planet1_entity)->vertex_buffer, sphere_model.vertex_data, sphere_model.vertex_count*sizeof(Vertex3D), sphere_model.index_data, sphere_model.index_count*sizeof(uint32_t), true);
@@ -109,7 +109,7 @@ static void init()
 	ecs_entity_get_transform(&planet2_entity)->position = (vec3s){10.0f, 0.0f, 0.0f};
 	ecs_entity_get_transform(&planet2_entity)->rotation = (vec3s){0.0f, 0.0f, 0.0f};
 	ecs_entity_get_transform(&planet2_entity)->scale = (vec3s){1.0f, 1.0f, 1.0f};
-	ecs_entity_get_sprite(&planet2_entity)->color = hex_to_rgb("#c79910", 1.0f);
+	ecs_entity_get_sprite(&planet2_entity)->color = hex_to_rgba("#c79910", 1.0f);
 	ecs_entity_get_physics(&planet2_entity)->mass = 10.0f;
 
 	vertex_buffer_3d_init(&ecs_entity_get_sprite(&planet2_entity)->vertex_buffer, sphere_model.vertex_data, sphere_model.vertex_count*sizeof(Vertex3D), sphere_model.index_data, sphere_model.index_count*sizeof(uint32_t), true);
@@ -129,7 +129,7 @@ static void init()
 	camera.pitch = 0.0f;
 	camera.yaw = -90.0f;
 	camera.camera_type =  CAMERA_WALK_AROUND | CAMERA_LOOK_AROUND;
-	init_camera(&camera);	
+	init_camera(&camera);
 }
 
 static void build_ui()
@@ -141,9 +141,9 @@ static void render()
 #if defined(_PLATFORM_ANDROID) || defined(_PLATFORM_WEB)
 	//ui_component_joystick("Input", "Joystick", joystick_box_size, joystick_radius, joystick_color, &joystick_angle, &is_joystick_active);
 #endif
-	
-	renderer_set_bg_color(hex_to_rgb("#111111", 1.0f));
-	
+
+	renderer_set_bg_color(hex_to_rgba("#111111", 1.0f));
+
 	render_planet_model(&planet1_entity);
 	render_planet_model(&planet2_entity);
 }
@@ -172,7 +172,7 @@ static void process_input()
 		else if(joystick_angle >= 45.0f && joystick_angle <= 135.0f) input_state.forward = true;
 		else if(joystick_angle >= 135.0f && joystick_angle <= 225.0f) input_state.left = true;
 		else if(joystick_angle >= 225.0f && joystick_angle <= 315.0f) input_state.backward = true;
-	}	
+	}
 }
 
 static void activate()
@@ -183,7 +183,7 @@ static void deactivate()
 {
 	vertex_buffer_unbind_all();
 	shader_unbind();
-	
+
 	texture_active_slot(TEXTURE_SLOT_1);
 	texture2d_unbind();
 

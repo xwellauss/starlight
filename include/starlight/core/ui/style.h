@@ -88,6 +88,11 @@ typedef struct
 void ui_style_push(UIStyle* style);
 void ui_style_pop();
 
+UIStyle ui_style_root_default_style();
+UIStyle ui_style_container_default_style();
+UIStyle ui_style_text_default_style();
+UIStyle ui_style_button_default_style();
+
 static inline UISizingAxis ui_style_size_fit(float min, float max)
 {
 	return (UISizingAxis){ .type = UI_LAYOUT_SIZING_TYPE_FIT, .size.min_max = {min, max} };

@@ -6,6 +6,7 @@
 
 typedef enum
 {
+	UI_NODE_ROOT,
 	UI_NODE_CONTAINER,
 	UI_NODE_TEXT,
 	UI_NODE_BUTTON
@@ -43,7 +44,7 @@ void ui_node_create_tree();
 
 void ui_style_init();
 void ui_style_stack_reset();
-UIStyleResolved* ui_style_get_current(UINodeType type);
+UIStyleResolved ui_style_get_current(UINodeType type);
 
 void ui_backend_init(const char* font_path);
 void ui_backend_render(Clay_RenderCommandArray cmds);

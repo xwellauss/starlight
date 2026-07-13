@@ -148,7 +148,7 @@ static void render_model()
 
 		shader_uniform_mat4(m_s, "transform", m_t->transform);
 		shader_uniform_mat3(m_s, "transform_normal", glms_mat3_transpose(glms_mat3_inv(glms_mat4_pick3(m_t->transform))));
-		
+
 		vertex_buffer_draw_indexed(&m_sc->vertex_buffer, PRIMITIVE_TRIANGLES, mesh->index_count, (void*)(mesh->index_offset * sizeof(uint32_t)));
 	}
 }
@@ -169,7 +169,7 @@ static void init()
 	ecs_entity_get_transform(&light_source)->scale = (vec3s){0.2f, 0.2f, 0.2f};
 	ecs_entity_get_transform(&light_source)->rotation = (vec3s){0.0f, 0.0f, 0.0f};
 	ecs_entity_get_sprite(&light_source)->color = (vec4s){1.0f, 1.0f, 1.0f, 1.0f};
-	
+
 	model_load_from_file(&model, "3d-models/lambo.glb", FILE_GLTF);
 	model_load_from_file(&light_model, "3d-models/cube.glb", FILE_GLTF);
 
@@ -194,7 +194,7 @@ static void init()
 	camera.camera_type =  CAMERA_WALK_AROUND | CAMERA_LOOK_AROUND;
 	init_camera(&camera);
 
-	renderer_set_bg_color(hex_to_rgb("#222222", 1.0f));
+	renderer_set_bg_color(hex_to_rgba("#222222", 1.0f));
 }
 
 static void build_ui()
@@ -205,7 +205,7 @@ static void render()
 {
 #if defined(_PLATFORM_ANDROID) || defined(_PLATFORM_WEB)
 	//ui_component_joystick("Input", "Joystick", joystick_box_size, joystick_radius, joystick_color, &joystick_angle, &is_joystick_active);
-#endif	
+#endif
 	// Light Cube
 	update_entity_transform(&light_source);
 	render_light_source();
@@ -267,7 +267,7 @@ static void deactivate()
 {
 	vertex_buffer_unbind_all();
 	shader_unbind();
-	
+
 	texture_active_slot(TEXTURE_SLOT_1);
 	texture2d_unbind();
 
@@ -279,7 +279,7 @@ static void destroy()
 {
 	model_free(&model);
 	model_free(&light_model);
-	
+
 	shader_destroy(&ecs_entity_get_sprite(&model_entity)->shader);
 	vertex_buffer_destroy(&ecs_entity_get_sprite(&model_entity)->vertex_buffer);
 

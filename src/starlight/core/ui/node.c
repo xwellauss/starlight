@@ -23,7 +23,7 @@ typedef struct UINode
 	struct UINode* children[MAX_CHILDREN];
 	int child_count;
 
-	UIStyleResolved* style;
+	UIStyleResolved style;
 
 	void* user_data;
 } UINode;
@@ -59,11 +59,16 @@ static void interactive_hover_callback(Clay_ElementId id, Clay_PointerData point
 
 static UINode* append_node(UINodeType type, const char* label)
 {
-	if(node_count >= MAX_UI_NODES) return NULL;
+	if(node_count >= MAX_UI_NODES)
+	{
+		log_error("UI: node pool limit exceeded\n");
+		return NULL;
+	}
 
 	UINode* parent = get_current_parent();
 	if(parent && parent->child_count >= MAX_CHILDREN)
 	{
+		log_error("UI: node child limit exceeded\n");
 		return NULL;
 	}
 
@@ -87,10 +92,25 @@ static void execute_node(UINode* node)
 	if(!node) return;
 
 	Clay_String clay_label = { .length = strlen(node->label), .chars = node->label};
-	UIStyleResolved* node_style = node->style;
+	UIStyleResolved* node_style = &node->style;
 
 	switch(node->type)
 	{
+		case UI_NODE_ROOT:
+		{
+			CLAY(Clay_GetElementId(clay_label), {
+				.layout = node_style->base.layout,
+				.backgroundColor = node_style->base.bg_color,
+				.cornerRadius = node_style->base.corner_radius
+			})
+			{
+				for(int i = 0; i < node->child_count; i++)
+				{
+					execute_node(node->children[i]);
+				}
+			}
+			break;
+		}
 		case UI_NODE_CONTAINER:
 		{
 			CLAY(Clay_GetElementId(clay_label), {
@@ -157,23 +177,30 @@ void ui_node_stack_reset()
 	node_count = 0;
 	stack_cursor = 0;
 
+	root_node.type = UI_NODE_ROOT;
+	root_node.label = "RootNode";
 	root_node.child_count = 0;
+	root_node.user_data = NULL;
+	root_node.style = ui_style_get_current(UI_NODE_ROOT);
 
 	parent_stack[stack_cursor] = &root_node;
 }
 
 void ui_node_create_tree()
 {
-	for(int i = 0; i < root_node.child_count; i++)
-	{
-		execute_node(root_node.children[i]);
-	}
+	execute_node(&root_node);
 }
 
 // Widgets and Containers
 void ui_container_begin(const char* label, bool* clicked)
 {
 	UINode* node = append_node(UI_NODE_CONTAINER, label);
+	if(!node)
+	{
+		log_error("UI: Container: could not append node");
+		return;
+	}
+
 	node->user_data = clicked;
 
 	if(stack_cursor < MAX_STACK_DEPTH - 1)
@@ -198,10 +225,9 @@ void ui_container_end()
 void ui_widget_button(const char* label, bool* clicked)
 {
 	UINode* node = append_node(UI_NODE_BUTTON, label);
-
 	if(!node)
 	{
-		log_error("UI: node pool/child limit exceeded\n");
+		log_error("UI: Button: could not append node");
 		return;
 	}
 
@@ -211,4 +237,9 @@ void ui_widget_button(const char* label, bool* clicked)
 void ui_widget_text(const char* label)
 {
 	UINode* node = append_node(UI_NODE_TEXT, label);
+	if(!node)
+	{
+		log_error("UI: Text: could not append node");
+		return;
+	}
 }
