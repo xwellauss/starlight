@@ -18,6 +18,7 @@ starlight_src = files(
   'core/resources/model_loader.c',
   'core/ui/ui.c',
   'core/ui/backend.c',
+  'core/ui/node.c',
   'core/ui/style.c',
   'network/network.c',
   'network/server.c',

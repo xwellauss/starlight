@@ -69,8 +69,6 @@ static void update()
 	{
 		network_client_init(client, on_network_event, NULL);
 		client_connected = network_client_connect(client, "localhost", 8000);
-
-		button_clicked = false;
 	}
 
 	if(client_connected)
@@ -82,16 +80,15 @@ static void update()
 	{
 		network_client_disconnect(client);
 		client_connected = false;
-		button2_clicked = false;
 	}
 }
 
 static void build_ui()
 {
-	ui_begin_container("Container 1", NULL);
-	ui_button("Join Server", &button_clicked);
-	ui_button("Leave Server", &button2_clicked);
-	ui_end_container();
+	ui_container_begin("Container 1", NULL);
+	ui_widget_button("Join Server", &button_clicked);
+	ui_widget_button("Leave Server", &button2_clicked);
+	ui_container_end();
 }
 
 static void render()

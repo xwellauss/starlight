@@ -60,8 +60,6 @@ static void update()
 	if(button_clicked && !server_started)
 	{
 		server_started = network_server_init(server, 8000, 16, on_network_event, NULL);
-
-		button_clicked = false;
 	}
 
 	if(server_started)
@@ -72,9 +70,9 @@ static void update()
 
 static void build_ui()
 {
-	ui_begin_container("Container 1", NULL);
-	ui_button("Start Server", &button_clicked);
-	ui_end_container();
+	ui_container_begin("Container 1", NULL);
+	ui_widget_button("Start Server", &button_clicked);
+	ui_container_end();
 }
 
 static void render()

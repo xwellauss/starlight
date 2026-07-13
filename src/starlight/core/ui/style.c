@@ -1,10 +1,10 @@
 #include <starlight/core/ui/style.h>
-#include "internal.h"
-
 #include <starlight/utils/math_utils.h>
 #include <starlight/utils/logger.h>
 
 #include <cglm/struct.h>
+
+#include "internal.h"
 
 #define MAX_STACK_DEPTH 64
 
@@ -88,8 +88,8 @@ UIStyleResolved* ui_style_get_current(UINodeType type)
 
 	switch(type)
 	{
-		case UI_NODE_BUTTON:    return &default_button_style;
-		case UI_NODE_TEXT:      return &default_text_style;
+		case UI_NODE_BUTTON: return &default_button_style;
+		case UI_NODE_TEXT: return &default_text_style;
 		case UI_NODE_CONTAINER: return &default_container_style;
 	}
 }

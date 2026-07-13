@@ -57,24 +57,23 @@ static void update()
 	if(button_clicked)
 	{
 		log_debug("Bro clicked the button!\n");
-		button_clicked = false;
 	}
 }
 
 static void build_ui()
 {
 	//ui_style_push(&style1);
-	ui_begin_container("Container 1", NULL);
-		ui_text("This is a button!");
+	ui_container_begin("Container 1", NULL);
+		ui_widget_text("This is a button!");
 		//ui_style_push(&style2);
-		ui_button("Click me!", &button_clicked);
+		ui_widget_button("Click me!", &button_clicked);
 		//ui_style_pop();
-	ui_end_container();
+	ui_container_end();
 	//ui_style_pop();
-	ui_begin_container("Container 2", NULL);
-		ui_text("This is a button!");
+	ui_container_begin("Container 2", NULL);
+		ui_widget_text("This is a button!");
 		//ui_button("Click me!", &button_clicked);
-	ui_end_container();
+	ui_container_end();
 }
 
 static void render()

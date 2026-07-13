@@ -40,7 +40,7 @@ static void init()
 	style2.base.layout.padding = (vec4s){8.0f, 8.0f, 8.0f, 8.0f};
 	style2.base.layout.direction = UI_LAYOUT_TOP_TO_BOTTOM;
 	style2.base.layout.child_gap = 4;
-	style2.base.layout.child_alignment_x = UI_LAYOUT_ALIGN_X_CENTER;
+	style2.base.layout.child_alignment_x = UI_LAYOUT_ALIGN_X_LEFT;
 	style2.base.layout.child_alignment_y = UI_LAYOUT_ALIGN_Y_CENTER;
 	style2.base.layout.sizing.x = ui_style_size_fit(0, 400);
 	style2.base.layout.sizing.y = ui_style_size_grow(0, 200);
@@ -68,8 +68,8 @@ static void render()
 static void build_ui()
 {
     ui_style_push(&style1);
-	ui_begin_container("Scenes", NULL);
-	ui_text("Scenes");
+	ui_container_begin("Scenes", NULL);
+	ui_widget_text("Scenes");
 	ui_style_push(&style2);
 	for(size_t i = 0; i < arrlen(scenes_list); i++)
 	{
@@ -78,7 +78,7 @@ static void build_ui()
 			continue;
 		}
 
-		ui_button(scenes_list[i], &scene_button_list[i]);
+		ui_widget_button(scenes_list[i], &scene_button_list[i]);
 
 		if(scene_button_list[i])
 		{
@@ -86,7 +86,7 @@ static void build_ui()
 		}
 	}
 	ui_style_pop();
-	ui_end_container();
+	ui_container_end();
 	ui_style_pop();
 }
 

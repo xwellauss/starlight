@@ -18,7 +18,6 @@ typedef struct
 
 	Clay_CornerRadius corner_radius;
 	Clay_LayoutConfig layout;
-	// TODO: add size mode
 
 	int font_size;
 } UIBaseStyleResolved;
@@ -34,16 +33,17 @@ typedef struct
 typedef struct
 {
 	UIBaseStyleResolved base;
-	
+
 	bool is_interactive;
 	UIInteractiveStyleResolved interactive;
 } UIStyleResolved;
 
+void ui_node_stack_reset();
+void ui_node_create_tree();
+
 void ui_style_init();
 void ui_style_stack_reset();
 UIStyleResolved* ui_style_get_current(UINodeType type);
-
-
 
 void ui_backend_init(const char* font_path);
 void ui_backend_render(Clay_RenderCommandArray cmds);
