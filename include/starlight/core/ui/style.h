@@ -103,6 +103,8 @@ typedef struct
 void ui_style_push(UIStyle* style);
 void ui_style_pop();
 
+void ui_style_reset();
+
 void ui_style_root_set(UIStyle* style);
 void ui_style_container_set(UIStyle* style);
 void ui_style_text_set(UIStyle* style);

@@ -1,4 +1,5 @@
 #include <starlight/core/scene/scene_manager.h>
+#include <starlight/core/ui/style.h>
 #include <starlight/utils/logger.h>
 
 #include <stb_ds.h>
@@ -30,6 +31,8 @@ void scene_manager_switch_scene(const char* scene_name)
 	{
 		current_scene->deactivate();
 	}
+
+	ui_style_reset();
 
 	current_scene = target;
 	current_scene->activate();

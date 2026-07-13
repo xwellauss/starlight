@@ -208,14 +208,8 @@ void ui_style_button_set(UIStyle* style)
 	button_style_resolved = resolve_style(style);
 }
 
-void ui_style_init()
+void ui_style_reset()
 {
-}
-
-void ui_style_stack_reset()
-{
-	style_stack_cursor = 0;
-
 	UIStyle s1, s2, s3, s4;
 	s1 = ui_style_root_get_default();
 	s2 = ui_style_container_get_default();
@@ -226,23 +220,6 @@ void ui_style_stack_reset()
 	container_style_resolved = resolve_style(&s2);
 	text_style_resolved = resolve_style(&s3);
 	button_style_resolved = resolve_style(&s4);
-}
-
-UIStyleResolved ui_style_get_current(UINodeType type)
-{
-	if(style_stack_cursor > 0)
-	{
-		return style_stack[style_stack_cursor];
-	}
-
-	switch(type)
-	{
-		case UI_NODE_ROOT: return root_style_resolved;
-		case UI_NODE_CONTAINER: return container_style_resolved;
-		case UI_NODE_TEXT: return text_style_resolved;
-		case UI_NODE_BUTTON: return button_style_resolved;
-		default: return container_style_resolved;
-	}
 }
 
 void ui_style_push(UIStyle* style)
@@ -264,5 +241,35 @@ void ui_style_pop()
 	else
 	{
 		log_error("UI: Mismatched ui_style_pop!\n");
+	}
+}
+
+
+// Internal
+
+void ui_style_init()
+{
+	ui_style_reset();
+}
+
+void ui_style_stack_reset()
+{
+	style_stack_cursor = 0;
+}
+
+UIStyleResolved ui_style_get_current(UINodeType type)
+{
+	if(style_stack_cursor > 0)
+	{
+		return style_stack[style_stack_cursor];
+	}
+
+	switch(type)
+	{
+		case UI_NODE_ROOT: return root_style_resolved;
+		case UI_NODE_CONTAINER: return container_style_resolved;
+		case UI_NODE_TEXT: return text_style_resolved;
+		case UI_NODE_BUTTON: return button_style_resolved;
+		default: return container_style_resolved;
 	}
 }

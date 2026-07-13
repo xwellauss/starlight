@@ -21,9 +21,6 @@ static UIStyle root_style;
 
 static void init()
 {
-	root_style = ui_style_root_get_default();
-	root_style.base.layout.child_alignment_x = UI_LAYOUT_ALIGN_X_CENTER;
-
 	style1 = ui_style_container_get_default();
     style1.base.bg_color = hex_to_rgba("#000000", 0.0f);
 	style1.base.fg_color = hex_to_rgba("#ffffff", 1.0f);
@@ -59,6 +56,10 @@ static void init()
 
 static void activate()
 {
+	root_style = ui_style_root_get_default();
+	root_style.base.layout.child_alignment_x = UI_LAYOUT_ALIGN_X_CENTER;
+	ui_style_root_set(&root_style);
+
     scenes_list = scene_manager_get_scenes_list();
 
 	for(size_t i = 0; i < arrlen(scenes_list); i++)
@@ -73,8 +74,6 @@ static void render()
 
 static void build_ui()
 {
-	ui_style_root_set(&root_style);
-
     ui_style_push(&style1);
 	ui_container_begin("Scenes", NULL);
 	ui_widget_text("Scenes");
