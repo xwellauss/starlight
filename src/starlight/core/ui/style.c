@@ -3,6 +3,7 @@
 #include <starlight/utils/logger.h>
 
 #include <cglm/struct.h>
+#include <stdint.h>
 
 #include "internal.h"
 
@@ -11,10 +12,10 @@
 static UIStyleResolved style_stack[MAX_STACK_DEPTH];
 static int style_stack_cursor;
 
-static UIStyleResolved default_root_style_resolved;
-static UIStyleResolved default_container_style_resolved;
-static UIStyleResolved default_button_style_resolved;
-static UIStyleResolved default_text_style_resolved;
+static UIStyleResolved root_style_resolved;
+static UIStyleResolved container_style_resolved;
+static UIStyleResolved button_style_resolved;
+static UIStyleResolved text_style_resolved;
 
 static Clay_Color vec4_to_clay_color(vec4s color_vec)
 {
@@ -59,6 +60,14 @@ static UIStyleResolved resolve_style(UIStyle* style)
 		.base.layout.sizing.width.type = style->base.layout.sizing.x.type,
 		.base.layout.sizing.height.type = style->base.layout.sizing.y.type,
 
+
+		.base.border.color = vec4_to_clay_color(style->base.border.color),
+		.base.border.width.left = (uint16_t)style->base.border.width.x,
+		.base.border.width.right = (uint16_t)style->base.border.width.y,
+		.base.border.width.top = (uint16_t)style->base.border.width.z,
+		.base.border.width.bottom = (uint16_t)style->base.border.width.w,
+		.base.border.width.betweenChildren = style->base.border.between_children,
+
 		.is_interactive = style->is_interactive,
 		.interactive.bg_hover_color = vec4_to_clay_color(style->interactive.bg_hover_color),
 		.interactive.bg_press_color = vec4_to_clay_color(style->interactive.bg_press_color),
@@ -95,7 +104,7 @@ static UIStyleResolved resolve_style(UIStyle* style)
 	return resolved;
 }
 
-UIStyle ui_style_root_default_style()
+UIStyle ui_style_root_get_default()
 {
 	UIStyle style;
 
@@ -107,14 +116,17 @@ UIStyle ui_style_root_default_style()
 	style.base.layout.sizing = (UISizing){ .x=ui_style_size_grow(0, 0), .y=ui_style_size_grow(0, 0)};
 	style.base.layout.direction = UI_LAYOUT_TOP_TO_BOTTOM;
 	style.base.layout.child_gap = 4;
-	style.base.layout.child_alignment_x = UI_LAYOUT_ALIGN_X_CENTER;
+	style.base.layout.child_alignment_x = UI_LAYOUT_ALIGN_X_LEFT;
 	style.base.layout.child_alignment_y = UI_LAYOUT_ALIGN_Y_TOP;
+	style.base.border.color = hex_to_rgba("#000000", 0.0f);
+	style.base.border.width = (vec4s){0.0f, 0.0f, 0.0f, 0.0f};
+	style.base.border.between_children = 0;
 	style.is_interactive = false;
 
 	return style;
 }
 
-UIStyle ui_style_container_default_style()
+UIStyle ui_style_container_get_default()
 {
 	UIStyle style;
 
@@ -128,17 +140,20 @@ UIStyle ui_style_container_default_style()
 	style.base.layout.child_gap = 4;
 	style.base.layout.child_alignment_x = UI_LAYOUT_ALIGN_X_LEFT;
 	style.base.layout.child_alignment_y = UI_LAYOUT_ALIGN_Y_TOP;
+	style.base.border.color = hex_to_rgba("#000000", 0.0f);
+	style.base.border.width = (vec4s){0.0f, 0.0f, 0.0f, 0.0f};
+	style.base.border.between_children = 0;
 	style.is_interactive = false;
 
 	return style;
 }
 
-UIStyle ui_style_text_default_style()
+UIStyle ui_style_text_get_default()
 {
-	return ui_style_container_default_style();
+	return ui_style_container_get_default();
 }
 
-UIStyle ui_style_button_default_style()
+UIStyle ui_style_button_get_default()
 {
 	UIStyle style;
 
@@ -152,6 +167,9 @@ UIStyle ui_style_button_default_style()
 	style.base.layout.direction = UI_LAYOUT_TOP_TO_BOTTOM;
 	style.base.layout.child_alignment_x = UI_LAYOUT_ALIGN_X_LEFT;
 	style.base.layout.child_alignment_y = UI_LAYOUT_ALIGN_Y_TOP;
+	style.base.border.color = hex_to_rgba("#000000", 0.0f);
+	style.base.border.width = (vec4s){0.0f, 0.0f, 0.0f, 0.0f};
+	style.base.border.between_children = 0;
 	style.is_interactive = true;
 	style.interactive.bg_hover_color = hex_to_rgba("#746030", 1.0f);
 	style.interactive.bg_press_color = hex_to_rgba("#746055", 1.0f);
@@ -161,23 +179,44 @@ UIStyle ui_style_button_default_style()
 	return style;
 }
 
+void ui_style_root_set(UIStyle* style)
+{
+	root_style_resolved = resolve_style(style);
+}
+
+void ui_style_container_set(UIStyle* style)
+{
+	container_style_resolved = resolve_style(style);
+}
+
+void ui_style_text_set(UIStyle* style)
+{
+	text_style_resolved = resolve_style(style);
+}
+
+void ui_style_button_set(UIStyle* style)
+{
+	button_style_resolved = resolve_style(style);
+}
+
 void ui_style_init()
 {
-	UIStyle s1, s2, s3, s4;
-	s1 = ui_style_root_default_style();
-	s2 = ui_style_container_default_style();
-	s3 = ui_style_text_default_style();
-	s4 = ui_style_button_default_style();
-
-	default_root_style_resolved = resolve_style(&s1);
-	default_container_style_resolved = resolve_style(&s2);
-	default_text_style_resolved = resolve_style(&s3);
-	default_button_style_resolved = resolve_style(&s4);
 }
 
 void ui_style_stack_reset()
 {
 	style_stack_cursor = 0;
+
+	UIStyle s1, s2, s3, s4;
+	s1 = ui_style_root_get_default();
+	s2 = ui_style_container_get_default();
+	s3 = ui_style_text_get_default();
+	s4 = ui_style_button_get_default();
+
+	root_style_resolved = resolve_style(&s1);
+	container_style_resolved = resolve_style(&s2);
+	text_style_resolved = resolve_style(&s3);
+	button_style_resolved = resolve_style(&s4);
 }
 
 UIStyleResolved ui_style_get_current(UINodeType type)
@@ -189,11 +228,11 @@ UIStyleResolved ui_style_get_current(UINodeType type)
 
 	switch(type)
 	{
-		case UI_NODE_ROOT: return default_root_style_resolved;
-		case UI_NODE_CONTAINER: return default_container_style_resolved;
-		case UI_NODE_TEXT: return default_text_style_resolved;
-		case UI_NODE_BUTTON: return default_button_style_resolved;
-		default: return default_container_style_resolved;
+		case UI_NODE_ROOT: return root_style_resolved;
+		case UI_NODE_CONTAINER: return container_style_resolved;
+		case UI_NODE_TEXT: return text_style_resolved;
+		case UI_NODE_BUTTON: return button_style_resolved;
+		default: return container_style_resolved;
 	}
 }
 

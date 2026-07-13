@@ -101,7 +101,8 @@ static void execute_node(UINode* node)
 			CLAY(Clay_GetElementId(clay_label), {
 				.layout = node_style->base.layout,
 				.backgroundColor = node_style->base.bg_color,
-				.cornerRadius = node_style->base.corner_radius
+				.cornerRadius = node_style->base.corner_radius,
+				.border = node_style->base.border,
 			})
 			{
 				for(int i = 0; i < node->child_count; i++)
@@ -116,7 +117,8 @@ static void execute_node(UINode* node)
 			CLAY(Clay_GetElementId(clay_label), {
 				.layout = node_style->base.layout,
 				.backgroundColor = node_style->is_interactive ? ((Clay_Hovered()) ? (window_input_mouse_btn_is_down(INPUT_MOUSE_BUTTON_LEFT) ? node_style->interactive.bg_press_color : node_style->interactive.bg_hover_color) : node_style->base.bg_color) : node_style->base.bg_color,
-				.cornerRadius = node_style->base.corner_radius
+				.cornerRadius = node_style->base.corner_radius,
+				.border = node_style->base.border,
 			})
 			{
 				if(node_style->is_interactive)
@@ -136,6 +138,7 @@ static void execute_node(UINode* node)
 		{
 			CLAY_AUTO_ID({
 				.layout = node_style->base.layout,
+				.border = node_style->base.border,
 			})
 			{
 				CLAY_TEXT(clay_label, CLAY_TEXT_CONFIG({
@@ -154,7 +157,8 @@ static void execute_node(UINode* node)
 			CLAY_AUTO_ID({
 					.layout = node_style->base.layout,
 					.backgroundColor = ((Clay_Hovered()) ? (window_input_mouse_btn_is_down(INPUT_MOUSE_BUTTON_LEFT) ? node_style->interactive.bg_press_color : node_style->interactive.bg_hover_color) : node_style->base.bg_color),
-					.cornerRadius = node_style->base.corner_radius
+					.cornerRadius = node_style->base.corner_radius,
+					.border = node_style->base.border,
 				})
 				{
 					Clay_OnHover(interactive_hover_callback, node);
@@ -181,7 +185,7 @@ void ui_node_stack_reset()
 	root_node.label = "RootNode";
 	root_node.child_count = 0;
 	root_node.user_data = NULL;
-	root_node.style = ui_style_get_current(UI_NODE_ROOT);
+	root_node.style = ui_style_get_current(root_node.type);
 
 	parent_stack[stack_cursor] = &root_node;
 }

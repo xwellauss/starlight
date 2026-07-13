@@ -59,12 +59,20 @@ typedef struct
 
 typedef struct
 {
+	vec4s color;
+	vec4s width; // x=left y=right z=top w=bottom
+	uint16_t between_children;
+} UIBorderStyle;
+
+typedef struct
+{
 	vec4s bg_color;
 	vec4s fg_color;
 
 	vec4s corner_radius;
 
 	UILayout layout;
+	UIBorderStyle border;
 
 	int font_size;
 } UIBaseStyle;
@@ -88,10 +96,15 @@ typedef struct
 void ui_style_push(UIStyle* style);
 void ui_style_pop();
 
-UIStyle ui_style_root_default_style();
-UIStyle ui_style_container_default_style();
-UIStyle ui_style_text_default_style();
-UIStyle ui_style_button_default_style();
+void ui_style_root_set(UIStyle* style);
+void ui_style_container_set(UIStyle* style);
+void ui_style_text_set(UIStyle* style);
+void ui_style_button_set(UIStyle* style);
+
+UIStyle ui_style_root_get_default();
+UIStyle ui_style_container_get_default();
+UIStyle ui_style_text_get_default();
+UIStyle ui_style_button_get_default();
 
 static inline UISizingAxis ui_style_size_fit(float min, float max)
 {

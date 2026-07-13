@@ -1,5 +1,6 @@
 #pragma once
 
+#include "starlight/core/ui/style.h"
 #include <starlight/core/renderer/renderer.h>
 
 #include <clay.h>
@@ -19,6 +20,7 @@ typedef struct
 
 	Clay_CornerRadius corner_radius;
 	Clay_LayoutConfig layout;
+	Clay_BorderElementConfig border;
 
 	int font_size;
 } UIBaseStyleResolved;

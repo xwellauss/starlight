@@ -15,10 +15,10 @@ static UIStyle style2;
 
 static void init()
 {
-	style1 = ui_style_button_default_style();
+	style1 = ui_style_button_get_default();
 	style1.base.bg_color = hex_to_rgba("#ff0000", 1.0f);
 
-	style2 = ui_style_button_default_style();
+	style2 = ui_style_button_get_default();
 	style2.base.bg_color = hex_to_rgba("#00ff00", 1.0f);
 }
 

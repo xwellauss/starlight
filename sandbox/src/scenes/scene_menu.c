@@ -17,9 +17,14 @@ static bool* scene_button_list = NULL;
 
 static UIStyle style1;
 static UIStyle style2;
+static UIStyle root_style;
 
 static void init()
 {
+	root_style = ui_style_root_get_default();
+	root_style.base.layout.child_alignment_x = UI_LAYOUT_ALIGN_X_CENTER;
+
+	style1 = ui_style_container_get_default();
     style1.base.bg_color = hex_to_rgba("#000000", 0.0f);
 	style1.base.fg_color = hex_to_rgba("#ffffff", 1.0f);
 	style1.base.font_size = 64;
@@ -33,6 +38,7 @@ static void init()
 	style1.base.layout.sizing.y = ui_style_size_grow(0, 200);
 	style1.is_interactive = false;
 
+	style2 = ui_style_button_get_default();
 	style2.base.bg_color = hex_to_rgba("#9a8040", 0.0f);
 	style2.base.fg_color = hex_to_rgba("#4287f5", 1.0f);
 	style2.base.font_size = 32;
@@ -67,6 +73,8 @@ static void render()
 
 static void build_ui()
 {
+	ui_style_root_set(&root_style);
+
     ui_style_push(&style1);
 	ui_container_begin("Scenes", NULL);
 	ui_widget_text("Scenes");
