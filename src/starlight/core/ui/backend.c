@@ -187,9 +187,6 @@ void ui_backend_init(const char* font_path)
 	font_atlas_init(&font_atlas, font_path, 1024, 1024, 45.0f);
 	Clay_SetMeasureTextFunction(clay_measure_text, NULL);
 
-	window_width = (float)window_get_width();
-	window_height = (float)window_get_height();
-
 	{
 		VertexAttrib attribs[] =
 		{
@@ -214,6 +211,9 @@ void ui_backend_init(const char* font_path)
 
 void ui_backend_render(Clay_RenderCommandArray cmds)
 {
+	window_width = (float)window_get_width();
+	window_height = (float)window_get_height();
+
 	projection = glms_ortho(0.0f, window_width, window_height, 0.0f, -1.0f, 1.0f); // Top left origin
 
 	shader_bind(&rect_shader);

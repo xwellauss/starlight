@@ -37,7 +37,6 @@ static void update()
 static void build_ui()
 {
 	ui_container_begin("Container 1", NULL);
-		ui_widget_text("");
 		ui_style_push(&style1);
 		ui_widget_button("Click me!", &button_clicked);
 		ui_style_pop();

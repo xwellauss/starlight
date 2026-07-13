@@ -54,6 +54,9 @@ void ui_process_input()
 {
 	if(window_input_key_just_pressed(INPUT_KEY_B)) toggle_debug_mode();
 
+	window_width = (float)window_get_width();
+	window_height = (float)window_get_height();
+
 	Clay_Vector2 mouse_pos = {window_input_mouse_get_position().x, window_input_mouse_get_position().y};
 	vec2s mouse_scroll_delta = window_input_mouse_get_scroll();
     bool mouse_pressed = window_input_mouse_btn_is_down(INPUT_MOUSE_BUTTON_LEFT);
