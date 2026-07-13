@@ -4,22 +4,23 @@
 #include <starlight/core/ui/ui.h>
 #include <starlight/core/ui/style.h>
 #include <starlight/audio/audio.h>
-#include <starlight/utils/logger.h>
 #include <starlight/utils/math_utils.h>
+#include <starlight/utils/logger.h>
+
+#include <stdbool.h>
 
 static bool button_clicked = false;
 
 static UIStyle style1;
 static UIStyle style2;
 
-
 static void init()
 {
 	style1 = ui_style_button_get_default();
 	style1.base.bg_color = hex_to_rgba("#ff0000", 1.0f);
 
-	style2 = ui_style_button_get_default();
-	style2.base.bg_color = hex_to_rgba("#00ff00", 1.0f);
+	style2 = ui_style_text_get_default();
+	// style2.base.bg_color = hex_to_rgba("#00ff00", 1.0f);
 }
 
 static void activate()
@@ -42,7 +43,7 @@ static void build_ui()
 		ui_style_pop();
 
 		ui_style_push(&style2);
-		ui_widget_button("Click me!", &button_clicked);
+		ui_widget_text("Click me text");
 		ui_style_pop();
 	ui_container_end();
 }

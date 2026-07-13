@@ -226,9 +226,7 @@ void ui_style_push(UIStyle* style)
 {
 	if(style_stack_cursor < MAX_STACK_DEPTH - 1)
 	{
-		style_stack_cursor++;
-
-		style_stack[style_stack_cursor] = resolve_style(style);
+		style_stack[++style_stack_cursor] = resolve_style(style);
 	}
 }
 

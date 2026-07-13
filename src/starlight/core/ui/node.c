@@ -144,10 +144,12 @@ static void execute_node(UINode* node)
 		{
 			CLAY_AUTO_ID({
 				.layout = node_style->base.layout,
+				.cornerRadius = node_style->base.corner_radius,
 				.border = node_style->base.border,
 				.clip.horizontal = node_style->base.clip.horizontal,
 				.clip.vertical = node_style->base.clip.vertical,
 				.clip.childOffset = Clay_GetScrollOffset(),
+				.backgroundColor = node_style->base.bg_color,
 			})
 			{
 				CLAY_TEXT(clay_label, CLAY_TEXT_CONFIG({
@@ -221,8 +223,7 @@ void ui_container_begin(const char* label, bool* clicked)
 
 	if(stack_cursor < MAX_STACK_DEPTH - 1)
 	{
-		stack_cursor++;
-		parent_stack[stack_cursor] = node;
+		parent_stack[++stack_cursor] = node;
 	}
 }
 
