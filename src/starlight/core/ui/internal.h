@@ -1,6 +1,5 @@
 #pragma once
 
-#include "starlight/core/ui/style.h"
 #include <starlight/core/renderer/renderer.h>
 
 #include <clay.h>
