@@ -9,24 +9,8 @@
 #include <stdint.h>
 #include <string.h>
 
-#include <clay.h>
-
 #define MAX_UI_NODES 512
 #define MAX_STACK_DEPTH 32
-#define MAX_CHILDREN 32
-
-typedef struct UINode
-{
-	UINodeType type;
-	const char* label;
-
-	struct UINode* children[MAX_CHILDREN];
-	int child_count;
-
-	UIStyleResolved style;
-
-	void* user_data;
-} UINode;
 
 static UINode node_pool[MAX_UI_NODES];
 static int node_count;
@@ -55,36 +39,6 @@ static void interactive_hover_callback(Clay_ElementId id, Clay_PointerData point
 
 		*clicked = true;
 	}
-}
-
-static UINode* append_node(UINodeType type, const char* label)
-{
-	if(node_count >= MAX_UI_NODES)
-	{
-		log_error("UI: node pool limit exceeded\n");
-		return NULL;
-	}
-
-	UINode* parent = get_current_parent();
-	if(parent && parent->child_count >= MAX_CHILDREN)
-	{
-		log_error("UI: node child limit exceeded\n");
-		return NULL;
-	}
-
-	UINode* node = &node_pool[node_count++];
-	node->type = type;
-	node->label = label;
-	node->child_count = 0;
-	node->style = ui_style_get_current(type);
-	node->user_data = NULL;
-
-	if(parent)
-	{
-		parent->children[parent->child_count++] = node;
-	}
-
-	return node;
 }
 
 static void execute_node(UINode* node)
@@ -190,6 +144,36 @@ static void execute_node(UINode* node)
 	}
 }
 
+UINode* ui_node_append(UINodeType type, const char* label)
+{
+	if(node_count >= MAX_UI_NODES)
+	{
+		log_error("UI: node pool limit exceeded\n");
+		return NULL;
+	}
+
+	UINode* parent = get_current_parent();
+	if(parent && parent->child_count >= MAX_NODE_CHILDREN)
+	{
+		log_error("UI: node child limit exceeded\n");
+		return NULL;
+	}
+
+	UINode* node = &node_pool[node_count++];
+	node->type = type;
+	node->label = label;
+	node->child_count = 0;
+	node->style = ui_style_get_current(type);
+	node->user_data = NULL;
+
+	if(parent)
+	{
+		parent->children[parent->child_count++] = node;
+	}
+
+	return node;
+}
+
 void ui_node_stack_reset()
 {
 	node_count = 0;
@@ -209,54 +193,30 @@ void ui_node_create_tree()
 	execute_node(&root_node);
 }
 
-// Widgets and Containers
-void ui_container_begin(const char* label, bool* clicked)
+bool ui_node_push_parent(UINode* node)
 {
-	UINode* node = append_node(UI_NODE_CONTAINER, label);
-	if(!node)
-	{
-		log_error("UI: Container: could not append node");
-		return;
-	}
-
-	node->user_data = clicked;
-
 	if(stack_cursor < MAX_STACK_DEPTH - 1)
 	{
 		parent_stack[++stack_cursor] = node;
+		return true;
+	}
+	else
+	{
+		log_error("UI: node stack overflow!\n");
+		return false;
 	}
 }
 
-void ui_container_end()
+bool ui_node_pop_parent()
 {
 	if(stack_cursor > 0)
 	{
 		stack_cursor--;
+		return true;
 	}
 	else
 	{
-		log_error("UI: Mismatched ui_end_contained!\n");
-	}
-}
-
-void ui_widget_button(const char* label, bool* clicked)
-{
-	UINode* node = append_node(UI_NODE_BUTTON, label);
-	if(!node)
-	{
-		log_error("UI: Button: could not append node");
-		return;
-	}
-
-	node->user_data = clicked;
-}
-
-void ui_widget_text(const char* label)
-{
-	UINode* node = append_node(UI_NODE_TEXT, label);
-	if(!node)
-	{
-		log_error("UI: Text: could not append node");
-		return;
+		log_error("UI: Mismatched ui_node_pop_parent!\n");
+		return false;
 	}
 }

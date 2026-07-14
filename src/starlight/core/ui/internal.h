@@ -4,6 +4,8 @@
 
 #include <clay.h>
 
+#define MAX_NODE_CHILDREN 32
+
 typedef enum
 {
 	UI_NODE_ROOT,
@@ -41,8 +43,24 @@ typedef struct
 	UIInteractiveStyleResolved interactive;
 } UIStyleResolved;
 
+typedef struct UINode
+{
+	UINodeType type;
+	const char* label;
+
+	struct UINode* children[MAX_NODE_CHILDREN];
+	int child_count;
+
+	UIStyleResolved style;
+
+	void* user_data;
+} UINode;
+
 void ui_node_stack_reset();
 void ui_node_create_tree();
+UINode* ui_node_append(UINodeType type, const char* label);
+bool ui_node_push_parent(UINode* node);
+bool ui_node_pop_parent();
 
 void ui_style_init();
 void ui_style_stack_reset();
