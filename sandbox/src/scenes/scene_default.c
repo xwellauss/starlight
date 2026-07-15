@@ -14,8 +14,11 @@ static bool button_clicked = false;
 static UIStyle style1;
 static UIStyle style2;
 
+static UITextInputState x;
+
 static void init()
 {
+	ui_text_input_state_init(&x);
 	style1 = ui_style_button_get_default();
 	style1.base.bg_color = hex_to_rgba("#ff0000", 1.0f);
 
@@ -42,6 +45,8 @@ static void build_ui()
 		ui_widget_button("Click me!", &button_clicked);
 		ui_style_pop();
 
+		ui_widget_text_input("Input1", &x);
+
 		ui_style_push(&style2);
 		ui_widget_text("Click me text");
 		ui_style_pop();
@@ -62,6 +67,7 @@ static void deactivate()
 
 static void destroy()
 {
+	ui_text_input_state_destroy(&x);
 }
 
 Scene scene_default = {"SceneDefault", .init=init, .destroy=destroy, .activate=activate, .deactivate=deactivate, .update=update, .render=render, .build_ui=build_ui, .process_input=process_input};

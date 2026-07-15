@@ -21,3 +21,6 @@ typedef struct
 
 void font_atlas_init(FontAtlas* font_atlas, const char* filepath, int atlas_w, int atlas_h, float backed_font_size);
 void font_atlas_destroy(FontAtlas* font_atlas);
+
+float font_atlas_glyph_advance(FontAtlas* atlas, char c);
+float font_atlas_measure_text_width(FontAtlas* atlas, const char* text, int count);

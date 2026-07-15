@@ -5,6 +5,8 @@
 
 #include <GLFW/glfw3.h>
 
+#define WINDOW_CHAR_QUEUE_MAX 256
+
 typedef struct
 {
 	bool keys[INPUT_KEY_COUNT];
@@ -12,6 +14,11 @@ typedef struct
 	
 	bool mouse_btns[INPUT_MOUSE_BUTTON_COUNT];
 	bool mouse_btns_prev[INPUT_MOUSE_BUTTON_COUNT];
+
+	int mods;
+	
+	uint32_t key_char_queue[WINDOW_CHAR_QUEUE_MAX];
+	int key_char_queue_len;
 
 	bool mouse_moved;
 	vec2s mouse_position;

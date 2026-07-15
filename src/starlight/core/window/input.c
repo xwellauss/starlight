@@ -137,6 +137,33 @@ InputMouseButton glfw_mouse_btn_to_input_mouse_btn(int glfw_btn)
 	}
 }
 
+bool window_input_mod_active(InputMod mod)
+{
+	return (window.input_system.mods & mod) != 0;
+}
+
+bool window_input_mods_active(int mask)
+{
+	return (window.input_system.mods & mask) == mask;
+}
+
+int window_input_get_key_char_queue(uint32_t* out, int max)
+{
+	int count = (window.input_system.key_char_queue_len < max) ? window.input_system.key_char_queue_len : max;
+
+	for(int i = 0; i < count; i++)
+	{
+		out[i] = window.input_system.key_char_queue[i];
+	}
+
+	return count;
+}
+
+void window_input_clear_char_queue()
+{
+	window.input_system.key_char_queue_len = 0;
+}
+
 bool window_input_key_is_down(InputKey key)
 {
 	return window.input_system.keys[key];

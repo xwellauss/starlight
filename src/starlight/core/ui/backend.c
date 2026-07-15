@@ -182,6 +182,11 @@ static void build_glyphs(const char* text, float x, float y, float requested_sca
 	}
 }
 
+FontAtlas* ui_backend_font_get_current()
+{
+	return &font_atlas;
+}
+
 void ui_backend_init(const char* font_path)
 {
 	font_atlas_init(&font_atlas, font_path, 1024, 1024, 45.0f);

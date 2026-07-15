@@ -39,9 +39,9 @@ static void engine_render_frame()
 		last_frame = current_frame;
 	}
 
-	window_poll_events();
+	window_poll_events();	
 
-	if(!window_is_valid()) return;
+	if(!window_is_valid()) return;	
 
 	ui_process_input();
 	scene_manager_scene_process_input();
@@ -49,10 +49,9 @@ static void engine_render_frame()
 
 	renderer_clear_buffer();
 
-	scene_manager_scene_render();
-
 	ui_begin_frame();
 	scene_manager_scene_build_ui();
+	scene_manager_scene_render();
 	ui_render_frame();
 
 	window_swap_buffers();

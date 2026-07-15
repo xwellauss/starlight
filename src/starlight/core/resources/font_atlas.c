@@ -61,3 +61,21 @@ void font_atlas_destroy(FontAtlas* font_atlas)
 {
 	texture2d_destroy(&font_atlas->texture);
 }
+
+float font_atlas_glyph_advance(FontAtlas* atlas, char c)
+{
+	if(c < 32 || c >= 127) return 0.0f;
+
+	return atlas->glyph_ascii[c - 32].xadvance;
+}
+
+float font_atlas_measure_text_width(FontAtlas* atlas, const char* text, int count)
+{
+	float width = 0.0f;
+	for(int i = 0; i < count; i++)
+	{
+		width += font_atlas_glyph_advance(atlas, text[i]);
+	}
+
+	return width;
+}

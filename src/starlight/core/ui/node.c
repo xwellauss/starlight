@@ -140,6 +140,96 @@ static void execute_node(UINode* node)
 
 			break;
 		}
+		case UI_NODE_TEXT_INPUT:
+		{
+			UITextInputState* s = (UITextInputState*)(node->user_data);
+
+			CLAY(Clay_GetElementId(clay_label), {
+				.layout.layoutDirection = CLAY_LEFT_TO_RIGHT,
+				.layout.childAlignment = {.y = CLAY_ALIGN_Y_CENTER },
+				.layout.childGap = 2,
+				.layout.sizing = { .width = CLAY_SIZING_GROW(0), .height=CLAY_SIZING_FIT(0)},
+				.border.width = (Clay_BorderWidth){.top=0, .right=0, .left=0, .bottom=2},
+				.border.color = s->focused ? (Clay_Color){255.0f, 255.0f, 255.0f, 255.0f} : (Clay_Color){0.0f, 0.0f, 0.0f, 0.0f},
+				.backgroundColor = node_style->base.bg_color,
+				.cornerRadius = node_style->base.corner_radius,
+				.clip.horizontal = node_style->base.clip.horizontal,
+				.clip.vertical = node_style->base.clip.vertical,
+				.clip.childOffset = Clay_GetScrollOffset(),
+			})
+			{
+				bool hovered = Clay_Hovered();
+				bool mouse_just_pressed = window_input_mouse_btn_just_pressed(INPUT_MOUSE_BUTTON_LEFT);
+
+				if(mouse_just_pressed)
+				{
+					if(hovered)
+					{
+						Clay_ElementData element_data = Clay_GetElementData(Clay_GetElementId(clay_label));
+						float local_x = window_input_mouse_get_position().x - element_data.boundingBox.x;
+						ui_text_input_focus(s);
+						ui_text_input_click(s, local_x);
+					}
+					else
+					{
+						ui_text_input_unfocus(s);
+					}
+				}
+
+				if(s->length == 0 && !s->focused)
+				{
+					CLAY_TEXT(clay_label, CLAY_TEXT_CONFIG({
+						.fontId = 0,
+						.fontSize = node_style->base.font_size,
+						.textColor = node_style->base.fg_color,
+					}));
+				}
+				else
+				{
+					Clay_String clay_input_text = (Clay_String){ .length = s->length, .chars = s->buffer};
+
+					CLAY_TEXT(clay_input_text, CLAY_TEXT_CONFIG({
+						.fontId = 0,
+						.fontSize = node_style->base.font_size,
+						.textColor = node_style->base.fg_color,
+					}));
+				}
+
+				if(s->focused && (int)(s->blink_timer * 2.0f) % 2 == 0)
+				{
+					int cursor_index = ui_text_input_get_cursor_index(s);
+					float cursor_offset_x = font_atlas_measure_text_width(s->font_atlas, s->buffer, cursor_index);
+					float line_height = node_style->base.font_size;
+					float cursor_w, cursor_h, cursor_offset_y;
+
+					// Line
+					cursor_w = 2.0f;
+					cursor_h = line_height;
+					cursor_offset_y = 0.0f;
+
+					CLAY_AUTO_ID({
+						.floating = {
+							.attachTo = CLAY_ATTACH_TO_PARENT,
+							.attachPoints = {
+								.element = CLAY_ATTACH_POINT_LEFT_TOP,
+								.parent = CLAY_ATTACH_POINT_LEFT_TOP,
+							},
+							.offset = { .x=cursor_offset_x, .y=cursor_offset_y },
+							.zIndex = 1,
+						},
+						.layout = {
+							.sizing = {
+								.width = CLAY_SIZING_FIXED(cursor_w),
+								.height = CLAY_SIZING_FIXED(cursor_h),
+							}
+						},
+						.backgroundColor = node_style->base.fg_color,
+					}){}
+				}
+			}
+
+			break;
+		}
 		default: break;
 	}
 }

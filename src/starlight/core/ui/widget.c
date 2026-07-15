@@ -49,3 +49,19 @@ void ui_widget_text(const char* label)
 		return;
 	}
 }
+
+void ui_widget_text_input(const char* label, UITextInputState* state)
+{
+	UINode* node = ui_node_append(UI_NODE_TEXT_INPUT, label);
+	if(!node)
+	{
+		log_error("UI: Text Input: could not append node");
+		return;
+	}
+
+	state->label = label;
+
+	ui_text_input_update(state);
+	
+	node->user_data = state;
+}

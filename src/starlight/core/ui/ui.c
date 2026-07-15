@@ -72,6 +72,7 @@ void ui_begin_frame()
 {
 	ui_node_stack_reset();
 	ui_style_stack_reset();
+	ui_text_input_char_queue_reset();
 }
 
 void ui_render_frame()

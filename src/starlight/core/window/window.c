@@ -42,6 +42,8 @@ static void key_callback(GLFWwindow* handle, int key, int scancode, int action, 
 {
 	InputKey input_key = glfw_key_to_input_key(key);
 	if(input_key == INPUT_KEY_UNKNOWN) return;
+	
+	window.input_system.mods = mods;
 
 	if(key < 0 || key >= GLFW_KEY_LAST) return;
 
@@ -67,6 +69,8 @@ static void mouse_button_callback(GLFWwindow* handle, int button, int action, in
 
 	if(button < 0 || button >= GLFW_MOUSE_BUTTON_LAST) return;
 
+	window.input_system.mods = mods;
+
 	if(action == GLFW_PRESS)
 	{
 		window.input_system.mouse_btns[input_mouse_btn] = true;
@@ -89,6 +93,14 @@ static void framebuffer_size_callback(GLFWwindow* handle, int width, int height)
 	window.config.height = height;
 
 	renderer_set_viewport(0, 0, window.config.width, window.config.height);
+}
+
+static void character_callback(GLFWwindow* handle, unsigned int codepoint)
+{
+	if(window.input_system.key_char_queue_len < WINDOW_CHAR_QUEUE_MAX)
+	{
+		window.input_system.key_char_queue[window.input_system.key_char_queue_len++] = codepoint;
+	}
 }
 
 void window_init(WindowConfig window_config)
@@ -139,6 +151,7 @@ void window_init(WindowConfig window_config)
 
 	glfwSetKeyCallback(window.handle, key_callback);
 	glfwSetCursorPosCallback(window.handle, mouse_callback);
+	glfwSetCharCallback(window.handle, character_callback);
 	glfwSetMouseButtonCallback(window.handle, mouse_button_callback);
 	glfwSetScrollCallback(window.handle, scroll_callback);
 	glfwSetFramebufferSizeCallback(window.handle, framebuffer_size_callback);
@@ -155,6 +168,7 @@ void window_poll_events()
 	memcpy(window.input_system.mouse_btns_prev, window.input_system.mouse_btns, sizeof(window.input_system.mouse_btns));
 	window.input_system.mouse_scroll_delta = (vec2s){0};
 	window.input_system.mouse_moved = false;
+	window.input_system.key_char_queue_len = 0;
 
 	glfwPollEvents();
 }

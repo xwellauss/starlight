@@ -2,7 +2,16 @@
 
 #include <cglm/struct.h>
 
-// TODO: Implement MOD KEYS
+typedef enum
+{
+	INPUT_MOD_NONE = 0,
+	INPUT_MOD_SHIFT = 0x0001,
+	INPUT_MOD_CONTROL = 0x0002,
+	INPUT_MOD_ALT = 0x0004,
+	INPUT_MOD_SUPER = 0x0008,
+	INPUT_MOD_CAPS_LOCK = 0x0010,
+	INPUT_MOD_NUM_LOCK = 0x0020,
+} InputMod;
 
 typedef enum
 {
@@ -154,6 +163,11 @@ typedef struct
 	bool down;
 } InputState;
 
+bool window_input_mod_active(InputMod mod);
+bool window_input_mods_active(int mask);
+
+int window_input_get_key_char_queue(uint32_t* out, int max);
+void window_input_clear_char_queue();
 
 bool window_input_key_is_down(InputKey key);
 bool window_input_key_just_pressed(InputKey key);

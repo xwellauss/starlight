@@ -21,6 +21,7 @@ starlight_src = files(
   'core/ui/node.c',
   'core/ui/style.c',
   'core/ui/widget.c',
+  'core/ui/text_input.c',
   'network/network.c',
   'network/server.c',
   'network/client.c',
