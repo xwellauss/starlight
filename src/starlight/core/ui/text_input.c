@@ -3,6 +3,8 @@
 #include <starlight/core/window/input.h>
 #include <starlight/utils/logger.h>
 
+#include "internal.h"
+
 enum
 {
 	UI_KEY_LEFT = 0x10000,
@@ -34,7 +36,7 @@ enum
 static void ui_text_layout_row(StbTexteditRow* row, UITextInputState* s, int n)
 {
 	row->x0 = 0.0f;
-	row->x1 = font_atlas_measure_text_width(s->font_atlas, s->buffer + n, s->length - n);
+	row->x1 = ui_backend_font_measure_text_width(s->buffer + n, s->length - n);
 	// row->x1 = font_atlas_measure_text_width(s->font_atlas, s->buffer, s->length);
 	row->baseline_y_delta = 1.0f;
 	row->ymin = 0.0f;
@@ -51,7 +53,7 @@ static void ui_text_layout_row(StbTexteditRow* row, UITextInputState* s, int n)
 #define STB_TEXTEDIT_KEYTOTEXT(k) ((k) < 0x10000 ? (k) : -1)
 #define STB_TEXTEDIT_IS_SPACE(c) ((c) == ' ')
 
-#define STB_TEXTEDIT_GETWIDTH(s,n,i) font_atlas_glyph_advance((s)->font_atlas, (s)->buffer[(n)+(i)])
+#define STB_TEXTEDIT_GETWIDTH(s,n,i) ui_backend_font_glyph_advance((s)->buffer[(n)+(i)])
 
 // Delete and insert chars
 #define STB_TEXTEDIT_LAYOUTROW(r,obj,n) ui_text_layout_row(r, obj, n)
@@ -81,8 +83,6 @@ static void ui_text_layout_row(StbTexteditRow* row, UITextInputState* s, int n)
 
 #include <string.h>
 #include <stdlib.h>
-
-#include "internal.h"
 
 struct UITextEditState
 {
@@ -155,7 +155,6 @@ void ui_text_input_char_queue_reset()
 void ui_text_input_state_init(UITextInputState* state)
 {
 	memset(state, 0, sizeof(*state));
-	state->font_atlas = ui_backend_font_get_current();
 	state->edit_state = malloc(sizeof(UITextEditState));
 	stb_textedit_initialize_state(&state->edit_state->stb_state, 1);
 }

@@ -80,4 +80,5 @@ UIStyleResolved ui_style_get_current(UINodeType type);
 void ui_backend_init(const char* font_path);
 void ui_backend_render(Clay_RenderCommandArray cmds);
 void ui_backend_destroy();
-FontAtlas* ui_backend_font_get_current();
+float ui_backend_font_glyph_advance(char c);
+float ui_backend_font_measure_text_width(const char* text, int count);

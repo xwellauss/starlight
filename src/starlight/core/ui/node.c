@@ -198,12 +198,12 @@ static void execute_node(UINode* node)
 				if(s->focused && (int)(s->blink_timer * 2.0f) % 2 == 0)
 				{
 					int cursor_index = ui_text_input_get_cursor_index(s);
-					float cursor_offset_x = font_atlas_measure_text_width(s->font_atlas, s->buffer, cursor_index);
+					float cursor_offset_x = ui_backend_font_measure_text_width(s->buffer, cursor_index);
 					float line_height = node_style->base.font_size;
 					float cursor_w, cursor_h, cursor_offset_y;
 
 					// Line
-					cursor_w = 2.0f;
+					cursor_w = ui_backend_font_glyph_advance(cursor_index < s->length ? s->buffer[cursor_index] : ' ');
 					cursor_h = line_height;
 					cursor_offset_y = 0.0f;
 
@@ -223,7 +223,7 @@ static void execute_node(UINode* node)
 								.height = CLAY_SIZING_FIXED(cursor_h),
 							}
 						},
-						.backgroundColor = node_style->base.fg_color,
+						.backgroundColor = (Clay_Color){255.0f, 255.0f, 255.0f, 100.0f},
 					}){}
 				}
 			}

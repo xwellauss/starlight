@@ -17,8 +17,6 @@ typedef struct
 	UITextEditState* edit_state;
 	bool focused;
 	float blink_timer;
-
-	FontAtlas* font_atlas;
 } UITextInputState;
 
 

@@ -41,6 +41,7 @@ static mat4s projection = GLMS_MAT4_IDENTITY_INIT;
 static VertexBuffer rect_vertex_buffer;
 static Shader rect_shader;
 static FontAtlas font_atlas;
+static float font_scale_factor;
 
 static RectQuad rect_vertex_data[MAX_RECTS];
 static size_t rect_count = 0;
@@ -67,6 +68,7 @@ static Clay_Dimensions clay_measure_text(Clay_StringSlice glyph_vtx_array, Clay_
 	int len = glyph_vtx_array.length;
 
 	float scale = config->fontSize / font_atlas.baked_font_size;
+	font_scale_factor = scale;
 	float letter_spacing = (float)config->letterSpacing;
 	float line_height = (config->lineHeight > 0) ? (float)config->lineHeight : font_atlas.baked_font_size;
 
@@ -88,6 +90,25 @@ static Clay_Dimensions clay_measure_text(Clay_StringSlice glyph_vtx_array, Clay_
 
 	float line_h = (font_atlas.ascent - font_atlas.descent) * scale;
 	return (Clay_Dimensions){.width=x, .height=y+line_h};
+}
+
+float ui_backend_font_glyph_advance(char c)
+{
+	if(c < 32 || c >= 127) return 0.0f;
+
+	return font_atlas.glyph_ascii[c - 32].xadvance * font_scale_factor;
+}
+
+float ui_backend_font_measure_text_width(const char* text, int count)
+{
+	float width = 0.0f;
+	
+	for(int i = 0; i < count; i++)
+	{
+		width += ui_backend_font_glyph_advance(text[i]);
+	}
+
+	return width;
 }
 
 
@@ -180,11 +201,6 @@ static void build_glyphs(const char* text, float x, float y, float requested_sca
 
 		x += pc->xadvance * render_scale;
 	}
-}
-
-FontAtlas* ui_backend_font_get_current()
-{
-	return &font_atlas;
 }
 
 void ui_backend_init(const char* font_path)
