@@ -16,6 +16,7 @@ static UIStyleResolved root_style_resolved;
 static UIStyleResolved container_style_resolved;
 static UIStyleResolved button_style_resolved;
 static UIStyleResolved text_style_resolved;
+static UIStyleResolved text_input_style_resolved;
 
 static Clay_Color vec4_to_clay_color(vec4s color_vec)
 {
@@ -171,7 +172,7 @@ UIStyle ui_style_button_get_default()
 	style.base.layout.padding = (vec4s){8.0f, 8.0f, 8.0f, 8.0f};
 	style.base.layout.sizing = (UISizing){ .x=ui_style_size_fit(0, 0), .y=ui_style_size_fit(0, 0)};
 	style.base.layout.child_gap = 0;
-	style.base.layout.direction = UI_LAYOUT_TOP_TO_BOTTOM;
+	style.base.layout.direction = UI_LAYOUT_LEFT_TO_RIGHT;
 	style.base.layout.child_alignment_x = UI_LAYOUT_ALIGN_X_LEFT;
 	style.base.layout.child_alignment_y = UI_LAYOUT_ALIGN_Y_TOP;
 	style.base.border.color = hex_to_rgba("#000000", 0.0f);
@@ -184,6 +185,35 @@ UIStyle ui_style_button_get_default()
 	style.interactive.bg_press_color = hex_to_rgba("#746055", 1.0f);
 	style.interactive.fg_hover_color = hex_to_rgba("#cccccc", 1.0f);
 	style.interactive.fg_press_color = hex_to_rgba("#aaaaaa", 1.0f);
+
+	return style;
+}
+
+UIStyle ui_style_text_input_get_default()
+{
+	UIStyle style;
+
+	style.base.bg_color = hex_to_rgba("#000000", 1.0f);
+	style.base.fg_color = hex_to_rgba("#ffffff", 1.0f);
+	style.base.corner_radius = (vec4s){1.0f, 1.0f, 1.0f, 1.0f};
+	style.base.font_size = 16;
+	style.base.layout.padding = (vec4s){8.0f, 8.0f, 8.0f, 8.0f};
+	style.base.layout.sizing = (UISizing){ .x=ui_style_size_grow(0, 0), .y=ui_style_size_fixed(32)};
+	style.base.layout.child_gap = 0;
+	style.base.layout.direction = UI_LAYOUT_LEFT_TO_RIGHT;
+	style.base.layout.child_alignment_x = UI_LAYOUT_ALIGN_X_LEFT;
+	style.base.layout.child_alignment_y = UI_LAYOUT_ALIGN_Y_TOP;
+	style.base.border.color = hex_to_rgba("#ffffff", 0.5f);
+	style.base.border.width = (vec4s){0.0f, 0.0f, 0.0f, 2.0f};
+	style.base.border.between_children = 0;
+	style.base.scroll.enable_x = false;
+	style.base.scroll.enable_y = false;
+	style.is_interactive = true;
+	style.interactive.bg_hover_color = hex_to_rgba("#000000", 0.0f);
+	style.interactive.bg_press_color = hex_to_rgba("#000000", 0.0f);
+	style.interactive.fg_hover_color = hex_to_rgba("#cccccc", 1.0f);
+	style.interactive.fg_press_color = hex_to_rgba("#aaaaaa", 0.0f);
+
 
 	return style;
 }
@@ -208,18 +238,25 @@ void ui_style_button_set(UIStyle* style)
 	button_style_resolved = resolve_style(style);
 }
 
+void ui_style_text_input_set(UIStyle* style)
+{
+	text_input_style_resolved = resolve_style(style);
+}
+
 void ui_style_reset()
 {
-	UIStyle s1, s2, s3, s4;
+	UIStyle s1, s2, s3, s4, s5;
 	s1 = ui_style_root_get_default();
 	s2 = ui_style_container_get_default();
 	s3 = ui_style_text_get_default();
 	s4 = ui_style_button_get_default();
+	s5 = ui_style_text_input_get_default();
 
 	root_style_resolved = resolve_style(&s1);
 	container_style_resolved = resolve_style(&s2);
 	text_style_resolved = resolve_style(&s3);
 	button_style_resolved = resolve_style(&s4);
+	text_input_style_resolved = resolve_style(&s5);
 }
 
 void ui_style_push(UIStyle* style)
@@ -268,6 +305,7 @@ UIStyleResolved ui_style_get_current(UINodeType type)
 		case UI_NODE_CONTAINER: return container_style_resolved;
 		case UI_NODE_TEXT: return text_style_resolved;
 		case UI_NODE_BUTTON: return button_style_resolved;
+		case UI_NODE_TEXT_INPUT: return text_input_style_resolved;
 		default: return container_style_resolved;
 	}
 }

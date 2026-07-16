@@ -109,11 +109,13 @@ void ui_style_root_set(UIStyle* style);
 void ui_style_container_set(UIStyle* style);
 void ui_style_text_set(UIStyle* style);
 void ui_style_button_set(UIStyle* style);
+void ui_style_text_input_set(UIStyle* style);
 
 UIStyle ui_style_root_get_default();
 UIStyle ui_style_container_get_default();
 UIStyle ui_style_text_get_default();
 UIStyle ui_style_button_get_default();
+UIStyle ui_style_text_input_get_default();
 
 static inline UISizingAxis ui_style_size_fit(float min, float max)
 {

@@ -142,15 +142,10 @@ static void execute_node(UINode* node)
 		}
 		case UI_NODE_TEXT_INPUT:
 		{
-			UITextInputState* s = (UITextInputState*)(node->user_data);
-
 			CLAY(Clay_GetElementId(clay_label), {
-				.layout.layoutDirection = CLAY_LEFT_TO_RIGHT,
-				.layout.childAlignment = {.y = CLAY_ALIGN_Y_CENTER },
-				.layout.childGap = 2,
-				.layout.sizing = { .width = CLAY_SIZING_GROW(0), .height=CLAY_SIZING_FIT(0)},
-				.border.width = (Clay_BorderWidth){.top=0, .right=0, .left=0, .bottom=2},
-				.border.color = s->focused ? (Clay_Color){255.0f, 255.0f, 255.0f, 255.0f} : (Clay_Color){0.0f, 0.0f, 0.0f, 0.0f},
+				.layout = node_style->base.layout,
+				.border.width = node_style->base.border.width,
+				.border.color = (Clay_Hovered() ? node_style->interactive.fg_hover_color : node_style->base.border.color),
 				.backgroundColor = node_style->base.bg_color,
 				.cornerRadius = node_style->base.corner_radius,
 				.clip.horizontal = node_style->base.clip.horizontal,
@@ -158,6 +153,7 @@ static void execute_node(UINode* node)
 				.clip.childOffset = Clay_GetScrollOffset(),
 			})
 			{
+				UITextInputState* s = (UITextInputState*)(node->user_data);
 				bool hovered = Clay_Hovered();
 				bool mouse_just_pressed = window_input_mouse_btn_just_pressed(INPUT_MOUSE_BUTTON_LEFT);
 
@@ -182,6 +178,7 @@ static void execute_node(UINode* node)
 						.fontId = 0,
 						.fontSize = node_style->base.font_size,
 						.textColor = node_style->base.fg_color,
+						.lineHeight = 25.0f,
 					}));
 				}
 				else
@@ -195,11 +192,11 @@ static void execute_node(UINode* node)
 					}));
 				}
 
-				if(s->focused && (int)(s->blink_timer * 2.0f) % 2 == 0)
+				if(s->focused && (int)(s->blink_timer * 1.5f) % 2 == 0)
 				{
 					int cursor_index = ui_text_input_get_cursor_index(s);
 					float cursor_offset_x = ui_backend_font_measure_text_width(s->buffer, cursor_index);
-					float line_height = node_style->base.font_size;
+					float line_height = 25.0f;
 					float cursor_w, cursor_h, cursor_offset_y;
 
 					// Line
