@@ -99,6 +99,15 @@ static void ui_text_input_process_keys(UITextInputState* state)
 	bool ctrl = window_input_mod_active(INPUT_MOD_CONTROL);
 	STB_TexteditState* s = &state->edit_state->stb_state;
 
+	if(ctrl && window_input_key_just_pressed(INPUT_KEY_A))
+	{
+		s->select_start = 0;
+		s->select_end = state->length;
+		s->cursor = state->length;
+		s->has_preferred_x = 0;
+		return;
+	}
+
 	if(window_input_key_just_pressed(INPUT_KEY_LEFT))
 		stb_textedit_key(state, s, ctrl ? UI_KEY_WORDLEFT : (UI_KEY_LEFT | (shift ? UI_KEY_SHIFT_BIT : 0)));
 	if(window_input_key_just_pressed(INPUT_KEY_RIGHT))
@@ -140,6 +149,11 @@ bool ui_text_input_is_focused(UITextInputState* state)
 void ui_text_input_click(UITextInputState* state, float local_x)
 {
 	stb_textedit_click(state, &state->edit_state->stb_state, local_x, 0.0f);
+}
+
+void ui_text_input_drag(UITextInputState* state, float local_x)
+{
+	stb_textedit_drag(state, &state->edit_state->stb_state, local_x, 0.0f);
 }
 
 int ui_text_input_get_cursor_index(UITextInputState* s)

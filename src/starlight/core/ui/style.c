@@ -61,6 +61,9 @@ static UIStyleResolved resolve_style(UIStyle* style)
 		.base.layout.sizing.width.type = style->base.layout.sizing.x.type,
 		.base.layout.sizing.height.type = style->base.layout.sizing.y.type,
 
+		.base.text_cursor_type = style->base.text_cursor.type,
+		.base.text_cursor_color = vec4_to_clay_color(style->base.text_cursor.color),
+
 
 		.base.border.color = vec4_to_clay_color(style->base.border.color),
 		.base.border.width.left = (uint16_t)style->base.border.width.x,
@@ -195,10 +198,12 @@ UIStyle ui_style_text_input_get_default()
 
 	style.base.bg_color = hex_to_rgba("#000000", 1.0f);
 	style.base.fg_color = hex_to_rgba("#ffffff", 1.0f);
+	style.base.text_cursor.color = hex_to_rgba("#ffffff", 0.5f);
+	style.base.text_cursor.type = UI_TEXT_CURSOR_LINE;
 	style.base.corner_radius = (vec4s){1.0f, 1.0f, 1.0f, 1.0f};
 	style.base.font_size = 16;
 	style.base.layout.padding = (vec4s){8.0f, 8.0f, 8.0f, 8.0f};
-	style.base.layout.sizing = (UISizing){ .x=ui_style_size_grow(0, 0), .y=ui_style_size_fixed(32)};
+	style.base.layout.sizing = (UISizing){ .x=ui_style_size_grow(0, 0), .y=ui_style_size_fixed(style.base.font_size*2.0f)};
 	style.base.layout.child_gap = 0;
 	style.base.layout.direction = UI_LAYOUT_LEFT_TO_RIGHT;
 	style.base.layout.child_alignment_x = UI_LAYOUT_ALIGN_X_LEFT;

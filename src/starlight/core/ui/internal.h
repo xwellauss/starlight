@@ -27,6 +27,9 @@ typedef struct
 	Clay_BorderElementConfig border;
 	Clay_ClipElementConfig clip;
 
+	Clay_Color text_cursor_color;
+	UITextCursorType text_cursor_type;
+
 	int font_size;
 } UIBaseStyleResolved;
 
@@ -71,6 +74,7 @@ void ui_text_input_unfocus(UITextInputState* state);
 bool ui_text_input_is_focused(UITextInputState* state);
 int ui_text_input_get_cursor_index(UITextInputState* s);
 void ui_text_input_click(UITextInputState* state, float local_x);
+void ui_text_input_drag(UITextInputState* state, float local_x);
 void ui_text_input_update(UITextInputState* state);
 
 void ui_style_init();

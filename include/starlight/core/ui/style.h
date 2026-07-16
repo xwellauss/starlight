@@ -31,6 +31,13 @@ typedef enum
 	UI_LAYOUT_SIZING_TYPE_FIXED,
 } UILayoutSizingType;
 
+typedef enum
+{
+	UI_TEXT_CURSOR_BLOCK,
+	UI_TEXT_CURSOR_LINE,
+	UI_TEXT_CURSOR_UNDERLINE,
+} UITextCursorType;
+
 typedef struct
 {
 	UILayoutSizingType type;
@@ -72,6 +79,12 @@ typedef struct
 
 typedef struct
 {
+	UITextCursorType type;
+	vec4s color;
+} UITextCursorStyle;
+
+typedef struct
+{
 	vec4s bg_color;
 	vec4s fg_color;
 
@@ -80,6 +93,8 @@ typedef struct
 	UILayout layout;
 	UIBorderStyle border;
 	UIScroll scroll;
+
+	UITextCursorStyle text_cursor;
 
 	int font_size;
 } UIBaseStyle;

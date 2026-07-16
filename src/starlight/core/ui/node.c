@@ -156,13 +156,15 @@ static void execute_node(UINode* node)
 				UITextInputState* s = (UITextInputState*)(node->user_data);
 				bool hovered = Clay_Hovered();
 				bool mouse_just_pressed = window_input_mouse_btn_just_pressed(INPUT_MOUSE_BUTTON_LEFT);
+				bool mouse_held = window_input_mouse_btn_is_down(INPUT_MOUSE_BUTTON_LEFT);
+
+				Clay_ElementData element_data = Clay_GetElementData(Clay_GetElementId(clay_label));
+				float local_x = window_input_mouse_get_position().x - element_data.boundingBox.x - node_style->base.layout.padding.left;
 
 				if(mouse_just_pressed)
 				{
 					if(hovered)
 					{
-						Clay_ElementData element_data = Clay_GetElementData(Clay_GetElementId(clay_label));
-						float local_x = window_input_mouse_get_position().x - element_data.boundingBox.x;
 						ui_text_input_focus(s);
 						ui_text_input_click(s, local_x);
 					}
@@ -171,6 +173,10 @@ static void execute_node(UINode* node)
 						ui_text_input_unfocus(s);
 					}
 				}
+				else if(s->focused && mouse_held)
+				{
+					ui_text_input_drag(s, local_x);
+				}
 
 				if(s->length == 0 && !s->focused)
 				{
@@ -178,7 +184,7 @@ static void execute_node(UINode* node)
 						.fontId = 0,
 						.fontSize = node_style->base.font_size,
 						.textColor = node_style->base.fg_color,
-						.lineHeight = 25.0f,
+						.lineHeight = node_style->base.font_size * 1.5f,
 					}));
 				}
 				else
@@ -192,17 +198,44 @@ static void execute_node(UINode* node)
 					}));
 				}
 
-				if(s->focused && (int)(s->blink_timer * 1.5f) % 2 == 0)
+				// if(s->focused && (int)(s->blink_timer * 1.5f) % 2 == 0)
+				if(s->focused)
 				{
 					int cursor_index = ui_text_input_get_cursor_index(s);
-					float cursor_offset_x = ui_backend_font_measure_text_width(s->buffer, cursor_index);
-					float line_height = 25.0f;
-					float cursor_w, cursor_h, cursor_offset_y;
+					float line_height = node_style->base.font_size * 1.5f;
+					
+					float cursor_offset_x, cursor_offset_y;
+					float cursor_w, cursor_h;
 
-					// Line
-					cursor_w = ui_backend_font_glyph_advance(cursor_index < s->length ? s->buffer[cursor_index] : ' ');
-					cursor_h = line_height;
-					cursor_offset_y = 0.0f;
+
+					cursor_offset_x = ui_backend_font_measure_text_width(s->buffer, cursor_index) + node_style->base.layout.padding.left;
+
+					switch(node_style->base.text_cursor_type)
+					{
+						case UI_TEXT_CURSOR_BLOCK:
+						{
+							cursor_offset_y = 0.0f;
+
+							cursor_w = ui_backend_font_glyph_advance(cursor_index < s->length ? s->buffer[cursor_index] : ' ');
+							cursor_h = line_height;
+							break;
+						}
+						case UI_TEXT_CURSOR_LINE:
+						{
+							cursor_offset_y = 0.0f;
+
+							cursor_w = 2.0f;
+							cursor_h = line_height;
+							break;
+						}
+						case UI_TEXT_CURSOR_UNDERLINE:
+						{
+							cursor_w = ui_backend_font_glyph_advance(cursor_index < s->length ? s->buffer[cursor_index] : ' ');
+							cursor_h = 2.0f;
+							cursor_offset_y = line_height - cursor_h;
+							break;
+						}
+					}
 
 					CLAY_AUTO_ID({
 						.floating = {
@@ -214,13 +247,8 @@ static void execute_node(UINode* node)
 							.offset = { .x=cursor_offset_x, .y=cursor_offset_y },
 							.zIndex = 1,
 						},
-						.layout = {
-							.sizing = {
-								.width = CLAY_SIZING_FIXED(cursor_w),
-								.height = CLAY_SIZING_FIXED(cursor_h),
-							}
-						},
-						.backgroundColor = (Clay_Color){255.0f, 255.0f, 255.0f, 100.0f},
+						.layout.sizing = { .width = CLAY_SIZING_FIXED(cursor_w), .height = CLAY_SIZING_FIXED(cursor_h),},
+						.backgroundColor = node_style->base.text_cursor_color,
 					}){}
 				}
 			}
