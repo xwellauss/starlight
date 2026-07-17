@@ -1,4 +1,4 @@
-#include <starlight/core/ui/widget.h>
+#include <starlight/core/ui/text_input.h>
 #include <starlight/core/engine.h>
 #include <starlight/core/window/input.h>
 #include <starlight/utils/logger.h>
@@ -166,19 +166,6 @@ void ui_text_input_char_queue_reset()
 	char_queue_len = window_input_get_key_char_queue(char_queue, UI_TEXT_INPUT_MAX);
 }
 
-void ui_text_input_state_init(UITextInputState* state)
-{
-	memset(state, 0, sizeof(*state));
-	state->edit_state = malloc(sizeof(UITextEditState));
-	stb_textedit_initialize_state(&state->edit_state->stb_state, 1);
-}
-
-void ui_text_input_state_destroy(UITextInputState* state)
-{
-	free(state->edit_state);
-	state->edit_state = NULL;
-}
-
 void ui_text_input_update(UITextInputState* state)
 {
 	if(!state->focused) return;
@@ -204,3 +191,25 @@ void ui_text_input_update(UITextInputState* state)
 	state->blink_timer += engine_get_deltatime();
 }
 
+// Public
+void ui_text_input_state_init(UITextInputState* state)
+{
+	memset(state, 0, sizeof(*state));
+	state->edit_state = malloc(sizeof(UITextEditState));
+	stb_textedit_initialize_state(&state->edit_state->stb_state, 1);
+}
+
+void ui_text_input_state_destroy(UITextInputState* state)
+{
+	free(state->edit_state);
+	state->edit_state = NULL;
+}
+
+void ui_text_input_state_reset(UITextInputState* state)
+{
+	state->length = 0;
+	state->buffer[0] = '\0';
+	state->edit_state->stb_state.cursor = 0;
+	state->edit_state->stb_state.select_start = 0;
+	state->edit_state->stb_state.select_end = 0;
+}
