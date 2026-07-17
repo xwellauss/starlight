@@ -52,7 +52,7 @@ void ui_destroy()
 
 void ui_process_input()
 {
-	if(window_input_key_just_pressed(INPUT_KEY_B)) toggle_debug_mode();
+	if(window_input_mod_active(INPUT_MOD_CONTROL) && window_input_key_just_pressed(INPUT_KEY_B)) toggle_debug_mode();
 
 	window_width = (float)window_get_width();
 	window_height = (float)window_get_height();
