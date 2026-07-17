@@ -17,7 +17,6 @@ static void shader_check_for_errors(unsigned int id, int status)
 		{
 			glGetShaderInfoLog(id, 512, NULL, info_log);
 			log_error("Error in Compiling Shader\n%s\n", info_log);
-			exit(EXIT_FAILURE);
 		}
 	}
 	else if(status == GL_LINK_STATUS)
@@ -28,7 +27,6 @@ static void shader_check_for_errors(unsigned int id, int status)
 		{
 			glGetProgramInfoLog(id, 512, NULL, info_log);
 			log_error("Error in Linking Shaders\n%s\n", info_log);
-			exit(EXIT_FAILURE);
 		}
 	}
 }
