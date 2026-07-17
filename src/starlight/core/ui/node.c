@@ -71,7 +71,7 @@ static void execute_node(UINode* node)
 		}
 		case UI_NODE_CONTAINER:
 		{
-			CLAY(Clay_GetElementId(clay_label), {
+			CLAY_AUTO_ID({
 				.layout = node_style->base.layout,
 				.backgroundColor = node_style->is_interactive ? ((Clay_Hovered()) ? (window_input_mouse_btn_is_down(INPUT_MOUSE_BUTTON_LEFT) ? node_style->interactive.bg_press_color : node_style->interactive.bg_hover_color) : node_style->base.bg_color) : node_style->base.bg_color,
 				.cornerRadius = node_style->base.corner_radius,
@@ -142,7 +142,7 @@ static void execute_node(UINode* node)
 		}
 		case UI_NODE_TEXT_INPUT:
 		{
-			CLAY(Clay_GetElementId(clay_label), {
+			CLAY_AUTO_ID({
 				.layout = node_style->base.layout,
 				.border.width = node_style->base.border.width,
 				.border.color = (Clay_Hovered() ? node_style->interactive.fg_hover_color : node_style->base.border.color),
