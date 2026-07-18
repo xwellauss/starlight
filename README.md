@@ -18,7 +18,7 @@ You can download them from your package manager
 After cloning the repo recursively, `cd` into it.
 
 ### Desktop
-In `meson_options.txt`, set `linux_windowing` to `x11` or `wayland` as needed.
+In `meson_options.txt`, set `linux_windowing` to `x11` or `wayland` as needed. Also add `-Dbuild_sandbox=true` or set it in meson_options.txt, to build the sandbox.
 ```
 CC=clang CXX=clang++ meson setup bin/desktop-debug --buildtype="debug"
 meson compile -C bin/desktop-debug

@@ -5,4 +5,4 @@ option('linux_windowing', type: 'combo', choices: ['x11', 'wayland'], value: 'x1
 option('ndk_home', type: 'string', value: '/home/techie-guy/dev/programs/Android_SDK/ndk/25.1.8937393')
 
 # Build Sandbox
-option('build_sandbox', type: 'boolean', value: true)
+option('build_sandbox', type: 'boolean', value: false)
