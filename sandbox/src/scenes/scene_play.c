@@ -156,7 +156,7 @@ static void fill_map()
 	}
 
 	// Indices
-	for(int i = 0; i < sizeof(map_indices)/sizeof(map_indices[0]); i += 6)
+	for(size_t i = 0; i < sizeof(map_indices)/sizeof(map_indices[0]); i += 6)
 	{
 		static int offset = 0;
 

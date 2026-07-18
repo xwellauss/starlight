@@ -19,9 +19,9 @@ void model_load_from_file(Model* model, const char* filepath, enum ModelFileType
 		break;
 	}
 
-	model->vertex_count = arrlen(model->vertex_data);
-	model->index_count = arrlen(model->index_data);
-	model->mesh_count = arrlen(model->meshes);
+	model->vertex_count = arrlenu(model->vertex_data);
+	model->index_count = arrlenu(model->index_data);
+	model->mesh_count = arrlenu(model->meshes);
 }
 
 void model_free(Model* model)

@@ -26,10 +26,17 @@ if host_machine.system() == 'android'
   sandbox_lib = shared_library('starlight_sandbox', sandbox_src, include_directories: sandbox_inc, c_args: sandbox_c_args + android_c_args, link_args: sandbox_link_args + android_link_args, dependencies: sandbox_deps + android_deps)
 
 elif host_machine.system() == 'emscripten'
-  web_c_args = ['-pthread', '-DASSETS_DIR="assets/"']
+  web_c_args = [
+    '-pthread',
+    '-sPROXY_POSIX_SOCKETS',
+    '-DASSETS_DIR="assets/"',
+  ]
   web_link_args = [
     '-sTOTAL_MEMORY=262144000',
     '-sALLOW_MEMORY_GROWTH=1',
+    '-sPROXY_POSIX_SOCKETS',
+    '-sPROXY_TO_PTHREAD',
+    '-lwebsocket.js',
     '--embed-file=' + assets_dir +  '@/assets/',
     '--shell-file=' + assets_dir + '/index.html',
   ]

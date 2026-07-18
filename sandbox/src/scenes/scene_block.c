@@ -89,7 +89,7 @@ static void add_block(vec3s origin, float block_size, char* block_name, bool is_
 	tex_coords[3] = (vec2s){uv_coords.x2, uv_coords.y1};
 	tex_coords[5] = (vec2s){uv_coords.x1, uv_coords.y1};
 
-	for(int i = 0; i < sizeof(cube_indices)/sizeof(cube_indices[0]); i++)
+	for(size_t i = 0; i < sizeof(cube_indices)/sizeof(cube_indices[0]); i++)
 	{
 		Vertex3D vertex;
 

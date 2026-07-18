@@ -80,8 +80,8 @@ static void gltf_parse_primitive(Model* model, Mesh* model_mesh, cgltf_data* glt
 
 	if (!position_accessor) return;
 
-	model_mesh->vertex_offset = arrlen(model->vertex_data);
-	model_mesh->index_offset = arrlen(model->index_data);
+	model_mesh->vertex_offset = arrlenu(model->vertex_data);
+	model_mesh->index_offset = arrlenu(model->index_data);
 
 	vertex_count = position_accessor->count;
 	model_mesh->vertex_count = vertex_count;
@@ -178,9 +178,9 @@ static void gltf_parse_mesh(Model* model, cgltf_data* gltf_data, cgltf_node* glt
 
 	arrput(model->meshes, model_mesh);
 
-	model->vertex_count = arrlen(model->vertex_data);
-	model->index_count = arrlen(model->index_data);
-	model->mesh_count = arrlen(model->meshes);
+	model->vertex_count = arrlenu(model->vertex_data);
+	model->index_count = arrlenu(model->index_data);
+	model->mesh_count = arrlenu(model->meshes);
 }
 
 

@@ -42,7 +42,7 @@ void texture_atlas_init(TextureAtlas* texture_atlas, const char* atlas_json_path
 	cJSON* atlas_regions_json = json_get_object(json, "atlas_regions");
 	int atlas_region_count = json_get_array_length(atlas_regions_json);
 
-	for(size_t j = 0; j < atlas_region_count; j++)
+	for(int j = 0; j < atlas_region_count; j++)
 	{
 		cJSON* atlas_region_json = json_get_array_item(atlas_regions_json, j);
 
@@ -106,7 +106,7 @@ void texture_atlas_get_uv(AtlasUV* atlas_uv, TextureAtlas* texture_atlas, AtlasR
 
 void texture_atlas_destroy(TextureAtlas* texture_atlas)
 {
-	for(size_t j = 0; j < shlen(texture_atlas->atlas_region_map); j++)
+	for(int j = 0; j < shlen(texture_atlas->atlas_region_map); j++)
 	{
 		AtlasRegion* atlas_region = texture_atlas->atlas_region_map[j].value;
 

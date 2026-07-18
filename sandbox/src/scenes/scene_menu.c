@@ -62,7 +62,7 @@ static void activate()
 
     scenes_list = scene_manager_get_scenes_list();
 
-	for(size_t i = 0; i < arrlen(scenes_list); i++)
+	for(int i = 0; i < arrlen(scenes_list); i++)
 	{
 		arrput(scene_button_list, false);
 	}
@@ -78,7 +78,7 @@ static void build_ui()
 	ui_container_begin("Scenes", NULL);
 	ui_widget_text("Scenes");
 	ui_style_push(&style2);
-	for(size_t i = 0; i < arrlen(scenes_list); i++)
+	for(int i = 0; i < arrlen(scenes_list); i++)
 	{
 		if(strcmp(scenes_list[i], "SceneMenu") == 0)
 		{
