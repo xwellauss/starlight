@@ -54,12 +54,14 @@ if host_machine.system() != 'emscripten'
 
       wayland_xml_files = [
         [client_dir    / 'wayland.xml', 'wayland-client-protocol'],
-        [protocols_dir / 'stable/xdg-shell/xdg-shell.xml', 'wayland-xdg-shell-client-protocol'],
-        [protocols_dir / 'stable/viewporter/viewporter.xml', 'wayland-viewporter-client-protocol'],
-        [protocols_dir / 'unstable/xdg-decoration/xdg-decoration-unstable-v1.xml', 'wayland-xdg-decoration-client-protocol'],
-        [protocols_dir / 'unstable/relative-pointer/relative-pointer-unstable-v1.xml', 'wayland-relative-pointer-unstable-v1-client-protocol'],
-        [protocols_dir / 'unstable/pointer-constraints/pointer-constraints-unstable-v1.xml', 'wayland-pointer-constraints-unstable-v1-client-protocol'],
-        [protocols_dir / 'unstable/idle-inhibit/idle-inhibit-unstable-v1.xml', 'wayland-idle-inhibit-unstable-v1-client-protocol'],
+        [protocols_dir / 'stable/xdg-shell/xdg-shell.xml', 'xdg-shell-client-protocol'],
+        [protocols_dir / 'stable/viewporter/viewporter.xml', 'viewporter-client-protocol'],
+        [protocols_dir / 'unstable/xdg-decoration/xdg-decoration-unstable-v1.xml', 'xdg-decoration-unstable-v1-client-protocol'],
+        [protocols_dir / 'unstable/relative-pointer/relative-pointer-unstable-v1.xml', 'relative-pointer-unstable-v1-client-protocol'],
+        [protocols_dir / 'unstable/pointer-constraints/pointer-constraints-unstable-v1.xml', 'pointer-constraints-unstable-v1-client-protocol'],
+        [protocols_dir / 'staging/fractional-scale/fractional-scale-v1.xml', 'fractional-scale-v1-client-protocol'],
+        [protocols_dir / 'staging/xdg-activation/xdg-activation-v1.xml', 'xdg-activation-v1-client-protocol'],
+        [protocols_dir / 'unstable/idle-inhibit/idle-inhibit-unstable-v1.xml', 'idle-inhibit-unstable-v1-client-protocol'],
       ]
 
       foreach entry : wayland_xml_files
