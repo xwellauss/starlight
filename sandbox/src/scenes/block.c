@@ -1,4 +1,4 @@
-#include "scene_block.h"
+#include "block.h"
 
 #include <starlight/core/engine.h>
 #include <starlight/core/ecs.h>

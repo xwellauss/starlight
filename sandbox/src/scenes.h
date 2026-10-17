@@ -4,14 +4,15 @@
 
 #include <starlight/core/scene/scene_manager.h>
 
-#include "scenes/scene_play.h"
-#include "scenes/scene_menu.h"
-#include "scenes/scene_model.h"
-#include "scenes/scene_block.h"
-#include "scenes/physics_sim/scene_gravity.h"
-#include "scenes/scene_default.h"
-#include "scenes/scene_server_test.h"
-#include "scenes/scene_client_test.h"
+#include "scenes/play.h"
+#include "scenes/menu.h"
+#include "scenes/model.h"
+#include "scenes/block.h"
+#include "scenes/physics_sim/gravity.h"
+#include "scenes/default.h"
+#include "scenes/server_test.h"
+#include "scenes/client_test.h"
+#include "scenes/raycasting.h"
 
 void sandbox_scenes()
 {
@@ -23,4 +24,5 @@ void sandbox_scenes()
 	scene_manager_register_scene(&scene_server_test);
 	scene_manager_register_scene(&scene_client_test);
 	scene_manager_register_scene(&scene_menu);
+	scene_manager_register_scene(&scene_raycasting);
 }

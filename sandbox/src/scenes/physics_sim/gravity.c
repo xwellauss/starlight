@@ -1,4 +1,4 @@
-#include "scene_gravity.h"
+#include "gravity.h"
 
 #include <starlight/core/engine.h>
 #include <starlight/core/ecs.h>

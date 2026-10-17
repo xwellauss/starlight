@@ -1,4 +1,4 @@
-#include "scene_default.h"
+#include "default.h"
 
 #include <starlight/core/window/input.h>
 #include <starlight/core/ui/ui.h>

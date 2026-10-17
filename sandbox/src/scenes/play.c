@@ -1,4 +1,4 @@
-#include "scene_play.h"
+#include "play.h"
 
 #include <starlight/core/engine.h>
 #include <starlight/core/ecs.h>

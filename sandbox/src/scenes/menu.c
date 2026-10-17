@@ -1,4 +1,4 @@
-#include "scene_menu.h"
+#include "menu.h"
 
 #include <starlight/core/window/input.h>
 #include <starlight/core/ui/ui.h>

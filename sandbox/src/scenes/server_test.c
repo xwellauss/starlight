@@ -1,4 +1,4 @@
-#include "scene_server_test.h"
+#include "server_test.h"
 
 #include <starlight/core/window/input.h>
 #include <starlight/core/ui/ui.h>

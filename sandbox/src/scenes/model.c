@@ -1,4 +1,4 @@
-#include "scene_model.h"
+#include "model.h"
 
 #include <starlight/core/engine.h>
 #include <starlight/core/ecs.h>

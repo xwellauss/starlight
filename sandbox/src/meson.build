@@ -2,14 +2,15 @@ sandbox_inc = [include_directories('.'), public_inc]
 
 sandbox_src = files(
   'main.c',
-  'scenes/scene_default.c',
-  'scenes/scene_block.c',
-  'scenes/scene_model.c',
-  'scenes/scene_play.c',
-  'scenes/scene_server_test.c',
-  'scenes/scene_client_test.c',
-  'scenes/physics_sim/scene_gravity.c',
-  'scenes/scene_menu.c',
+  'scenes/default.c',
+  'scenes/block.c',
+  'scenes/model.c',
+  'scenes/play.c',
+  'scenes/server_test.c',
+  'scenes/client_test.c',
+  'scenes/physics_sim/gravity.c',
+  'scenes/menu.c',
+  'scenes/raycasting.c',
 )
 
 sandbox_c_args = []

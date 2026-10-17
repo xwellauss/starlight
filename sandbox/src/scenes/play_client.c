@@ -1,4 +1,4 @@
-#include "scene_play_client.h"
+#include "play_client.h"
 
 #include "../core/game_engine.h"
 #include "../core/ecs.h"
