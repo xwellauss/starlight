@@ -225,7 +225,7 @@ static void init()
 	camera.pitch = 0.0f;
 	camera.yaw = -90.0f;
 	camera.camera_type = CAMERA_NO_MOVE;
-	init_camera(&camera);	
+	init_camera(&camera);
 }
 
 static void update()
