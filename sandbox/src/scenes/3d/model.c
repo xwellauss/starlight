@@ -174,10 +174,10 @@ static void init()
 	model_load_from_file(&light_model, "3d-models/cube.glb", FILE_GLTF);
 
 	vertex_buffer_3d_init(&ecs_entity_get_sprite(&model_entity)->vertex_buffer, model.vertex_data, model.vertex_count*sizeof(Vertex3D), model.index_data, model.index_count*sizeof(uint32_t), true);
-	shader_init_from_file(&ecs_entity_get_sprite(&model_entity)->shader, "shaders/model-vertex-shader.glsl", "shaders/model-fragment-shader.glsl");
+	shader_init_from_file(&ecs_entity_get_sprite(&model_entity)->shader, "shaders/3d/model-vertex-shader.glsl", "shaders/3d/model-fragment-shader.glsl");
 
 	vertex_buffer_3d_init(&ecs_entity_get_sprite(&light_source)->vertex_buffer, light_model.vertex_data, light_model.vertex_count*sizeof(Vertex3D), light_model.index_data, light_model.index_count*sizeof(uint32_t), true);
-	shader_init_from_file(&ecs_entity_get_sprite(&light_source)->shader, "shaders/light-source-vertex-shader.glsl", "shaders/light-source-fragment-shader.glsl");
+	shader_init_from_file(&ecs_entity_get_sprite(&light_source)->shader, "shaders/3d/light-source-vertex-shader.glsl", "shaders/3d/light-source-fragment-shader.glsl");
 
 
 	camera.position = (vec3s){{-10.0f, 0.0f, 20.0f}};

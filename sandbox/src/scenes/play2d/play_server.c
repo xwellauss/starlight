@@ -152,7 +152,7 @@ static void init_map()
 	add_texture_from_file(&map->component_list.sprite_component.textures, "map", map_sprite_sheet->path);
 
 	fill_map();
-	init_shader_program(&map->component_list.sprite_component.shader_program, "shaders/map-vertex-shader.glsl", "shaders/map-fragment-shader.glsl");
+	init_shader_program(&map->component_list.sprite_component.shader_program, "shaders/play2d/map-vertex-shader.glsl", "shaders/play2d/map-fragment-shader.glsl");
 	init_vertex_attributes(&map->component_list.sprite_component.vertex_attribs, map_tiles, sizeof(map_tiles), map_indices, sizeof(map_indices), true, false);
 }
 

@@ -134,9 +134,11 @@ void texture2d_map_add_from_file(Texture2DHashMap* textures, const char* texture
 	shput(*textures, texture_name, texture);
 }
 
-void texture2d_map_add_from_bytes(Texture2DHashMap* textures, const char* texture_name, uint32_t format, const unsigned char* texture_data)
+void texture2d_map_add_from_bytes(Texture2DHashMap* textures, const char* texture_name, int width, int height,  uint32_t format, const unsigned char* texture_data)
 {
 	Texture2D texture = {};
+	texture.width = width;
+	texture.height = height;
 
 	texture2d_init_from_bytes(&texture, format, texture_data);
 

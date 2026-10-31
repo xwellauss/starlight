@@ -260,7 +260,7 @@ static void init()
 
 	texture2d_map_add_from_file(&ecs_entity_get_sprite(&chunk)->textures, "block", blocks_texture_atlas.path);
 	vertex_buffer_3d_init(&ecs_entity_get_sprite(&chunk)->vertex_buffer, vertex_render_data, sizeof(Vertex3D)*arrlen(vertex_render_data), NULL, 0, false);
-	shader_init_from_file(&ecs_entity_get_sprite(&chunk)->shader, "shaders/block-vertex-shader.glsl", "shaders/block-fragment-shader.glsl");
+	shader_init_from_file(&ecs_entity_get_sprite(&chunk)->shader, "shaders/voxel/block-vertex-shader.glsl", "shaders/voxel/block-fragment-shader.glsl");
 
 	camera.position = (vec3s){{10.0f, 20.0f, 10.0f}};
 	camera.target = (vec3s){{0.0f, 0.0f, 0.0f}};

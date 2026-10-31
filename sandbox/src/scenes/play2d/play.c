@@ -76,7 +76,7 @@ static void init_player()
 
 	texture2d_map_add_from_file(&ecs_entity_get_sprite(&player)->textures, "player", player_texture_atlas.path);
 	vertex_buffer_2d_init(&ecs_entity_get_sprite(&player)->vertex_buffer, player_quad, sizeof(player_quad), player_indices, sizeof(player_indices), true);
-	shader_init_from_file(&ecs_entity_get_sprite(&player)->shader, "shaders/player-vertex-shader.glsl", "shaders/player-fragment-shader.glsl");
+	shader_init_from_file(&ecs_entity_get_sprite(&player)->shader, "shaders/play2d/player-vertex-shader.glsl", "shaders/play2d/player-fragment-shader.glsl");
 }
 
 static void player_update_texcoords()
@@ -187,7 +187,7 @@ static void init_map()
 
 	fill_map();
 	vertex_buffer_2d_init(&ecs_entity_get_sprite(&map)->vertex_buffer, map_tiles, sizeof(map_tiles), map_indices, sizeof(map_indices), true);
-	shader_init_from_file(&ecs_entity_get_sprite(&map)->shader, "shaders/map-vertex-shader.glsl", "shaders/map-fragment-shader.glsl");
+	shader_init_from_file(&ecs_entity_get_sprite(&map)->shader, "shaders/play2d/map-vertex-shader.glsl", "shaders/play2d/map-fragment-shader.glsl");
 }
 
 static void draw_map()

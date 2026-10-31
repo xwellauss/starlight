@@ -68,7 +68,7 @@ void texture2d_unbind();
 void texture2d_destroy(Texture2D* texture);
 
 void texture2d_map_add_from_file(Texture2DHashMap* textures, const char* texture_name, const char* texture_path);
-void texture2d_map_add_from_bytes(Texture2DHashMap* textures, const char* texture_name, uint32_t format, const unsigned char* texture_data);
+void texture2d_map_add_from_bytes(Texture2DHashMap* textures, const char* texture_name, int width, int height,  uint32_t format, const unsigned char* texture_data);
 void texture2d_map_destroy(Texture2DHashMap* textures);
 
 void texture2d_array_destroy(Texture2D** textures);
